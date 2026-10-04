@@ -1,5 +1,5 @@
 {
-  "updated_at": "2026-10-04T22:42:00+08:00",
+  "updated_at": "2026-10-04T22:56:00+08:00",
   "agents": [
     {
       "id": "hanrin",
@@ -39,12 +39,12 @@
     },
     {
       "id": "ornf",
-      "name": "Ophelia Real Not Fake",
+      "name": "Co Agent 2 Lia",
       "role": "Chat WhatsApp",
       "room": "kamar",
       "status": "tidur",
       "task": "belum ada tugas",
-      "updated_at": "2026-10-04T22:30:00+08:00"
+      "updated_at": "2026-10-04T22:56:00+08:00"
     },
     {
       "id": "emely",

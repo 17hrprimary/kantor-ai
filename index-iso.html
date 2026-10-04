@@ -205,9 +205,8 @@ const W=30,D=24;
 const ROOMS=[
  {id:'ceo',name:'👑 Ruang CEO',x:0,y:0,w:9,d:8,floor:'#fde6c6',alt:'#f9dcb4'},
  {id:'ig',name:'📸 Kantor IG',x:9,y:0,w:12,d:8,floor:'#ffe0ee',alt:'#ffd3e6'},
- {id:'grup-jfm',name:'💬 Grup Just For Mature',x:21,y:0,w:9,d:8,floor:'#e8e1ff',alt:'#ddd4fb',group:['Rin','Keira','Ophelia Real Not Fake','Hanrin']},
- {id:'grup-mybini',name:'💬 Grup My Bini',x:0,y:8,w:10,d:8,floor:'#dfefff',alt:'#d2e6fb',group:['Rin','Keira','Ophelia Real Not Fake','Hanrin','Emely']},
- {id:'grup-rin',name:'💬 Grup Sekali Rin',x:10,y:8,w:6,d:8,floor:'#e0f6ea',alt:'#d2efdf',group:['Rin']},
+ {id:'grup-jfm',name:'💬 Grup Just For Mature',x:21,y:0,w:9,d:8,floor:'#e8e1ff',alt:'#ddd4fb',group:['Rin','Keira','Co Agent 2 Lia','Hanrin']},
+ {id:'grup-mybini',name:'💬 Grup My Bini',x:0,y:8,w:16,d:8,floor:'#dfefff',alt:'#d2e6fb',group:['Rin','Keira','Co Agent 2 Lia','Hanrin','Emely']},
  {id:'kamar',name:'🛏️ Kamar Tidur',x:16,y:8,w:14,d:9,floor:'#ebe3ff',alt:'#e1d7fb'},
  {id:'kerja',name:'🖥️ Meja Kerja Bersama',x:0,y:16,w:16,d:8,floor:'#fff4d6',alt:'#fbebc2'},
  {id:'lounge',name:'☕ Lounge',x:16,y:17,w:14,d:7,floor:'#effbe9',alt:'#e3f5da'},
@@ -274,6 +273,8 @@ function build(){
   box(r.x+.3,r.y+.15,0,2.2,.12,1.5,'#fff',{front:'#eef4ff'}); // whiteboard
   plant(r.x+r.w-.7,r.y+.7,.9);
  });
+ // pojok tanaman
+ rug(12,9.2,3.4,5.6,'#d6f2c8');plant(12.6,9.8,1.2);plant(14.9,9.8,1);plant(15.2,12.2,1.3);plant(12.5,14.6,1.1);plant(15,14.8,.9);box(13.1,11.6,0,1.6,.55,.4,'#c98f5a');
  // kamar tidur
  rug(17,8.8,12.6,7.6,'rgba(200,170,255,.35)');
  BEDS.forEach(([x,y])=>{bed(x,y);box(x+1.6,y+.1,0,.55,.5,.5,'#e7d7ff');cyl(x+1.87,y+.35,.5,.12,.25,'#ffe7a8');});
@@ -381,7 +382,8 @@ const actors={}; // id -> {x,y,path:[],sleep,spot}
 const idOf=a=>a.id||String(a.name).toLowerCase().replace(/[^a-z0-9]+/g,'-');
 function effective(){return agentsData.map(a=>{const o=overrides[idOf(a)];if(o&&(!a.updated_at||new Date(a.updated_at)<=o.at))return{...a,...o.patch};return a;});}
 function spotFor(a,used){
- const id=idOf(a),room=a.room;
+ const id=idOf(a);let room=a.room;
+ if(String(room).startsWith('kamar')||a.status==='tidur')room='kamar';
  if(room==='ceo'||room==='ig'){const s=SPOTS[room][id];if(s)return{x:s[0],y:s[1],pose:'sit'};}
  if(room==='kamar'){let i=BED_ORDER.indexOf(id);if(i<0)i=BED_ORDER.length+Object.keys(used).length;const b=BEDS[i%BEDS.length];return{x:b[0]+.7,y:b[1]+.45,pose:a.status==='tidur'?'bed':'stand',bed:b};}
  const g=ROOMS.find(r=>r.id===room&&r.group);
@@ -510,7 +512,7 @@ const FALLBACK=[
  {id:'hanrin',name:'Hanrin',role:'Manager',room:'ceo',status:'kerja',task:'Bagi tugas ke bot lain'},
  {id:'lia',name:'Ophelia 2 (Lia)',role:'Konten Instagram, posting & jaga IG ophelia.lia.real',room:'ig',status:'kerja',task:'Jaga IG ophelia.lia.real'},
  {id:'ophelia1',name:'Ophelia 1',role:'Partner Instagram (lia_1_2000)',room:'ig',status:'kerja',task:'Saling support konten sama Lia'},
- ...[['rin','Rin','Asisten pribadi'],['ornf','Ophelia Real Not Fake','Chat WhatsApp'],['emely','Emely','Teman ngobrol'],['hr','HR','Hanrin, pacar / pendamping'],['keira','Keira','Konsultan pribadi'],['lab','Lab Observasi','Riset & eksperimen']].map(([id,name,role])=>({id,name,role,room:'kamar',status:'tidur',task:'belum ada tugas'}))];
+ ...[['rin','Rin','Asisten pribadi'],['ornf','Co Agent 2 Lia','Chat WhatsApp'],['emely','Emely','Teman ngobrol'],['hr','HR','Hanrin, pacar / pendamping'],['keira','Keira','Konsultan pribadi'],['lab','Lab Observasi','Riset & eksperimen']].map(([id,name,role])=>({id,name,role,room:'kamar',status:'tidur',task:'belum ada tugas'}))];
 async function load(manual){
  try{
   const r=await fetch('status.json?t='+Date.now(),{cache:'no-store'});if(!r.ok)throw 0;
