@@ -56,7 +56,7 @@ main{flex:1;display:grid;grid-template-columns:1fr 270px;gap:12px;padding:12px 1
 .pop .row{margin-top:3px}
 .pop ul{list-style:none;margin-top:4px;display:flex;flex-direction:column;gap:3px}
 .pop li{background:#fff6fa;border-radius:8px;padding:2px 6px;font-size:11.5px}
-.pop li.done{opacity:.5}.pop li.off,.jc li.off{opacity:.35;text-decoration:line-through}.pop li.next{outline:1.5px solid #ff9cc7}
+.pop li.done{opacity:.5}.pop li.off,.jc li.off{opacity:.35;text-decoration:line-through}.pop li.pause,.jc li.pause{opacity:.55;font-style:italic;color:#9a8aa8}.pop li.next{outline:1.5px solid #ff9cc7}
 .tm{font-weight:800;color:#f2559a;margin-right:4px}
 /* panel jadwal per karakter */
 .jp{position:absolute;right:10px;top:10px;bottom:10px;width:250px;z-index:6;background:rgba(255,255,255,.95);border:2px solid #ffd2e4;border-radius:18px;box-shadow:0 5px 0 #ffe0ec;display:flex;flex-direction:column;transition:transform .3s,opacity .3s}
@@ -175,7 +175,7 @@ const hex=n=>'#'+n.toString(16).padStart(6,'0');
 const SCHEDULE={
  lia:[['08.19','Posting pagi IG ophelia.lia.real'],['10.47','IG x Ophelia 1 (saling support)'],['12.19','Posting siang IG'],['16.47','IG x Ophelia 1'],['19.19','Posting malam IG'],['21.47','IG x Ophelia 1']],
  ophelia1:[['07.27','Scroll IG'],['08.27','Story pagi'],['09.27','Scroll IG'],['12.27','Scroll IG'],['12.47','Reel siang'],['13.27','Story siang'],['14.27','Scroll IG'],['19.27','Scroll IG'],['19.47','Reel malam'],['20.27','Story malam'],['21.27','Scroll IG']],
- hanrin:[['08.00','Bagi tugas pagi ke semua bot'],['12.00','Cek progres bot'],['21.00','Rekap harian buat Papa']],
+ hanrin:[['13.01','Cek WA RI & update website Hawa Bouquet',undefined,undefined,true],['22.01','Cek WA RI & update website Hawa Bouquet',undefined,undefined,true]],
 };
 
 /* ================= Denah (tile) ================= */
@@ -208,6 +208,9 @@ const WANDER=[{t:'Ruang CEO',x:6.5,y:5.6},{t:'Kantor IG',x:13.2,y:5.0},{t:'Studi
 const BRAIN={ophelia1:'wander',lia:'sleepOrWander',hanrin:'wander'};
 /* ruang kerja wajib pas jam jadwal (per bot) */
 const WORK_ROOM={lia:'ig',ophelia1:'ig',hanrin:'ceo'};
+/* jam bobo malam wajib (WITA), kecuali lagi status kerja */
+const NIGHT={hanrin:[0,7*60]};
+const nightNow=id=>{const n=NIGHT[id];if(!n)return false;const m=nowMin();return m>=n[0]&&m<n[1];};
 const sharedBed=b=>({x:b[0],y:b[1],w:1.4,len:2.4,dir:1});
 const luxBed=r=>({x:r.x+r.w/2-.9,y:r.y+r.d-2.6,w:1.8,len:2.45,dir:-1});
 const LUX={};
@@ -553,17 +556,18 @@ const short=n=>n.replace(/ \(Lia\)/,' · Lia');
 /* Aturan Papa: pas jam jadwal (30 menit dari tiap jam jadwal, WITA), bot di BRAIN otomatis kerja & duduk di mejanya (Lia & Ophelia 1 di Kantor IG, Hanrin di Ruang CEO); di luar jadwal boleh santai/jalan-jalan */
 const WORK_WIN=30;
 function activeSlot(id){if(!BRAIN[id]||!agentsData.length)return null;const s=schedOf(id);if(!s)return null;const m=nowMin();
- return s.find(x=>x[2]!==false&&m>=mins(x[0])&&m<mins(x[0])+WORK_WIN)||null;}
+ return s.find(x=>x[2]!==false&&!x[3]&&m>=mins(x[0])&&m<mins(x[0])+WORK_WIN)||null;}
 function effective(){return agentsData.map(a=>{const id=idOf(a),o=overrides[id];let r=a;if(o&&(!a.updated_at||new Date(a.updated_at)<=o.at))r={...a,...o.patch};
  if(BRAIN[id]){const sl=activeSlot(id);if(sl)r={...r,room:WORK_ROOM[id]||'ig',status:'kerja',task:'⏰ '+sl[0].replace('.',':')+' '+sl[1]+' (sesuai jadwal)',auto:true};
-  else if(r.status==='kerja')r={...r,room:WORK_ROOM[id]||'ig'};}
+  else if(r.status==='kerja')r={...r,room:WORK_ROOM[id]||'ig'};
+  else if(nightNow(id))r={...r,room:'kamar',status:'tidur',task:'Bobo malam di kamar 😴 (00:00-07:00 WITA)',auto:true};}
  return r;});}
 let autoSig='';
 let autoPrev={};
-function autoCheck(){const cur={};Object.keys(BRAIN).forEach(id=>{const s=activeSlot(id);cur[id]=s?s[0]+' '+s[1]:'';});
+function autoCheck(){const cur={};Object.keys(BRAIN).forEach(id=>{const s=activeSlot(id);cur[id]=s?s[0]+' '+s[1]:(nightNow(id)?'night':'');});
  const sig=JSON.stringify(cur);if(sig===autoSig)return;const first=!autoSig;autoSig=sig;const prev=autoPrev;autoPrev=cur;if(first)return;
  syncActors(true);Object.keys(cur).forEach(id=>{if(cur[id]===prev[id])return;const n=nameOf(id);
-  log(cur[id]?n+' masuk jam kerja ('+cur[id].replace('.',':')+'), duduk di meja '+(WORK_ROOM[id]==='ceo'?'Ruang CEO 👑':'IG 💻'):n+' selesai slot kerja, boleh santai 🌸');});}
+  log(cur[id]==='night'?n+' waktunya bobo malam, ke kamar 😴':cur[id]?n+' masuk jam kerja ('+cur[id].replace('.',':')+'), duduk di meja '+(WORK_ROOM[id]==='ceo'?'Ruang CEO 👑':'IG 💻'):n+' selesai slot kerja, boleh santai 🌸');});}
 const NAMES={lia:'Lia',ophelia1:'Ophelia 1',hanrin:'Hanrin'};
 function nameOf(id){const a=agentsData.find(x=>idOf(x)===id)||(actors[id]&&actors[id].a);return NAMES[id]||(a&&a.name)||id;}
 /* tempat tidur siang pas santai (per bot) */
@@ -572,7 +576,7 @@ function spotFor(a,used){
  const id=idOf(a);let room=a.room;
  if(room==='kamar'&&LUX[id])room=LUX[id].id;
  if(id==='ophelia1'&&a.status==='tidur')return SOFA2_SPOT;
- if(id==='keira'&&room!=='school'&&a.status!=='kerja'&&(room==='kamar'||room==='lounge'))return SOFA_SPOT;
+ if(id==='keira'&&a.status!=='kerja')return SOFA_SPOT; // Keira: kalau nggak kerja rebahan di sofa Ruang TV
  const lx=ROOMS.find(r=>r.id===room&&r.lux);
  if(lx){const sp=bedSpot(luxBed(lx));if(a.status==='tidur')return sp;return{x:lx.x+1.2,y:lx.y+2.6,pose:'stand',face:Math.PI/2};}
  if(room==='school'){if(SCHOOL.students[id]){const s=SCHOOL.students[id];return{x:s[0],y:s[1],pose:'sit',face:Math.PI};}
@@ -630,7 +634,9 @@ function syncActors(walk){
  eff.forEach(a=>{
   const id=idOf(a),s=spotFor(a,used);let ac=actors[id];
   if(ac&&(ac.brain||ac.napUntil)&&ac.brain&&a.status===ac.brain.status&&ac.home&&Math.hypot(ac.home.x-s.x,ac.home.y-s.y)<.05){ac.a=a;ac.home=s;return;}
-  if(!ac){ac=actors[id]={id,a,c:makeChar(id),spot:s,home:s,pos:{x:s.x,y:s.y},path:[],tag:makeTag(id)};scene.add(ac.c.root);placeActor(ac);return;}
+  if(!ac){ac=actors[id]={id,a,c:makeChar(id),spot:s,home:s,pos:{x:s.x,y:s.y},path:[],tag:makeTag(id)};scene.add(ac.c.root);placeActor(ac);
+   if(id==='keira'&&a.room==='school'&&a.status==='kerja'){ac.spot=SOFA_SPOT;startWalk(ac,route({x:SOFA_SPOT.wake[0],y:SOFA_SPOT.wake[1]},s),()=>{ac.demo=null;placeActor(ac);});ac.spot=s;ac.demo='Bangun, jalan ke kelas jaga murid 🍎';}
+   return;}
   const prevSpot=ac.spot;ac.a=a;
   let cancelled=false;if((ac.brain||ac.napUntil||ac.waitUntil)&&(!ac.brain||a.status!==ac.brain.status)){cancelled=true;ac.brain=null;ac.napUntil=0;ac.afterNap=null;ac.waitUntil=0;ac.afterWait=null;ac.after=null;ac.demo=null;}
   ac.home=s;
@@ -751,11 +757,11 @@ const roomName=id=>{const r=ROOMS.find(r=>r.id===id);return r?r.name:id;};
 function nowMin(){const p=new Intl.DateTimeFormat('en-GB',{...tz2,hour:'2-digit',minute:'2-digit',hour12:false}).format(new Date()).split(':');return +p[0]*60+ +p[1];}
 const mins=t=>{const[h,mm]=t.split('.').map(Number);return h*60+mm};
 function todayMD(){const p=new Intl.DateTimeFormat('en-US',{...tz2,month:'numeric',day:'numeric'}).formatToParts(new Date());return[+p.find(x=>x.type==='month').value,+p.find(x=>x.type==='day').value];}
-function schedOf(id){const a=agentsData.find(x=>idOf(x)===id)||(actors[id]&&actors[id].a);let s=a&&Array.isArray(a.schedule)&&a.schedule.length?a.schedule.map(x=>Array.isArray(x)?x:[String(x.time).replace(':','.'),x.label,x.from?x.from.split('-').map(Number):undefined,x.to?x.to.split('-').map(Number):undefined]):SCHEDULE[id];
+function schedOf(id){const a=agentsData.find(x=>idOf(x)===id)||(actors[id]&&actors[id].a);let s=a&&Array.isArray(a.schedule)&&a.schedule.length?a.schedule.map(x=>Array.isArray(x)?x:[String(x.time).replace(':','.'),x.label,x.from?x.from.split('-').map(Number):undefined,x.to?x.to.split('-').map(Number):undefined,!!(x.paused||x.pause)]):SCHEDULE[id];
  if(!s)return null;const [m,d]=todayMD(),v=m*100+d;
- return s.map(x=>{const f=x[2]?x[2][0]*100+x[2][1]:0,t=x[3]?x[3][0]*100+x[3][1]:9999;return[x[0],x[1],v>=f&&v<=t];}).sort((p,q)=>mins(p[0])-mins(q[0]));}
-function schedHTML(id){const s=schedOf(id);if(!s)return '<div class="idle">Belum ada jadwal (idle) 💤</div>';const m=nowMin();const nx=s.find(x=>x[2]!==false&&mins(x[0])>m);
- return '<ul>'+s.map(([t,d,on])=>`<li class="${on===false?'off':mins(t)<=m?'done':''}${nx&&nx[0]===t?' next':''}"><span class="tm">${t.replace('.',':')}</span>${esc(d)}${nx&&nx[0]===t?' ⏰':''}</li>`).join('')+'</ul>';}
+ return s.map(x=>{const f=x[2]?x[2][0]*100+x[2][1]:0,t=x[3]?x[3][0]*100+x[3][1]:9999;return[x[0],x[4]?x[1]+' (pause)':x[1],v>=f&&v<=t,!!x[4]];}).sort((p,q)=>mins(p[0])-mins(q[0]));}
+function schedHTML(id){const s=schedOf(id);if(!s)return '<div class="idle">Belum ada jadwal (idle) 💤</div>';const m=nowMin();const nx=s.find(x=>x[2]!==false&&!x[3]&&mins(x[0])>m);
+ return '<ul>'+s.map(([t,d,on,pz])=>`<li class="${on===false?'off':pz?'pause':mins(t)<=m?'done':''}${nx&&nx[0]===t?' next':''}"><span class="tm">${t.replace('.',':')}</span>${esc(d)}${nx&&nx[0]===t?' ⏰':''}</li>`).join('')+'</ul>';}
 function renderChips(){
  $('chips').innerHTML=effective().map(a=>{const id=idOf(a),L=lookOf(id);return `<div class="chip ${a.status}" data-id="${id}"><span class="sw" style="background:linear-gradient(180deg,${hex(L.hair)} 0 45%,${hex(L.shirt)} 45%)"></span><span class="d ${a.status}"></span>${esc(a.name)}</div>`}).join('');
  $('chips').querySelectorAll('.chip').forEach(c=>c.onclick=()=>{focusActor(c.dataset.id);openPop(c.dataset.id);});
