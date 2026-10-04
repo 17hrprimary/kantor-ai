@@ -1,5 +1,5 @@
 {
-  "updated_at": "2026-10-04T22:56:00+08:00",
+  "updated_at": "2026-10-04T23:00:00+08:00",
   "agents": [
     {
       "id": "hanrin",
@@ -15,18 +15,73 @@
       "name": "Ophelia 2 (Lia)",
       "role": "Konten Instagram, posting & jaga IG ophelia.lia.real",
       "room": "ig",
-      "status": "kerja",
-      "task": "Jaga IG ophelia.lia.real & siapin posting besok",
-      "updated_at": "2026-10-04T22:30:00+08:00"
+      "status": "santai",
+      "task": "Jadwal hari ini udah selesai, santai dulu",
+      "updated_at": "2026-10-04T23:00:00+08:00"
     },
     {
       "id": "ophelia1",
       "name": "Ophelia 1",
       "role": "Partner Instagram (lia_1_2000)",
       "room": "ig",
-      "status": "kerja",
-      "task": "Saling support konten sama Lia",
-      "updated_at": "2026-10-04T22:30:00+08:00"
+      "status": "santai",
+      "task": "Jadwal hari ini udah selesai, jalan-jalan santai",
+      "updated_at": "2026-10-04T23:00:00+08:00",
+      "schedule": [
+        {
+          "time": "07:27",
+          "label": "Scroll IG"
+        },
+        {
+          "time": "08:27",
+          "label": "Story IG"
+        },
+        {
+          "time": "09:27",
+          "label": "Scroll IG"
+        },
+        {
+          "time": "10:32",
+          "label": "Reel baru (mulai 9 Okt)",
+          "from": "10-9"
+        },
+        {
+          "time": "12:27",
+          "label": "Scroll IG"
+        },
+        {
+          "time": "12:47",
+          "label": "Reel baru (5-8 Okt)",
+          "from": "10-5",
+          "to": "10-8"
+        },
+        {
+          "time": "13:27",
+          "label": "Story IG"
+        },
+        {
+          "time": "14:27",
+          "label": "Scroll IG"
+        },
+        {
+          "time": "19:27",
+          "label": "Scroll IG"
+        },
+        {
+          "time": "19:47",
+          "label": "Reel baru (5-8 Okt)",
+          "from": "10-5",
+          "to": "10-8"
+        },
+        {
+          "time": "20:27",
+          "label": "Story IG"
+        },
+        {
+          "time": "21:27",
+          "label": "Scroll IG"
+        }
+      ]
     },
     {
       "id": "rin",
