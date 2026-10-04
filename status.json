@@ -1,5 +1,5 @@
 {
-  "updated_at": "2026-10-04T23:47:44+08:00",
+  "updated_at": "2026-10-04T23:49:54+08:00",
   "agents": [
     {
       "id": "hanrin",
@@ -11,16 +11,14 @@
       "schedule": [
         {
           "time": "13:01",
-          "label": "Cek WA RI & update website Hawa Bouquet",
-          "paused": true
+          "label": "Cek WA RI & update website Hawa Bouquet"
         },
         {
           "time": "22:01",
-          "label": "Cek WA RI & update website Hawa Bouquet",
-          "paused": true
+          "label": "Cek WA RI & update website Hawa Bouquet"
         }
       ],
-      "updated_at": "2026-10-04T23:47:44+08:00"
+      "updated_at": "2026-10-04T23:49:54+08:00"
     },
     {
       "id": "lia",
