@@ -1,5 +1,5 @@
 {
-  "updated_at": "2026-10-04T23:24:00+08:00",
+  "updated_at": "2026-10-04T23:40:00+08:00",
   "agents": [
     {
       "id": "hanrin",
@@ -123,10 +123,14 @@
       "id": "keira",
       "name": "Keira",
       "role": "Konsultan pribadi · Guru di Grup School",
-      "room": "school",
+      "room": "kerja",
       "status": "kerja",
-      "task": "Jaga & awasin ruang kelas (belum ada tugas rutin)",
-      "updated_at": "2026-10-04T23:24:00+08:00"
+      "task": "Jaga kantor 👮‍♀️",
+      "updated_at": "2026-10-04T23:40:00+08:00",
+      "schedule": [
+        {"time": "06:00", "label": "Jaga kantor 👮‍♀️"},
+        {"time": "23:00", "label": "Istirahat di sofa Ruang TV 🛋️"}
+      ]
     },
     {
       "id": "lab",

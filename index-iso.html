@@ -42,7 +42,7 @@ aside{display:flex;flex-direction:column;gap:10px;overflow:auto;min-height:0}
 .sched{list-style:none;display:flex;flex-direction:column;gap:4px}
 .sched li{display:flex;gap:8px;align-items:center;font-size:12px;padding:4px 7px;border-radius:10px;background:#fff6fa}
 .sched .t{font-weight:800;color:#fff;background:#f2559a;border-radius:7px;padding:1px 6px;font-size:11.5px;min-width:44px;text-align:center}
-.sched li.x .t{background:#9a7bff}.sched li.done{opacity:.5}.sched li.next{outline:2px solid #ff9cc7}
+.sched li.x .t{background:#9a7bff}.sched li.k .t{background:#2c3142}.sched li.done{opacity:.5}.sched li.next{outline:2px solid #ff9cc7}
 .sec{font-size:10.5px;font-weight:800;color:#a37a95;text-transform:uppercase;letter-spacing:.6px;margin:5px 0 3px}
 .log{font-size:11.5px;display:flex;flex-direction:column;gap:4px;max-height:110px;overflow:auto}
 .log div{padding:4px 7px;border-radius:9px;background:#f6f3ff}
@@ -89,6 +89,7 @@ aside{display:flex;flex-direction:column;gap:10px;overflow:auto;min-height:0}
       <h2>📅 Jadwal hari ini</h2>
       <div class="sec">IG Lia harian</div><ul class="sched" id="s1"></ul>
       <div class="sec">IG Lia x Ophelia 1</div><ul class="sched" id="s2"></ul>
+      <div class="sec">Jaga Keira</div><ul class="sched" id="s3"></ul>
     </div>
     <div class="card"><h2>📝 Log kantor</h2><div class="log" id="log"></div></div>
   </aside>
@@ -217,6 +218,16 @@ const SPOTS={ // tempat duduk/berdiri tetap
  kamar:{},
  kerja:[[2.6,17.6],[7.1,17.6],[11.6,17.6],[2.6,21.1],[7.1,21.1],[11.6,21.1]],
 };
+const KEIRA_GUARD={x:14.35,y:20.15,pose:'stand'};
+const KEIRA_SOFA={x:18.95,y:18.5,pose:'sofa',wake:[18.9,19.7]};
+const KEIRA_PATROL=[
+ {t:'Patroli lorong meja 👀',x:4.8,y:19.75},
+ {t:'Cek pintu Grup 🚶‍♀️',x:4.8,y:16.9},
+ {t:'Menyusur pintu utara 🚶‍♀️',x:9.3,y:16.9},
+ {t:'Cek pintu School 🏫',x:9.3,y:23.15},
+ {t:'Balik lewat lorong 🚶‍♀️',x:9.3,y:19.9}];
+const KEIRA_DAY_TASK='Jaga kantor 👮‍♀️';
+const KEIRA_NIGHT_TASK='Istirahat di sofa Ruang TV 🛋️';
 const BEDS=[[17.6,9.2],[21.9,9.2],[26.2,9.2],[17.6,13.2],[21.9,13.2],[26.2,13.2]];
 const BED_ORDER=['rin','ornf','emely','hr','keira','lab'];
 // seat positions per group room
@@ -380,9 +391,16 @@ function tag(x,y,text,opt={}){
 let agentsData=[],overrides={},lastSig='',fileUpdated=null;
 const actors={}; // id -> {x,y,path:[],sleep,spot}
 const idOf=a=>a.id||String(a.name).toLowerCase().replace(/[^a-z0-9]+/g,'-');
-function effective(){return agentsData.map(a=>{const o=overrides[idOf(a)];if(o&&(!a.updated_at||new Date(a.updated_at)<=o.at))return{...a,...o.patch};return a;});}
+function keiraOnDuty(){const m=nowMin();return m>=6*60&&m<23*60;}
+function withKeiraDuty(a){
+ if(idOf(a)!=='keira'||a.room==='school')return a;
+ if(keiraOnDuty())return {...a,room:'kerja',status:'kerja',task:KEIRA_DAY_TASK};
+ return {...a,room:'lounge',status:'tidur',task:KEIRA_NIGHT_TASK};
+}
+function effective(){return agentsData.map(a=>{const o=overrides[idOf(a)];const e=(o&&(!a.updated_at||new Date(a.updated_at)<=o.at))?{...a,...o.patch}:a;return withKeiraDuty(e);});}
 function spotFor(a,used){
  const id=idOf(a);let room=a.room;
+ if(id==='keira'&&room!=='school')return (a.status==='tidur'||room==='lounge')?KEIRA_SOFA:KEIRA_GUARD;
  if(String(room).startsWith('kamar')||a.status==='tidur')room='kamar';
  if(room==='ceo'||room==='ig'){const s=SPOTS[room][id];if(s)return{x:s[0],y:s[1],pose:'sit'};}
  if(room==='kamar'){let i=BED_ORDER.indexOf(id);if(i<0)i=BED_ORDER.length+Object.keys(used).length;const b=BEDS[i%BEDS.length];return{x:b[0]+.7,y:b[1]+.45,pose:a.status==='tidur'?'bed':'stand',bed:b};}
@@ -406,15 +424,48 @@ function route(from,to){ // BFS antar ruangan lewat pintu
  const pts=[];for(let i=0;i<chain.length-1;i++){const d=doorBetween(chain[i],chain[i+1]);pts.push(...d);}
  pts.push([to.x,to.y]);return pts;
 }
+function keiraRoute(from,dest){
+ const rm=p=>{const r=roomAt(p.x,p.y);return r&&r.id;};
+ const out=[];
+ const add=(x,y)=>{const l=out[out.length-1];if(!l||Math.hypot(l[0]-x,l[1]-y)>.12)out.push([x,y]);};
+ const pullToAisle=(x,y)=>{
+  if(rm({x,y})!=='kerja')return;
+  const gap=x<6.6?4.8:(x<11.2?9.3:14.2);
+  const onAisle=y>=19.25&&y<=20.55;
+  if(onAisle){add(x,19.9);return;}
+  add(gap,Math.min(23.2,Math.max(16.9,y)));add(gap,19.9);
+ };
+ if(rm(from)==='kerja'&&rm(dest)!=='kerja'){
+  pullToAisle(from.x,from.y);add(14.2,19.9);
+  route({x:14.2,y:19.9},dest).forEach(p=>add(p[0],p[1]));
+  return out;
+ }
+ if(rm(from)==='kerja'&&rm(dest)==='kerja'){
+  pullToAisle(from.x,from.y);
+  const gap=dest.x<6.6?4.8:(dest.x<11.2?9.3:14.2);
+  add(gap,19.9);
+  if(dest.y<19.25||dest.y>20.55)add(gap,dest.y);
+  add(dest.x,dest.y);
+  return out;
+ }
+ return route(from,dest);
+}
 function syncActors(walk){
  const used={};
  effective().forEach(a=>{
   const id=idOf(a),s=spotFor(a,used);let ac=actors[id];
   if(!ac){actors[id]={x:s.x,y:s.y,path:[],spot:s,a};return;}
-  ac.a=a;const moved=Math.hypot(ac.spot.x-s.x,ac.spot.y-s.y)>.05;
+  ac.a=a;
+  const prev=ac.spot;
+  const moved=Math.hypot(prev.x-s.x,prev.y-s.y)>.05||prev.pose!==s.pose;
   if(moved&&walk){
-   const start=ac.spot.pose==='bed'?{x:ac.spot.bed[0]+1.75,y:ac.spot.bed[1]+1.6}:{x:ac.x,y:ac.y};
-   ac.x=start.x;ac.y=start.y;ac.path=route(start,s);ac.walkStart=performance.now();
+   const start=prev.pose==='bed'?{x:prev.bed[0]+1.75,y:prev.bed[1]+1.6}
+    :(prev.pose==='sofa'&&prev.wake)?{x:prev.wake[0],y:prev.wake[1]}
+    :{x:ac.x,y:ac.y};
+   const dest=s.pose==='sofa'&&s.wake?{x:s.wake[0],y:s.wake[1]}:{x:s.x,y:s.y};
+   if(id==='keira'){ac.patrol=null;ac.waitUntil=0;ac.demo=null;}
+   ac.x=start.x;ac.y=start.y;ac.path=id==='keira'?keiraRoute(start,dest):route(start,dest);
+   if(id==='keira')ac.demo=s.pose==='sofa'?'Jalan ke sofa Ruang TV 🛋️':'Jalan ke pos jaga 👮‍♀️';
   }else if(moved){ac.x=s.x;ac.y=s.y;ac.path=[];}
   ac.spot=s;
  });
@@ -459,11 +510,15 @@ function frame(t){
  // aktor
  hits=[];
  const now=t||0;
+ keiraIsoWatch(now);
  Object.entries(actors).forEach(([id,ac])=>{
   // gerak
   if(ac.path.length){const [tx,ty]=ac.path[0],dx=tx-ac.x,dy=ty-ac.y,dist=Math.hypot(dx,dy),sp=0.045;
-   if(dist<sp){ac.x=tx;ac.y=ty;ac.path.shift();}else{ac.x+=dx/dist*sp;ac.y+=dy/dist*sp;}}
-  const L=lookOf(id),a=ac.a,walking=ac.path.length>0,inBed=!walking&&ac.spot.pose==='bed';
+   if(dist<sp){ac.x=tx;ac.y=ty;ac.path.shift();}else{ac.x+=dx/dist*sp;ac.y+=dy/dist*sp;}
+   if(!ac.path.length&&ac.patrol)ac.waitUntil=now+1400+Math.random()*900;
+   if(!ac.path.length&&ac.demo&&!ac.patrol)ac.demo=null;
+  }else if(ac.waitUntil&&now>=ac.waitUntil){ac.waitUntil=0;keiraIsoStep(ac,now);}
+  const L=lookOf(id),a=ac.a,walking=ac.path.length>0,inBed=!walking&&ac.spot.pose==='bed',onSofa=!walking&&ac.spot.pose==='sofa';
   const [vx,vy]=rotP(ac.x,ac.y);
   if(inBed){
    const b=ac.spot.bed,bk=rotBox({x:b[0],y:b[1],w:1.4,d:2.4});const base=bk.x+bk.w/2+bk.y+bk.d/2;
@@ -473,6 +528,12 @@ function frame(t){
    list.push({k:1e6+1,f:()=>{const p=P(hx,hy,1.2);ctx.font=`900 ${13*zoom}px sans-serif`;ctx.fillStyle='#7a63c9';
      for(let i=0;i<3;i++){const ph=((now/1000+i*.6+id.length*.3)%1.8)/1.8;ctx.globalAlpha=Math.sin(ph*Math.PI);ctx.font=`900 ${(10+i*3)*zoom}px sans-serif`;ctx.fillText(i%2?'z':'Z',p[0]+(8+i*9+ph*6)*zoom,p[1]-(i*9+ph*10)*zoom);}ctx.globalAlpha=1;
      const q=P(hx,hy,.2);const r=tag(q[0],q[1]-14*zoom,a.name.replace(/ \(.*/,''),{size:10.5,dot:'#a996f0',color:'#6f52c9',border:'#d6c8fb'});hits.push({...r,id});}});
+  }else if(onSofa){
+   const sx=ac.spot.x,sy=ac.spot.y,[hx,hy]=rotP(sx,sy),base=hx+hy;
+   list.push({k:base+.001,f:()=>{const p=P(hx,hy,.55),im=img('s-'+id,sleepSVG(L)),h=58*zoom;ctx.save();ctx.translate(p[0],p[1]-h*.2);ctx.rotate(-.35);ctx.drawImage(im,-h*.39,-h*.55,h*.78,h);ctx.restore();}});
+   list.push({k:1e6+1,f:()=>{const p=P(hx,hy,1.15);ctx.fillStyle='#7a63c9';
+    for(let i=0;i<3;i++){const ph=((now/1000+i*.6+id.length*.3)%1.8)/1.8;ctx.globalAlpha=Math.sin(ph*Math.PI);ctx.font=`900 ${(10+i*3)*zoom}px sans-serif`;ctx.fillText(i%2?'z':'Z',p[0]+(8+i*9+ph*6)*zoom,p[1]-(i*9+ph*10)*zoom);}ctx.globalAlpha=1;
+    const q=P(hx,hy,.3);const r=tag(q[0],q[1]-10*zoom,a.name.replace(/ \(.*/,''),{size:10.5,dot:'#a996f0',color:'#6f52c9',border:'#d6c8fb'});hits.push({...r,id});}});
   }else{
    const sit=!walking&&ac.spot.pose==='sit';
    const bob=walking?Math.abs(Math.sin(now/120))*3:(a.status==='kerja'?Math.sin(now/300+id.length)*1.2:0);
@@ -480,7 +541,8 @@ function frame(t){
      ctx.fillStyle='rgba(90,58,82,.18)';ctx.beginPath();ctx.ellipse(p[0],P(vx,vy,0)[1],w*.32,w*.14,0,0,Math.PI*2);ctx.fill();
      ctx.drawImage(im,p[0]-w/2,p[1]-h-bob*zoom+ (sit?h*.06:0),w,h);}});
    list.push({k:1e6+2,f:()=>{const p=P(vx,vy,sit?3.2:2.9);const crown=id==='hanrin'?'👑 ':'';
-     const r=tag(p[0],p[1]-bob*zoom,crown+a.name.replace(/ \(Lia\)/,' · Lia'),{size:11.5,dot:a.status==='kerja'?'#35c47f':a.status==='santai'?'#f0b23a':'#a996f0',arrow:true});hits.push({...r,id});}});
+     const r=tag(p[0],p[1]-bob*zoom,crown+a.name.replace(/ \(Lia\)/,' · Lia'),{size:11.5,dot:a.status==='kerja'?'#35c47f':a.status==='santai'?'#f0b23a':'#a996f0',arrow:true});hits.push({...r,id});
+     if(ac.demo){const p2=P(vx,vy,sit?3.85:3.55);tag(p2[0],p2[1]-bob*zoom,ac.demo,{size:10,color:'#fff',bg:'#5a9cf0',border:'#5a9cf0'});}}});
   }
  });
  list.sort((p,q)=>p.k-q.k).forEach(d=>d.f());
@@ -527,7 +589,7 @@ async function load(manual){
  $('lastUpd').textContent=fileUpdated?fmtFull(fileUpdated):'-';$('lastCheck').textContent=fmtTime(new Date())+' WITA';
 }
 $('btnKerja').onclick=()=>{
- const lazy=effective().filter(a=>a.status!=='kerja');
+ const lazy=effective().filter(a=>a.status!=='kerja'&&!(idOf(a)==='keira'&&a.room!=='school'));
  if(!lazy.length){log('Semua udah kerja kok, Papa 😄');return;}
  const now=new Date();lazy.forEach(a=>overrides[idOf(a)]={at:now,patch:{room:'kerja',status:'kerja',task:'Bangun! Nunggu tugas dari Hanrin'}});
  syncActors(true);log(`Papa nyuruh balik kerja! ${lazy.length} bot bangun & jalan ke Meja Kerja Bersama 💪`);
@@ -546,11 +608,57 @@ window.addEventListener('resize',()=>{resize();fit();});
 // jadwal & jam
 const s1=[['08.19','Posting pagi Lia'],['12.19','Posting siang Lia'],['19.19','Posting malam Lia']];
 const s2=[['10.47','Cek & support Ophelia 1'],['16.47','Cek & support Ophelia 1'],['21.47','Cek & support Ophelia 1']];
-function nowMin(){const p=new Intl.DateTimeFormat('en-GB',{...tz,hour:'2-digit',minute:'2-digit',hour12:false}).format(new Date()).split(':');return +p[0]*60+ +p[1];}
+const s3=[['06.00','Jaga kantor 👮‍♀️'],['23.00','Istirahat di sofa Ruang TV 🛋️']];
+let _witaAt=0,_witaMin=0;
+function nowMin(){
+ const n=performance.now();if(n-_witaAt<400)return _witaMin;
+ const p=new Intl.DateTimeFormat('en-GB',{...tz,hour:'2-digit',minute:'2-digit',hour12:false}).format(new Date()).split(':');
+ _witaAt=n;_witaMin=+p[0]*60+ +p[1];return _witaMin;
+}
 function sched(){const m=nowMin(),mins=t=>{const[h,mm]=t.split('.').map(Number);return h*60+mm};
- const next=[...s1,...s2].filter(x=>mins(x[0])>m).sort((a,b)=>mins(a[0])-mins(b[0]))[0];
- const fill=(id,arr,cls)=>$(id).innerHTML=arr.map(([t,d])=>{const done=mins(t)<=m,nx=next&&next[0]===t;return `<li class="${cls}${done?' done':''}${nx?' next':''}"><span class="t">${t}</span><span>${d}${done?' ✅':nx?' ⏰':''}</span></li>`}).join('');
- fill('s1',s1,'');fill('s2',s2,'x');}
+ const next=[...s1,...s2,...s3].filter(x=>mins(x[0])>m).sort((a,b)=>mins(a[0])-mins(b[0]))[0];
+ const fill=(id,arr,cls)=>$(id).innerHTML=arr.map(([t,d])=>{const done=mins(t)<=m||(t==='23.00'&&m<6*60),nx=next&&next[0]===t&&!done;return `<li class="${cls}${done?' done':''}${nx?' next':''}"><span class="t">${t}</span><span>${d}${done?' ✅':nx?' ⏰':''}</span></li>`}).join('');
+ fill('s1',s1,'');fill('s2',s2,'x');fill('s3',s3,'k');}
+let keiraPhase=null,keiraNextPatrol=0;
+function keiraKey(){
+ const e=effective().find(a=>idOf(a)==='keira');
+ if(!e)return 'none';
+ if(e.room==='school')return 'school';
+ return (e.status==='tidur'||e.room==='lounge')?'night':'day';
+}
+function keiraIsoStep(ac,now){
+ if(!ac||actors.keira!==ac||!ac.patrol)return;
+ if(ac.a.room!=='kerja'||ac.a.status!=='kerja'){ac.patrol=null;ac.demo=null;return;}
+ if(ac.patrol.i<KEIRA_PATROL.length){
+  const w=KEIRA_PATROL[ac.patrol.i++];
+  ac.demo=w.t;ac.path=route({x:ac.x,y:ac.y},{x:w.x,y:w.y});
+  return;
+ }
+ if(!ac.patrol.home){
+  ac.patrol.home=1;ac.demo='Balik ke pos jaga 👮‍♀️';
+  ac.path=route({x:ac.x,y:ac.y},{x:ac.spot.x,y:ac.spot.y});
+  return;
+ }
+ ac.demo=null;ac.patrol=null;keiraNextPatrol=now+42000+Math.random()*36000;
+}
+function keiraIsoWatch(now){
+ const ac=actors.keira;if(!ac)return;
+ const key=keiraKey();
+ if(keiraPhase===null){keiraPhase=key;if(key==='day')keiraNextPatrol=now+14000;return;}
+ if(key!==keiraPhase){
+  keiraPhase=key;ac.patrol=null;ac.waitUntil=0;ac.demo=null;
+  syncActors(true);
+  if(key==='night')log('Keira selesai jaga, jalan istirahat di sofa Ruang TV 🛋️');
+  else if(key==='day'){log('Keira mulai jaga kantor 👮‍♀️');keiraNextPatrol=now+12000;}
+  tick();return;
+ }
+ if(ac.patrol||ac.path.length||ac.waitUntil)return;
+ if(ac.a.room!=='kerja'||ac.a.status!=='kerja')return;
+ if(now<keiraNextPatrol)return;
+ ac.patrol={i:0};
+ log('Keira patroli keliling kantor 👮‍♀️');
+ keiraIsoStep(ac,now);
+}
 function tick(){$('clock').textContent=fmtTime(new Date()).slice(0,5)+' WITA';$('tgl').textContent=new Intl.DateTimeFormat('id-ID',{...tz,weekday:'long',day:'numeric',month:'long',year:'numeric'}).format(new Date());sched();}
 // mulai
 build();WALLS=walls();resize();fit();tick();setInterval(tick,20000);
