@@ -1,14 +1,28 @@
 {
-  "updated_at": "2026-10-04T23:24:00+08:00",
+  "updated_at": "2026-10-04T23:40:05+08:00",
   "agents": [
     {
       "id": "hanrin",
       "name": "Hanrin",
       "role": "Manager",
       "room": "ceo",
-      "status": "kerja",
-      "task": "Bagi tugas ke bot lain",
-      "updated_at": "2026-10-04T22:30:00+08:00"
+      "status": "santai",
+      "task": "Free, jalan-jalan keliling kantor",
+      "schedule": [
+        {
+          "time": "08:00",
+          "label": "Bagi tugas pagi ke semua bot"
+        },
+        {
+          "time": "12:00",
+          "label": "Cek progres bot"
+        },
+        {
+          "time": "21:00",
+          "label": "Rekap harian buat Papa"
+        }
+      ],
+      "updated_at": "2026-10-04T23:40:05+08:00"
     },
     {
       "id": "lia",
