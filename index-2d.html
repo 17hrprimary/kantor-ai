@@ -136,7 +136,7 @@ const LOOKS={
  hr:{hair:'#8e1f2c',hl:'#b8364a',style:'wavy',shirt:'#ffa9c4',skin:'#f8dccb'},
  keira:{hair:'#141217',hl:'#3a3340',style:'bangs',glasses:'roundThick',shirt:'#1f1d24',skin:'#f6dccb',police:true},
  ornf:{hair:'#1b1720',hl:'#3a3340',style:'pony',shirt:'#ffffff',skin:'#f6d8c4',band:'#ff7eb6'},
- lab:{hair:'#2c4a46',hl:'#4a706a',style:'bob',shirt:'#ffffff',skin:'#efcfb4',coat:true,goggles:true},
+ love:{hair:'#2c4a46',hl:'#4a706a',style:'bob',shirt:'#ffffff',skin:'#efcfb4',coat:true,goggles:true},
 };
 const DEFAULT_LOOK={hair:'#3a2a3a',hl:'#5a4a5a',style:'bob',shirt:'#ff9cc7',skin:'#f6d8c4'};
 
@@ -257,7 +257,7 @@ function bedSVG(a){
 const FALLBACK={updated_at:null,agents:[
  {id:'hanrin',name:'Hanrin',role:'Manager',room:'desk',status:'kerja',task:'Bagi tugas ke bot lain'},
  {id:'lia',name:'Ophelia (Lia)',role:'Konten Instagram, posting & jaga IG ophelia.lia.real',room:'desk',status:'kerja',task:'Jaga IG ophelia.lia.real'},
- ...[['rin','Rin','Asisten pribadi'],['ornf','Co Agent 2 Lia','Chat WhatsApp'],['emely','Emely','Teman ngobrol'],['hr','HR','Hanrin, pacar / pendamping'],['keira','Keira','Konsultan pribadi'],['lab','Lab Observasi','Riset & eksperimen']]
+ ...[['rin','Rin','Asisten pribadi'],['ornf','Co Agent 2 Lia','Chat WhatsApp'],['emely','Emely','Teman ngobrol'],['hr','HR','Hanrin, pacar / pendamping'],['keira','Keira','Konsultan pribadi'],['love','Love ❤️','Asisten pasangan, pengingat dan riset']]
  .map(([id,name,role])=>({id,name,role,room:'kamar',status:'tidur',task:'belum ada tugas'}))]};
 let agents=[],overrides={},lastSig='',fileUpdated=null;
 const $=id=>document.getElementById(id);
