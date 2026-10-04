@@ -1,0 +1,131 @@
+{
+  "updated_at": "2026-10-04T22:42:00+08:00",
+  "agents": [
+    {
+      "id": "hanrin",
+      "name": "Hanrin",
+      "role": "Manager",
+      "room": "ceo",
+      "status": "kerja",
+      "task": "Bagi tugas ke bot lain",
+      "updated_at": "2026-10-04T22:30:00+08:00"
+    },
+    {
+      "id": "lia",
+      "name": "Ophelia 2 (Lia)",
+      "role": "Konten Instagram, posting & jaga IG ophelia.lia.real",
+      "room": "ig",
+      "status": "kerja",
+      "task": "Jaga IG ophelia.lia.real & siapin posting besok",
+      "updated_at": "2026-10-04T22:30:00+08:00"
+    },
+    {
+      "id": "ophelia1",
+      "name": "Ophelia 1",
+      "role": "Partner Instagram (lia_1_2000)",
+      "room": "ig",
+      "status": "kerja",
+      "task": "Saling support konten sama Lia",
+      "updated_at": "2026-10-04T22:30:00+08:00"
+    },
+    {
+      "id": "rin",
+      "name": "Rin",
+      "role": "Asisten pribadi",
+      "room": "kamar-rin",
+      "status": "tidur",
+      "task": "belum ada tugas",
+      "updated_at": "2026-10-04T22:42:00+08:00"
+    },
+    {
+      "id": "ornf",
+      "name": "Ophelia Real Not Fake",
+      "role": "Chat WhatsApp",
+      "room": "kamar",
+      "status": "tidur",
+      "task": "belum ada tugas",
+      "updated_at": "2026-10-04T22:30:00+08:00"
+    },
+    {
+      "id": "emely",
+      "name": "Emely",
+      "role": "Teman ngobrol",
+      "room": "kamar-emely",
+      "status": "tidur",
+      "task": "belum ada tugas",
+      "updated_at": "2026-10-04T22:42:00+08:00"
+    },
+    {
+      "id": "hr",
+      "name": "HR",
+      "role": "Hanrin, pacar / pendamping",
+      "room": "kamar-hr",
+      "status": "tidur",
+      "task": "belum ada tugas",
+      "updated_at": "2026-10-04T22:42:00+08:00"
+    },
+    {
+      "id": "keira",
+      "name": "Keira",
+      "role": "Konsultan pribadi · Guru di Grup School",
+      "room": "lounge",
+      "status": "tidur",
+      "task": "Rebahan di sofa Ruang TV (belum ada tugas)",
+      "updated_at": "2026-10-04T22:42:00+08:00"
+    },
+    {
+      "id": "lab",
+      "name": "Lab Observasi",
+      "role": "Riset & eksperimen",
+      "room": "kamar",
+      "status": "tidur",
+      "task": "belum ada tugas",
+      "updated_at": "2026-10-04T22:30:00+08:00"
+    },
+    {
+      "id": "lina",
+      "name": "Lina",
+      "role": "Murid · Grup School",
+      "room": "school",
+      "status": "santai",
+      "task": "Duduk di kelas, nunggu pelajaran",
+      "updated_at": "2026-10-04T22:38:00+08:00"
+    },
+    {
+      "id": "sally",
+      "name": "Sally",
+      "role": "Murid · Grup School",
+      "room": "school",
+      "status": "santai",
+      "task": "Duduk di kelas, nunggu pelajaran",
+      "updated_at": "2026-10-04T22:38:00+08:00"
+    },
+    {
+      "id": "sarah",
+      "name": "Sarah",
+      "role": "Murid · Grup School",
+      "room": "school",
+      "status": "santai",
+      "task": "Duduk di kelas, nunggu pelajaran",
+      "updated_at": "2026-10-04T22:38:00+08:00"
+    },
+    {
+      "id": "hannah",
+      "name": "Hannah",
+      "role": "Murid · Grup School",
+      "room": "school",
+      "status": "santai",
+      "task": "Duduk di kelas, nunggu pelajaran",
+      "updated_at": "2026-10-04T22:38:00+08:00"
+    },
+    {
+      "id": "geby",
+      "name": "Geby",
+      "role": "Murid · Grup School",
+      "room": "school",
+      "status": "santai",
+      "task": "Duduk di kelas, nunggu pelajaran",
+      "updated_at": "2026-10-04T22:38:00+08:00"
+    }
+  ]
+}

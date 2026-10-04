@@ -1,0 +1,357 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Kantor AI by Han HQ</title>
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:"Segoe UI","Nunito",system-ui,sans-serif;background:linear-gradient(160deg,#ffe4ef 0%,#fdf0ff 50%,#e9f3ff 100%);color:#5a3a52;min-height:100vh}
+header{display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap;padding:12px 24px;background:rgba(255,255,255,.75);border-bottom:3px solid #ffc4dc}
+.logo{display:flex;align-items:center;gap:12px}
+.logo .ic{width:42px;height:42px;border-radius:14px;background:linear-gradient(135deg,#ff8fbf,#c79bff);display:grid;place-items:center;font-size:22px;box-shadow:0 4px 0 #e06fa4;flex:none}
+h1{font-size:21px;color:#d6457f}
+.sub{font-size:12px;color:#a37a95}
+.stats{display:flex;gap:8px;align-items:center;flex-wrap:wrap}
+.pill{background:#fff;border:2px solid #ffd2e4;border-radius:999px;padding:5px 12px;font-size:12.5px;font-weight:700;white-space:nowrap}
+.pill b{color:#d6457f}
+.btn{border:none;cursor:pointer;font:inherit;font-weight:800;font-size:15px;color:#fff;padding:10px 20px;border-radius:16px;background:linear-gradient(180deg,#ff7eb6,#f2559a);box-shadow:0 5px 0 #c93a7a,0 8px 18px rgba(242,85,154,.35);transition:transform .1s,box-shadow .1s;white-space:nowrap}
+.btn:active{transform:translateY(4px);box-shadow:0 1px 0 #c93a7a}
+.btn.ghost{background:#fff;color:#d6457f;box-shadow:0 4px 0 #ffc4dc;font-size:12.5px;padding:8px 12px}
+main{display:grid;grid-template-columns:1fr 290px;gap:16px;padding:14px 22px}
+.left{display:flex;flex-direction:column;gap:16px}
+.room{position:relative;border-radius:24px;padding:22px 14px 12px;border:3px solid #ffd2e4;box-shadow:inset 0 0 0 5px #fff}
+.office{background:repeating-linear-gradient(45deg,rgba(255,255,255,.6) 0 22px,rgba(255,228,240,.6) 22px 44px),#fff3f8}
+.bedroom{background:radial-gradient(circle at 15% 20%,rgba(255,255,255,.9) 0 2px,transparent 3px),radial-gradient(circle at 70% 30%,rgba(255,255,255,.9) 0 1.5px,transparent 2.5px),radial-gradient(circle at 45% 12%,rgba(255,255,255,.8) 0 1.5px,transparent 2.5px),linear-gradient(180deg,#e7defc,#f6eefe);border-color:#d6c8fb}
+.rlabel{position:absolute;top:-13px;left:18px;font-size:12px;font-weight:800;letter-spacing:.8px;text-transform:uppercase;padding:4px 12px;border-radius:999px;color:#fff;background:#f2559a;box-shadow:0 3px 0 #c93a7a}
+.bedroom .rlabel{background:#9a7bff;box-shadow:0 3px 0 #7457e0}
+.moon{position:absolute;top:8px;right:16px;font-size:22px}
+.desks{display:flex;gap:16px;justify-content:center;align-items:flex-end;flex-wrap:wrap}
+.beds{display:grid;grid-template-columns:repeat(3,1fr);gap:12px 14px}
+.agent{display:flex;flex-direction:column;align-items:center;text-align:center;cursor:default}
+.desk-agent{flex:1;min-width:200px;max-width:330px}
+.desk-agent.big{max-width:380px}
+.bubble{position:relative;background:#fff;border:2px solid #ffc4dc;border-radius:14px;padding:5px 10px;font-size:12px;line-height:1.3;min-height:32px;display:flex;align-items:center;justify-content:center;box-shadow:0 3px 0 #ffe0ec;margin-bottom:6px;max-width:100%}
+.bubble:after{content:"";position:absolute;bottom:-8px;left:50%;transform:translateX(-50%);border:7px solid transparent;border-top-color:#ffc4dc;border-bottom:0}
+.santai .bubble{border-color:#d8d0e0;color:#9a8aa5}
+.scene svg{display:block;width:100%;height:auto;overflow:visible}
+.desk-agent .scene{width:230px}
+.desk-agent.big .scene{width:290px;max-width:100%}
+.desk-agent .scene{max-width:100%}
+.bed-agent .scene{width:170px;max-width:100%}
+.name{font-weight:800;font-size:14px;color:#c23d76;margin-top:2px}
+.bed-agent .name{font-size:13px;color:#6f52c9}
+.role{font-size:11px;color:#a37a95;line-height:1.25}
+.status{display:inline-flex;align-items:center;gap:5px;font-size:11px;font-weight:700;margin-top:4px;padding:2px 9px;border-radius:999px}
+.dot{width:8px;height:8px;border-radius:50%}
+.st-kerja{background:#eafaf2;color:#2f9e6e}.st-kerja .dot{background:#35c47f;box-shadow:0 0 0 3px rgba(53,196,127,.25)}
+.st-santai{background:#fff4e0;color:#c98a1d}.st-santai .dot{background:#f0b23a}
+.st-tidur{background:#efeaff;color:#7a63c9}.st-tidur .dot{background:#a996f0}
+.tag{font-size:10.5px;font-weight:700;color:#8d7ab8;background:#fff;border:1.5px dashed #c9bbf5;border-radius:999px;padding:1px 8px;margin-top:3px}
+.kerja .bob{animation:bob 1.2s ease-in-out infinite}
+.santai .bob{animation:sway 3s ease-in-out infinite;transform-origin:50% 80%}
+.tidur .breathe{animation:breathe 3s ease-in-out infinite;transform-origin:50% 100%;transform-box:fill-box}
+.zz text{animation:zz 2.4s ease-in-out infinite;opacity:.8}
+.zz text:nth-child(2){animation-delay:.8s}.zz text:nth-child(3){animation-delay:1.6s}
+@keyframes bob{0%,100%{transform:translateY(0)}50%{transform:translateY(-2px)}}
+@keyframes sway{0%,100%{transform:rotate(-2deg)}50%{transform:rotate(2deg)}}
+@keyframes breathe{0%,100%{transform:scaleY(1)}50%{transform:scaleY(1.06)}}
+@keyframes zz{0%{opacity:.35;transform:translate(0,0)}40%{opacity:1}100%{opacity:.2;transform:translate(6px,-8px)}}
+.flip{animation:pop .6s ease}
+@keyframes pop{0%{transform:scale(.6);opacity:.3}60%{transform:scale(1.08)}100%{transform:scale(1);opacity:1}}
+.heart{position:fixed;pointer-events:none;font-size:18px;animation:up 1.2s ease-out forwards;z-index:9}
+@keyframes up{to{transform:translateY(-70px) scale(1.4);opacity:0}}
+aside{display:flex;flex-direction:column;gap:14px}
+.card{background:#fff;border-radius:20px;border:2px solid #ffd2e4;padding:13px;box-shadow:0 5px 0 #ffe0ec}
+.card h2{font-size:15px;color:#d6457f;margin-bottom:8px}
+.sched{list-style:none;display:flex;flex-direction:column;gap:6px}
+.sched li{display:flex;gap:10px;align-items:center;font-size:12.5px;padding:5px 8px;border-radius:12px;background:#fff6fa}
+.sched .t{font-weight:800;color:#fff;background:#f2559a;border-radius:8px;padding:2px 7px;font-size:12px;min-width:48px;text-align:center}
+.sched li.x .t{background:#9a7bff}
+.sched li.done{opacity:.5}.sched li.next{outline:2px solid #ff9cc7}
+.sec{font-size:11px;font-weight:800;color:#a37a95;text-transform:uppercase;letter-spacing:.6px;margin:6px 0 3px}
+.clock{font-size:24px;font-weight:800;color:#c23d76}
+.small{font-size:11.5px;color:#a37a95;line-height:1.4}
+.small b{color:#7a5070}
+.live{display:inline-block;width:8px;height:8px;border-radius:50%;background:#35c47f;margin-right:5px;animation:blink 1.5s infinite}
+.live.off{background:#f0b23a;animation:none}
+@keyframes blink{50%{opacity:.3}}
+.log{font-size:12px;display:flex;flex-direction:column;gap:5px;max-height:120px;overflow:auto}
+.log div{padding:4px 8px;border-radius:10px;background:#f6f3ff}
+footer{text-align:center;font-size:11px;color:#b993ab;padding:2px 0 12px}
+.empty{font-size:12px;color:#9a8aa5;padding:16px;text-align:center;grid-column:1/-1}
+@media(max-width:1000px){main{grid-template-columns:1fr}}
+@media(max-width:640px){
+ header{padding:10px 12px}h1{font-size:18px}.sub{display:none}
+ main{padding:12px 10px}.stats{width:100%}.btn{flex:1}
+ .beds{grid-template-columns:repeat(2,1fr);gap:10px}
+ .desk-agent{min-width:0;flex-basis:100%}
+ .desk-agent .scene{width:220px}.desk-agent.big .scene{width:260px}
+ .bed-agent .scene{width:100%}
+ .room{padding:22px 8px 10px}
+}
+</style>
+</head>
+<body>
+<header>
+  <div class="logo"><div class="ic">🏢</div><div><h1>Kantor AI by Han HQ</h1><div class="sub">Yang kerja cuma Hanrin & Lia, sisanya bobo dulu 💤</div></div></div>
+  <div class="stats">
+    <div class="pill">💪 Kerja <b id="cKerja">0</b></div>
+    <div class="pill">💤 Tidur <b id="cTidur">0</b></div>
+    <button class="btn" id="btnKerja">💪 Suruh Balik Kerja</button>
+  </div>
+</header>
+<main>
+  <div class="left">
+    <section class="room office"><span class="rlabel">🏢 Ruang Kantor</span><div class="desks" id="desks"></div></section>
+    <section class="room bedroom"><span class="rlabel">🛏️ Kamar Tidur</span><span class="moon">🌙</span><div class="beds" id="beds"></div></section>
+  </div>
+  <aside>
+    <div class="card">
+      <div class="small">Waktu WITA</div>
+      <div class="clock" id="clock">--:--</div>
+      <div class="small" id="tgl"></div>
+      <div class="small" style="margin-top:8px"><span class="live" id="live"></span><span id="src">Memuat status.json…</span></div>
+      <div class="small">Terakhir update: <b id="lastUpd">-</b></div>
+      <div class="small">Dicek: <b id="lastCheck">-</b> · cek ulang tiap 60 detik</div>
+      <button class="btn ghost" id="btnReload" style="margin-top:8px;width:100%">🔄 Muat ulang status</button>
+    </div>
+    <div class="card">
+      <h2>📅 Jadwal hari ini</h2>
+      <div class="sec">IG Lia harian</div><ul class="sched" id="s1"></ul>
+      <div class="sec">IG Lia x Ophelia 1</div><ul class="sched" id="s2"></ul>
+    </div>
+    <div class="card"><h2>📝 Log kantor</h2><div class="log" id="log"></div></div>
+  </aside>
+</main>
+<footer>Kantor AI by Han HQ · HTML, CSS, JS doang · status dari status.json 🌸</footer>
+<script>
+/* ===== Tampilan karakter  ===== */
+const LOOKS={
+ lia:{hair:'#1b1720',hl:'#3a3340',style:'messy',glasses:'square',shirt:'#e23b3b',skin:'#f6d8c4'},
+ hanrin:{hair:'#141217',hl:'#4a4458',style:'neat',glasses:'roundBlack',shirt:'#d93636',skin:'#f3d2bb',skirt:true},
+ ophelia1:{hair:'#1b1720',hl:'#3a3340',style:'messy',glasses:'square',shirt:'#e23b3b',skin:'#f6d8c4',clip:'#ffd23f'},
+ rin:{hair:'#1e1a22',hl:'#3b3540',style:'bun',shirt:'#9a6a4a',skin:'#f3d0b6',clip:'#ff8fbf'},
+ emely:{hair:'#4a2e22',hl:'#6e4634',style:'straight',glasses:'round',shirt:'#24222b',skin:'#f3d2bb',earring:true},
+ hr:{hair:'#8e1f2c',hl:'#b8364a',style:'wavy',shirt:'#ffa9c4',skin:'#f8dccb'},
+ keira:{hair:'#141217',hl:'#3a3340',style:'bangs',glasses:'roundThick',shirt:'#1f1d24',skin:'#f6dccb',police:true},
+ ornf:{hair:'#1b1720',hl:'#3a3340',style:'pony',shirt:'#ffffff',skin:'#f6d8c4',band:'#ff7eb6'},
+ lab:{hair:'#2c4a46',hl:'#4a706a',style:'bob',shirt:'#ffffff',skin:'#efcfb4',coat:true,goggles:true},
+};
+const DEFAULT_LOOK={hair:'#3a2a3a',hl:'#5a4a5a',style:'bob',shirt:'#ff9cc7',skin:'#f6d8c4'};
+
+/* back hair: digambar di belakang badan */
+function hairBack(L){
+ const c=L.hair;
+ switch(L.style){
+  case 'messy':return `<path d="M-21 -2 Q-26 -26 0 -27 Q26 -26 21 -2 L25 20 L22 34 L27 46 L16 44 L10 50 L0 44 L-10 50 L-16 44 L-27 46 L-22 34 L-25 20 Z" fill="${c}"/>
+   <path d="M-24 22 l-6 6 M24 18 l7 4 M-20 40 l-7 3 M22 38 l6 5" stroke="${c}" stroke-width="3" stroke-linecap="round"/>`;
+  case 'straight':return `<path d="M-20 -4 Q-24 -26 0 -26 Q24 -26 20 -4 L23 46 Q0 50 -23 46 Z" fill="${c}"/>`;
+  case 'neat':return `<path d="M-19 -4 Q-23 -26 0 -26 Q23 -26 19 -4 L20 44 Q0 47 -20 44 Z" fill="${c}"/>`;
+  case 'bangs':return `<path d="M-20 -4 Q-24 -27 0 -27 Q24 -27 20 -4 L24 48 Q0 52 -24 48 Z" fill="${c}"/>`;
+  case 'wavy':return `<path d="M-20 -4 Q-25 -26 0 -26 Q25 -26 20 -4 Q26 8 21 20 Q27 32 21 46 Q0 52 -21 46 Q-27 32 -21 20 Q-26 8 -20 -4Z" fill="${c}"/>`;
+  case 'bun':return `<circle cx="2" cy="-27" r="11" fill="${c}"/><path d="M-6 -36 q-6 -4 -4 4 M10 -36 q6 -5 5 4" stroke="${c}" stroke-width="2.5" fill="none"/><path d="M-19 -2 Q-22 -24 0 -24 Q22 -24 19 -2 L18 10 Q0 14 -18 10Z" fill="${c}"/>`;
+  case 'braids':{let b='';for(let i=0;i<5;i++){b+=`<ellipse cx="-20" cy="${14+i*7}" rx="5" ry="4.5" fill="${c}" stroke="${L.hl}" stroke-width=".8"/><ellipse cx="20" cy="${14+i*7}" rx="5" ry="4.5" fill="${c}" stroke="${L.hl}" stroke-width=".8"/>`}
+   return `<path d="M-19 -2 Q-22 -24 0 -24 Q22 -24 19 -2 L20 12 L-20 12Z" fill="${c}"/>${b}<circle cx="-20" cy="50" r="2.5" fill="#c3a8ec"/><circle cx="20" cy="50" r="2.5" fill="#c3a8ec"/>`;}
+  case 'pony':return `<path d="M-19 -2 Q-22 -24 0 -24 Q22 -24 19 -2 L18 10 Q0 14 -18 10Z" fill="${c}"/><path d="M16 -12 Q34 -6 28 22 Q26 36 30 44 Q18 36 20 14 Z" fill="${c}"/>`;
+  case 'bob':default:return `<path d="M-20 -2 Q-23 -25 0 -25 Q23 -25 20 -2 L21 16 Q0 21 -21 16Z" fill="${c}"/>`;
+ }
+}
+/* poni / rambut depan */
+function hairFront(L){
+ const c=L.hair,h=L.hl;
+ switch(L.style){
+  case 'messy':return `<path d="M-18 4 Q-20 -20 0 -21 Q20 -20 18 4 L15 -4 L13 2 L9 -8 L6 -1 L2 -10 L-2 -2 L-6 -9 L-9 0 L-12 -6 L-15 2Z" fill="${c}"/>
+   <path d="M-4 -19 q-8 4 -10 14 M6 -18 q4 6 2 12 M-1 -21 q2 -6 7 -7 M3 -21 q-1 -5 -6 -6" stroke="${h}" stroke-width="1.4" fill="none" stroke-linecap="round"/>
+   <path d="M-17 2 q-3 10 -1 18 M17 0 q4 12 1 20" stroke="${c}" stroke-width="3.5" fill="none" stroke-linecap="round"/>`;
+  case 'straight':return `<path d="M-18 6 Q-19 -20 0 -20 Q19 -20 18 6 Q12 -6 1 -14 Q-10 -6 -18 6Z" fill="${c}"/><path d="M-18 4 L-17 36 M18 4 L17 36" stroke="${c}" stroke-width="4" stroke-linecap="round"/><path d="M1 -14 q-6 4 -10 12" stroke="${h}" stroke-width="1.2" fill="none"/>`;
+  case 'neat':return `<path d="M-18 8 Q-19 -20 0 -20 Q19 -20 18 8 Q14 -8 0 -15 Q-14 -8 -18 8Z" fill="${c}"/><path d="M0 -20 L0 -15" stroke="${h}" stroke-width="1.2"/><path d="M-17 6 L-16 38 M17 6 L16 38" stroke="${c}" stroke-width="3.5" stroke-linecap="round"/><path d="M-8 -17 q-6 4 -8 12 M8 -17 q6 4 8 12" stroke="${h}" stroke-width="1.6" fill="none" stroke-linecap="round"/>`;
+  case 'bangs':return `<path d="M-18 6 Q-20 -21 0 -21 Q20 -21 18 6 L16 -2 L15 -4 Q8 -1 0 -2 Q-8 -1 -15 -4 L-16 -2Z" fill="${c}"/><path d="M-10 -3 l1 -6 M-4 -2 l0 -6 M3 -2 l0 -6 M9 -3 l-1 -6" stroke="${h}" stroke-width=".9"/><path d="M-18 4 L-18 40 M18 4 L18 40" stroke="${c}" stroke-width="4" stroke-linecap="round"/>`;
+  case 'wavy':return `<path d="M-18 6 Q-19 -20 0 -20 Q19 -20 18 6 Q13 -8 2 -14 Q-10 -8 -18 6Z" fill="${c}"/><path d="M-18 4 q-3 10 1 18 q-3 8 0 16 M18 4 q3 10 -1 18 q3 8 0 16" stroke="${c}" stroke-width="4.5" fill="none" stroke-linecap="round"/><path d="M2 -14 q6 4 10 12" stroke="${h}" stroke-width="1.2" fill="none"/>`;
+  case 'bun':return `<path d="M-18 2 Q-19 -20 0 -20 Q19 -20 18 2 Q10 -12 -4 -10 Q-12 -8 -18 2Z" fill="${c}"/><path d="M-17 0 q-3 8 0 14" stroke="${c}" stroke-width="2.5" fill="none" stroke-linecap="round"/>`;
+  case 'braids':return `<path d="M-18 4 Q-19 -20 0 -20 Q19 -20 18 4 Q12 -10 0 -14 Q-12 -10 -18 4Z" fill="${c}"/><path d="M0 -20 L0 -13" stroke="${h}" stroke-width="1.3"/>`;
+  case 'pony':return `<path d="M-18 4 Q-19 -20 0 -20 Q19 -20 18 4 Q8 -10 -6 -10 Q-14 -6 -18 4Z" fill="${c}"/>`;
+  case 'bob':default:return `<path d="M-19 8 Q-20 -20 0 -20 Q20 -20 19 8 Q16 -6 10 -8 L-10 -8 Q-16 -6 -19 8Z" fill="${c}"/>`;
+ }
+}
+function face(L,sleep){
+ const eyes=sleep
+  ?`<path d="M-9 3 q3 3 6 0 M3 3 q3 3 6 0" stroke="#3a2a3a" stroke-width="1.6" fill="none" stroke-linecap="round"/>`
+  :`<ellipse cx="-6" cy="3" rx="2.3" ry="2.8" fill="#2a1f2a"/><ellipse cx="6" cy="3" rx="2.3" ry="2.8" fill="#2a1f2a"/><circle cx="-5.2" cy="2" r=".8" fill="#fff"/><circle cx="6.8" cy="2" r=".8" fill="#fff"/>
+    <path d="M-9 -2 q3 -2 6 0 M3 -2 q3 -2 6 0" stroke="#3a2a3a" stroke-width="1" fill="none"/>`;
+ let g='';
+ if(L.glasses==='square')g=`<g fill="rgba(255,255,255,.15)" stroke="#1d1a20" stroke-width="2.2"><rect x="-12.5" y="-2.5" width="10" height="9" rx="2"/><rect x="2.5" y="-2.5" width="10" height="9" rx="2"/></g><path d="M-2.5 1 h5 M-12.5 1 l-4 -1 M12.5 1 l4 -1" stroke="#1d1a20" stroke-width="2"/>`;
+ if(L.glasses==='roundBlack')g=`<g fill="rgba(255,255,255,.12)" stroke="#111" stroke-width="1.7"><circle cx="-6.5" cy="2.5" r="5.6"/><circle cx="6.5" cy="2.5" r="5.6"/></g><path d="M-1 2 q1 -1.5 2 0 M-12 2 l-5 -1 M12 2 l5 -1" stroke="#111" stroke-width="1.5" fill="none"/>`;
+ if(L.glasses==='roundThick')g=`<g fill="rgba(190,170,255,.28)" stroke="#111" stroke-width="2.6"><circle cx="-6.8" cy="2.5" r="6.3"/><circle cx="6.8" cy="2.5" r="6.3"/></g><path d="M-.6 1.5 h1.2 M-13 1.5 l-4.5 -1 M13 1.5 l4.5 -1" stroke="#111" stroke-width="2.2"/>`;
+ if(L.glasses==='round')g=`<g fill="none" stroke="#5a4a3a" stroke-width="1.1"><circle cx="-6" cy="2.5" r="5.5"/><circle cx="6" cy="2.5" r="5.5"/><path d="M-.5 2 h1 M-11.5 2 l-5 -1 M11.5 2 l5 -1"/></g>`;
+ const mouth=sleep?`<ellipse cx="0" cy="10.5" rx="1.5" ry="1.2" fill="#c0587e"/>`:`<path d="M-3 9.5 q3 3 6 0" stroke="#c0587e" stroke-width="1.6" fill="none" stroke-linecap="round"/>`;
+ let ex='';
+ if(L.earring)ex+=`<path d="M-17 8 l-1 4 l2 3 l2 -3z M17 8 l1 4 l-2 3 l-2 -3z" fill="none" stroke="#c9a24a" stroke-width="1"/>`;
+ return `<ellipse cx="0" cy="1" rx="17" ry="18" fill="${L.skin}"/>${ex}${eyes}
+ <ellipse cx="-11" cy="8" rx="3.2" ry="2" fill="#ffa3c0" opacity=".7"/><ellipse cx="11" cy="8" rx="3.2" ry="2" fill="#ffa3c0" opacity=".7"/>${mouth}${g}`;
+}
+function hairAcc(L){
+ let s='';
+ if(L.clip)s+=`<g transform="translate(-8,-29) rotate(-20)"><rect x="-6" y="-2" width="12" height="4" rx="2" fill="${L.clip}"/></g>`;
+ if(L.bunny)s+=`<g transform="translate(11,-15) rotate(15)"><ellipse cx="-2.5" cy="-6" rx="1.8" ry="4.5" fill="#ffb3d1" stroke="#ff7eb6" stroke-width=".6"/><ellipse cx="2.5" cy="-6" rx="1.8" ry="4.5" fill="#ffb3d1" stroke="#ff7eb6" stroke-width=".6"/><circle r="4" fill="#ffc8de" stroke="#ff7eb6" stroke-width=".6"/></g>`;
+ if(L.band)s+=`<path d="M-17 -10 Q0 -24 17 -10" stroke="${L.band}" stroke-width="3" fill="none"/>`;
+ if(L.goggles)s+=`<rect x="-15" y="-19" width="30" height="7" rx="3.5" fill="#bdeee0" stroke="#3fb894" stroke-width="1.2"/>`;
+ return s;
+}
+function head(L,sleep){return `${hairBack(L)}${face(L,sleep)}${hairFront(L)}${hairAcc(L)}`}
+function body(L){
+ const sh=L.shirt,stroke=(sh==='#ffffff')?'#e2d6e6':'rgba(0,0,0,.08)';
+ let s=`<rect x="-5" y="15" width="10" height="8" fill="${L.skin}"/>
+ <path d="M-24 50 Q-24 24 -10 21 L10 21 Q24 24 24 50Z" fill="${sh}" stroke="${stroke}"/>
+ <path d="M-6 21 q6 6 12 0" fill="${L.skin}"/>`;
+ if(L.skirt)s=`<rect x="-5" y="15" width="10" height="8" fill="${L.skin}"/>
+ <path d="M-27 58 L-21 32 L21 32 L27 58Z" fill="url(#plaid)" stroke="#5a1f2a" stroke-width=".8"/>
+ <path d="M-14 32 L-17 58 M-5 32 L-6 58 M5 32 L6 58 M14 32 L17 58" stroke="#5a1f2a" stroke-width=".7" opacity=".6"/>
+ <path d="M-21 34 Q-24 24 -10 21 L10 21 Q24 24 21 34Z" fill="${sh}" stroke="${stroke}"/>
+ <path d="M-6 21 q6 6 12 0" fill="${L.skin}"/>`;
+ if(L.police)s+=`<path d="M-9 21 L-3 30 L0 23 L3 30 L9 21 L6 20 L0 24 L-6 20Z" fill="#2c2a33" stroke="#4a4752" stroke-width=".6"/>
+ <path d="M0 26 L0 50" stroke="#3a3842" stroke-width="1"/><circle cx="0" cy="33" r=".9" fill="#55525e"/><circle cx="0" cy="41" r=".9" fill="#55525e"/>
+ <rect x="-19" y="30" width="9" height="6" rx="1" fill="none" stroke="#3a3842" stroke-width=".7"/>
+ <g transform="translate(13,34)"><path d="M0 -5 L4 -2 L4 2 L0 5 L-4 2 L-4 -2Z" fill="#d9dde3" stroke="#8d939c" stroke-width=".7"/><circle r="1.6" fill="#a8aeb7"/></g>`;
+ if(L.coat)s+=`<path d="M-24 50 Q-24 24 -10 21 L-3 21 L-1 50Z M24 50 Q24 24 10 21 L3 21 L1 50Z" fill="#f4fbff" stroke="#cfe3ea"/><rect x="11" y="32" width="6" height="5" rx="1" fill="#8fd8c4"/>`;
+ return s;
+}
+function lookOf(id){return Object.assign({},DEFAULT_LOOK,LOOKS[id]||{})}
+
+function deskSVG(a){
+ const L=lookOf(a.id),big=a.id==='hanrin';
+ const W=big?250:200,cx=W/2;
+ const x1=big?10:16,x2=W-x1;
+ return `<svg viewBox="0 0 ${W} 132"><defs><pattern id="plaid" width="8" height="8" patternUnits="userSpaceOnUse"><rect width="8" height="8" fill="#b3263a"/><rect width="8" height="3" y="2.5" fill="#2a1f3a" opacity=".55"/><rect width="3" height="8" x="2.5" fill="#2a1f3a" opacity=".55"/><path d="M0 6.5 H8 M6.5 0 V8" stroke="#f3c94a" stroke-width=".6"/></pattern></defs>
+  <ellipse cx="${cx}" cy="126" rx="${W/2-6}" ry="6" fill="rgba(214,69,127,.13)"/>
+  ${big?`<g transform="translate(${W-34},38)"><rect x="-6" y="30" width="12" height="18" rx="3" fill="#e9a26b"/><circle cx="0" cy="20" r="11" fill="#9be0b0"/><circle cx="-8" cy="27" r="7" fill="#7fcf9a"/><circle cx="8" cy="26" r="7" fill="#7fcf9a"/></g>
+  <g transform="translate(26,28)"><rect width="34" height="22" rx="3" fill="#fff" stroke="#ffc4dc" stroke-width="2"/><path d="M5 16 l7 -6 l6 4 l10 -9" stroke="#f2559a" stroke-width="2" fill="none"/></g>`:''}
+  <rect x="${cx-32}" y="44" width="64" height="50" rx="14" fill="${big?'#f0a92a':'#ff9cc7'}"/>
+  <g transform="translate(${cx},${L.skirt?31:36}) scale(1.12)"><g class="bob">${hairBack(L)}${body(L)}${face(L,false)}${hairFront(L)}${hairAcc(L)}</g></g>
+  <path d="M${x1} 96 L${cx} 84 L${x2} 96 L${cx} 108Z" fill="${big?'#f6d9a8':'#ffe7c2'}" stroke="${big?'#e3b46a':'#f0c48a'}" stroke-width="1.5"/>
+  <path d="M${x1} 96 L${cx} 108 L${cx} 120 L${x1} 108Z" fill="${big?'#e9c184':'#f6cf98'}"/>
+  <path d="M${cx} 108 L${x2} 96 L${x2} 108 L${cx} 120Z" fill="${big?'#dcae6c':'#eebd80'}"/>
+  <g transform="translate(${cx-14},82)"><path d="M0 14 L0 0 L28 -4 L28 10Z" fill="#6c5a7a"/><path d="M2.5 12 L2.5 1.5 L25.5 -2 L25.5 8.5Z" fill="#bff0ff"/>${a.id==='lia'?'<circle cx="14" cy="4" r="3" fill="none" stroke="#f2559a" stroke-width="1.3"/><circle cx="14" cy="4" r="1" fill="#f2559a"/>':''}</g>
+  <g transform="translate(${x2-36},90)"><path d="M0 4 q0 7 6 7 q6 0 6 -7z" fill="#fff" stroke="#f5b6d1"/><path d="M3 1 q2 -3 0 -5 M8 1 q2 -3 0 -5" stroke="#d8cde3" fill="none"/></g>
+  ${big?`<g transform="translate(${x1+22},92)"><path d="M0 0 L22 -4 L28 0 L6 4Z" fill="#fff" stroke="#e3b46a"/><text x="14" y="2" font-size="4" text-anchor="middle" fill="#c27a16" font-weight="800">MANAGER</text></g>`:''}
+ </svg>`;
+}
+function bedSVG(a){
+ const L=lookOf(a.id);
+ return `<svg viewBox="0 0 170 100">
+  <ellipse cx="85" cy="95" rx="78" ry="5" fill="rgba(122,99,201,.15)"/>
+  <rect x="8" y="22" width="12" height="66" rx="5" fill="#c8a6ff"/>
+  <rect x="150" y="48" width="10" height="40" rx="4" fill="#c8a6ff"/>
+  <rect x="12" y="54" width="146" height="28" rx="8" fill="#fff" stroke="#e2d6f7" stroke-width="1.5"/>
+  <rect x="14" y="74" width="142" height="14" rx="6" fill="#b897f5"/>
+  <ellipse cx="44" cy="52" rx="26" ry="10" fill="#fff" stroke="#e8def8"/>
+  <g transform="translate(44,36) rotate(-12) scale(.95)"><g class="breathe">${head(L,true)}</g></g>
+  <path class="breathe" d="M60 50 Q62 44 74 44 L150 46 Q158 48 156 58 L156 76 Q100 82 58 76 Q54 62 60 50Z" fill="${L.shirt==='#ffffff'?'#ffd6e8':'#ffd6e8'}" stroke="#f7b6d2" stroke-width="1.5"/>
+  <path d="M60 52 Q100 50 154 52" stroke="#ffb3d1" stroke-width="5" fill="none" stroke-linecap="round"/>
+  <g fill="#ffb3d1" opacity=".8"><circle cx="90" cy="64" r="2.5"/><circle cx="112" cy="68" r="2.5"/><circle cx="134" cy="62" r="2.5"/><circle cx="100" cy="72" r="2"/></g>
+  <g class="zz" font-weight="900" fill="#7a63c9"><text x="72" y="32" font-size="12">Z</text><text x="84" y="22" font-size="14">z</text><text x="97" y="12" font-size="17">Z</text></g>
+ </svg>`;
+}
+
+/* ===== Data & realtime ===== */
+const FALLBACK={updated_at:null,agents:[
+ {id:'hanrin',name:'Hanrin',role:'Manager',room:'desk',status:'kerja',task:'Bagi tugas ke bot lain'},
+ {id:'lia',name:'Ophelia (Lia)',role:'Konten Instagram, posting & jaga IG ophelia.lia.real',room:'desk',status:'kerja',task:'Jaga IG ophelia.lia.real'},
+ ...[['rin','Rin','Asisten pribadi'],['ornf','Ophelia Real Not Fake','Chat WhatsApp'],['emely','Emely','Teman ngobrol'],['hr','HR','Hanrin, pacar / pendamping'],['keira','Keira','Konsultan pribadi'],['lab','Lab Observasi','Riset & eksperimen']]
+ .map(([id,name,role])=>({id,name,role,room:'kamar',status:'tidur',task:'belum ada tugas'}))]};
+let agents=[],overrides={},lastSig='',fileUpdated=null;
+const $=id=>document.getElementById(id);
+const tz={timeZone:'Asia/Makassar'};
+const fmtTime=d=>new Intl.DateTimeFormat('id-ID',{...tz,hour:'2-digit',minute:'2-digit',second:'2-digit',hour12:false}).format(d).replace(/\./g,':');
+const fmtFull=d=>new Intl.DateTimeFormat('id-ID',{...tz,day:'numeric',month:'short',hour:'2-digit',minute:'2-digit',hour12:false}).format(d).replace('.',':')+' WITA';
+const idOf=a=>a.id||String(a.name).toLowerCase().replace(/[^a-z0-9]+/g,'-');
+
+function effective(){
+ return agents.map(a=>{const o=overrides[idOf(a)];
+  if(o&&(!a.updated_at||new Date(a.updated_at)<=o.at))return {...a,...o.patch};
+  return a;});
+}
+function render(anim){
+ const list=effective();
+ const isDesk=a=>a.room!=='kamar'&&a.status!=='tidur';const desks=list.filter(isDesk),beds=list.filter(a=>!isDesk(a));
+ $('desks').innerHTML=desks.map(a=>`
+  <div class="agent desk-agent ${a.id==='hanrin'?'big':''} ${a.status} ${anim&&anim.includes(idOf(a))?'flip':''}" id="ag-${idOf(a)}">
+   <div class="bubble">${esc(a.status==='kerja'?a.task:(a.task||'Lagi santai'))}</div>
+   <div class="scene">${deskSVG({...a,id:idOf(a)})}</div>
+   <div class="name">${a.id==='hanrin'?'👑 ':''}${esc(a.name)}</div>
+   <div class="role">${esc(a.role)}</div>
+   <div class="status st-${a.status}"><span class="dot"></span>${label(a.status)}</div>
+  </div>`).join('')||'<div class="empty">Kantor kosong, semua lagi bobo 😴</div>';
+ $('beds').innerHTML=beds.map(a=>`
+  <div class="agent bed-agent tidur" id="ag-${idOf(a)}">
+   <div class="scene">${bedSVG({...a,id:idOf(a)})}</div>
+   <div class="name">${esc(a.name)}</div>
+   <div class="role">${esc(a.role)}</div>
+   <div class="tag">💤 ${esc(a.task||'belum ada tugas')}</div>
+  </div>`).join('')||'<div class="empty">Kamar kosong, semua udah kerja! 🎉</div>';
+ $('cKerja').textContent=list.filter(a=>a.status==='kerja').length;
+ $('cTidur').textContent=list.filter(a=>a.status==='tidur').length;
+ if(anim)anim.forEach((id,i)=>{const el=$('ag-'+id);if(el)setTimeout(()=>hearts(el),i*150)});
+}
+const label=s=>({kerja:'Kerja',santai:'Santai',tidur:'Tidur'}[s]||s);
+const esc=s=>String(s??'').replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+
+async function load(manual){
+ try{
+  const r=await fetch('status.json?t='+Date.now(),{cache:'no-store'});
+  if(!r.ok)throw new Error(r.status);
+  const j=await r.json();const sig=JSON.stringify(j);
+  agents=Array.isArray(j)?j:j.agents;
+  const times=agents.map(a=>a.updated_at).concat(j.updated_at||[]).filter(Boolean).map(t=>new Date(t));
+  fileUpdated=times.length?new Date(Math.max(...times)):null;
+  $('live').className='live';$('src').textContent='Live dari status.json';
+  if(sig!==lastSig){if(lastSig)log('Status baru dari status.json 📥');lastSig=sig;render();}
+  else if(manual)log('Status dicek, belum ada perubahan');
+ }catch(e){
+  if(!agents.length){agents=FALLBACK.agents;render();}
+  $('live').className='live off';$('src').textContent='status.json gagal dimuat (pakai data bawaan)';
+ }
+ $('lastUpd').textContent=fileUpdated?fmtFull(fileUpdated):'-';
+ $('lastCheck').textContent=fmtTime(new Date())+' WITA';
+}
+function hearts(el){
+ const r=el.getBoundingClientRect();
+ ['💗','✨','💪'].forEach((t,i)=>{const h=document.createElement('div');h.className='heart';h.textContent=t;
+  h.style.left=(r.left+r.width/2-20+i*15)+'px';h.style.top=(r.top+20)+'px';
+  document.body.appendChild(h);setTimeout(()=>h.remove(),1400);});
+}
+function log(t){const d=document.createElement('div');d.textContent=fmtTime(new Date()).slice(0,5)+' · '+t;$('log').prepend(d);}
+
+$('btnKerja').onclick=()=>{
+ const lazy=effective().filter(a=>a.status!=='kerja');
+ if(!lazy.length){log('Semua udah kerja kok, Papa 😄');return;}
+ const now=new Date();
+ lazy.forEach(a=>overrides[idOf(a)]={at:now,patch:{room:'desk',status:'kerja',task:a.room==='desk'?a.task:'Bangun! Nunggu tugas dari Hanrin'}});
+ render(lazy.map(idOf));
+ log(`Papa nyuruh balik kerja! ${lazy.length} bot bangun & ke meja 💪`);
+};
+$('btnReload').onclick=()=>{overrides={};lastSig='';load(true).then(()=>log('Status dimuat ulang dari status.json 🔄'));};
+
+/* ===== Jadwal & jam ===== */
+const s1=[['08.19','Posting pagi Lia'],['12.19','Posting siang Lia'],['19.19','Posting malam Lia']];
+const s2=[['10.47','Cek & support Ophelia 1'],['16.47','Cek & support Ophelia 1'],['21.47','Cek & support Ophelia 1']];
+function nowMin(){const p=new Intl.DateTimeFormat('en-GB',{...tz,hour:'2-digit',minute:'2-digit',hour12:false}).format(new Date()).split(':');return +p[0]*60+ +p[1];}
+function sched(){
+ const m=nowMin(),mins=t=>{const[h,mm]=t.split('.').map(Number);return h*60+mm};
+ const next=[...s1,...s2].filter(x=>mins(x[0])>m).sort((a,b)=>mins(a[0])-mins(b[0]))[0];
+ const fill=(id,arr,cls)=>$(id).innerHTML=arr.map(([t,d])=>{const done=mins(t)<=m,nx=next&&next[0]===t;
+  return `<li class="${cls}${done?' done':''}${nx?' next':''}"><span class="t">${t}</span><span>${d}${done?' ✅':nx?' ⏰':''}</span></li>`}).join('');
+ fill('s1',s1,'');fill('s2',s2,'x');
+}
+function tick(){
+ $('clock').textContent=fmtTime(new Date()).slice(0,5)+' WITA';
+ $('tgl').textContent=new Intl.DateTimeFormat('id-ID',{...tz,weekday:'long',day:'numeric',month:'long',year:'numeric'}).format(new Date());
+ sched();
+}
+tick();setInterval(tick,20000);
+log('Kantor buka, selamat datang Papa 🌸');
+load();setInterval(load,60000);
+if(location.hash==='#kerja')setTimeout(()=>$('btnKerja').click(),600);
+</script>
+</body>
+</html>
