@@ -1,5 +1,5 @@
 {
-  "updated_at": "2026-10-04T23:40:00+08:00",
+  "updated_at": "2026-10-05T00:30:00+08:00",
   "agents": [
     {
       "id": "hanrin",
@@ -7,8 +7,18 @@
       "role": "Manager",
       "room": "ceo",
       "status": "kerja",
-      "task": "Bagi tugas ke bot lain",
-      "updated_at": "2026-10-04T22:30:00+08:00"
+      "task": "Kerja di Ruang CEO",
+      "schedule": [
+        {
+          "time": "13:01",
+          "label": "Cek WA RI & update website Hawa Bouquet"
+        },
+        {
+          "time": "22:01",
+          "label": "Cek WA RI & update website Hawa Bouquet"
+        }
+      ],
+      "updated_at": "2026-10-04T23:51:29+08:00"
     },
     {
       "id": "lia",
@@ -24,9 +34,9 @@
       "name": "Ophelia 1",
       "role": "Partner Instagram (lia_1_2000)",
       "room": "ig",
-      "status": "santai",
-      "task": "Jadwal hari ini udah selesai, jalan-jalan santai",
-      "updated_at": "2026-10-04T23:00:00+08:00",
+      "status": "kerja",
+      "task": "Scroll IG, Story, dan Reel lia_1_2000",
+      "updated_at": "2026-10-04T23:25:00+08:00",
       "schedule": [
         {
           "time": "07:27",
@@ -34,16 +44,11 @@
         },
         {
           "time": "08:27",
-          "label": "Story IG"
+          "label": "Story pagi"
         },
         {
           "time": "09:27",
           "label": "Scroll IG"
-        },
-        {
-          "time": "10:32",
-          "label": "Reel baru (mulai 9 Okt)",
-          "from": "10-9"
         },
         {
           "time": "12:27",
@@ -51,13 +56,11 @@
         },
         {
           "time": "12:47",
-          "label": "Reel baru (5-8 Okt)",
-          "from": "10-5",
-          "to": "10-8"
+          "label": "Reel siang"
         },
         {
           "time": "13:27",
-          "label": "Story IG"
+          "label": "Story siang"
         },
         {
           "time": "14:27",
@@ -69,13 +72,11 @@
         },
         {
           "time": "19:47",
-          "label": "Reel baru (5-8 Okt)",
-          "from": "10-5",
-          "to": "10-8"
+          "label": "Reel malam"
         },
         {
           "time": "20:27",
-          "label": "Story IG"
+          "label": "Story malam"
         },
         {
           "time": "21:27",
@@ -123,23 +124,25 @@
       "id": "keira",
       "name": "Keira",
       "role": "Konsultan pribadi · Guru di Grup School",
-      "room": "kerja",
-      "status": "kerja",
-      "task": "Jaga kantor 👮‍♀️",
-      "updated_at": "2026-10-04T23:40:00+08:00",
+      "room": "school",
+      "status": "santai",
+      "task": "Keliling sekolah & kantor",
       "schedule": [
-        {"time": "06:00", "label": "Jaga kantor 👮‍♀️"},
-        {"time": "23:00", "label": "Istirahat di sofa Ruang TV 🛋️"}
-      ]
+        {
+          "time": "∞",
+          "label": "Keliling sekolah & kantor"
+        }
+      ],
+      "updated_at": "2026-10-05T00:30:00+08:00"
     },
     {
-      "id": "lab",
-      "name": "Lab Observasi",
-      "role": "Riset & eksperimen",
+      "id": "love",
+      "name": "Love ❤️",
+      "role": "Asisten pasangan, pengingat dan riset",
       "room": "kamar",
       "status": "tidur",
       "task": "belum ada tugas",
-      "updated_at": "2026-10-04T22:30:00+08:00"
+      "updated_at": "2026-10-04T23:58:00+08:00"
     },
     {
       "id": "lina",

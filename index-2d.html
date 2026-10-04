@@ -67,8 +67,7 @@ aside{display:flex;flex-direction:column;gap:14px}
 .sched{list-style:none;display:flex;flex-direction:column;gap:6px}
 .sched li{display:flex;gap:10px;align-items:center;font-size:12.5px;padding:5px 8px;border-radius:12px;background:#fff6fa}
 .sched .t{font-weight:800;color:#fff;background:#f2559a;border-radius:8px;padding:2px 7px;font-size:12px;min-width:48px;text-align:center}
-.sched li.x .t{background:#9a7bff}
-.sched li.k .t{background:#2c3142}
+.sched li.x .t{background:#9a7bff}.sched li.k .t{background:#2c3142}
 .sched li.done{opacity:.5}.sched li.next{outline:2px solid #ff9cc7}
 .sec{font-size:11px;font-weight:800;color:#a37a95;text-transform:uppercase;letter-spacing:.6px;margin:6px 0 3px}
 .clock{font-size:24px;font-weight:800;color:#c23d76}
@@ -121,7 +120,7 @@ footer{text-align:center;font-size:11px;color:#b993ab;padding:2px 0 12px}
       <h2>📅 Jadwal hari ini</h2>
       <div class="sec">IG Lia harian</div><ul class="sched" id="s1"></ul>
       <div class="sec">IG Lia x Ophelia 1</div><ul class="sched" id="s2"></ul>
-      <div class="sec">Jaga Keira</div><ul class="sched" id="s3"></ul>
+      <div class="sec">Keira</div><ul class="sched" id="s3"></ul>
     </div>
     <div class="card"><h2>📝 Log kantor</h2><div class="log" id="log"></div></div>
   </aside>
@@ -138,7 +137,7 @@ const LOOKS={
  hr:{hair:'#8e1f2c',hl:'#b8364a',style:'wavy',shirt:'#ffa9c4',skin:'#f8dccb'},
  keira:{hair:'#141217',hl:'#3a3340',style:'bangs',glasses:'roundThick',shirt:'#1f1d24',skin:'#f6dccb',police:true},
  ornf:{hair:'#1b1720',hl:'#3a3340',style:'pony',shirt:'#ffffff',skin:'#f6d8c4',band:'#ff7eb6'},
- lab:{hair:'#2c4a46',hl:'#4a706a',style:'bob',shirt:'#ffffff',skin:'#efcfb4',coat:true,goggles:true},
+ love:{hair:'#2c4a46',hl:'#4a706a',style:'bob',shirt:'#ffffff',skin:'#efcfb4',coat:true,goggles:true},
 };
 const DEFAULT_LOOK={hair:'#3a2a3a',hl:'#5a4a5a',style:'bob',shirt:'#ff9cc7',skin:'#f6d8c4'};
 
@@ -259,7 +258,7 @@ function bedSVG(a){
 const FALLBACK={updated_at:null,agents:[
  {id:'hanrin',name:'Hanrin',role:'Manager',room:'desk',status:'kerja',task:'Bagi tugas ke bot lain'},
  {id:'lia',name:'Ophelia (Lia)',role:'Konten Instagram, posting & jaga IG ophelia.lia.real',room:'desk',status:'kerja',task:'Jaga IG ophelia.lia.real'},
- ...[['rin','Rin','Asisten pribadi'],['ornf','Co Agent 2 Lia','Chat WhatsApp'],['emely','Emely','Teman ngobrol'],['hr','HR','Hanrin, pacar / pendamping'],['keira','Keira','Konsultan pribadi'],['lab','Lab Observasi','Riset & eksperimen']]
+ ...[['rin','Rin','Asisten pribadi'],['ornf','Co Agent 2 Lia','Chat WhatsApp'],['emely','Emely','Teman ngobrol'],['hr','HR','Hanrin, pacar / pendamping'],['keira','Keira','Konsultan pribadi'],['love','Love ❤️','Asisten pasangan, pengingat dan riset']]
  .map(([id,name,role])=>({id,name,role,room:'kamar',status:'tidur',task:'belum ada tugas'}))]};
 let agents=[],overrides={},lastSig='',fileUpdated=null;
 const $=id=>document.getElementById(id);
@@ -268,16 +267,10 @@ const fmtTime=d=>new Intl.DateTimeFormat('id-ID',{...tz,hour:'2-digit',minute:'2
 const fmtFull=d=>new Intl.DateTimeFormat('id-ID',{...tz,day:'numeric',month:'short',hour:'2-digit',minute:'2-digit',hour12:false}).format(d).replace('.',':')+' WITA';
 const idOf=a=>a.id||String(a.name).toLowerCase().replace(/[^a-z0-9]+/g,'-');
 
-function keiraOnDuty(){const m=nowMin();return m>=6*60&&m<23*60;}
-function withKeiraDuty(a){
- if(idOf(a)!=='keira'||a.room==='school')return a;
- if(keiraOnDuty())return {...a,room:'kerja',status:'kerja',task:'Jaga kantor 👮‍♀️'};
- return {...a,room:'kamar',status:'tidur',task:'Istirahat di sofa Ruang TV 🛋️'};
-}
 function effective(){
  return agents.map(a=>{const o=overrides[idOf(a)];
-  const e=(o&&(!a.updated_at||new Date(a.updated_at)<=o.at))?{...a,...o.patch}:a;
-  return withKeiraDuty(e);});
+  if(o&&(!a.updated_at||new Date(a.updated_at)<=o.at))return {...a,...o.patch};
+  return a;});
 }
 function render(anim){
  const list=effective();
@@ -331,7 +324,7 @@ function hearts(el){
 function log(t){const d=document.createElement('div');d.textContent=fmtTime(new Date()).slice(0,5)+' · '+t;$('log').prepend(d);}
 
 $('btnKerja').onclick=()=>{
- const lazy=effective().filter(a=>a.status!=='kerja'&&!(idOf(a)==='keira'&&a.room!=='school'));
+ const lazy=effective().filter(a=>a.status!=='kerja');
  if(!lazy.length){log('Semua udah kerja kok, Papa 😄');return;}
  const now=new Date();
  lazy.forEach(a=>overrides[idOf(a)]={at:now,patch:{room:'desk',status:'kerja',task:a.room==='desk'?a.task:'Bangun! Nunggu tugas dari Hanrin'}});
@@ -343,43 +336,21 @@ $('btnReload').onclick=()=>{overrides={};lastSig='';load(true).then(()=>log('Sta
 /* ===== Jadwal & jam ===== */
 const s1=[['08.19','Posting pagi Lia'],['12.19','Posting siang Lia'],['19.19','Posting malam Lia']];
 const s2=[['10.47','Cek & support Ophelia 1'],['16.47','Cek & support Ophelia 1'],['21.47','Cek & support Ophelia 1']];
-const s3=[['06.00','Jaga kantor 👮‍♀️'],['23.00','Istirahat di sofa Ruang TV 🛋️']];
-let _witaAt=0,_witaMin=0;
-function nowMin(){
- const n=performance.now();if(n-_witaAt<400)return _witaMin;
- const p=new Intl.DateTimeFormat('en-GB',{...tz,hour:'2-digit',minute:'2-digit',hour12:false}).format(new Date()).split(':');
- _witaAt=n;_witaMin=+p[0]*60+ +p[1];return _witaMin;
-}
+function nowMin(){const p=new Intl.DateTimeFormat('en-GB',{...tz,hour:'2-digit',minute:'2-digit',hour12:false}).format(new Date()).split(':');return +p[0]*60+ +p[1];}
 function sched(){
  const m=nowMin(),mins=t=>{const[h,mm]=t.split('.').map(Number);return h*60+mm};
- const next=[...s1,...s2,...s3].filter(x=>mins(x[0])>m).sort((a,b)=>mins(a[0])-mins(b[0]))[0];
- const fill=(id,arr,cls)=>$(id).innerHTML=arr.map(([t,d])=>{const done=mins(t)<=m||(t==='23.00'&&m<6*60),nx=next&&next[0]===t&&!done;
+ const next=[...s1,...s2].filter(x=>mins(x[0])>m).sort((a,b)=>mins(a[0])-mins(b[0]))[0];
+ const fill=(id,arr,cls)=>$(id).innerHTML=arr.map(([t,d])=>{const done=mins(t)<=m,nx=next&&next[0]===t;
   return `<li class="${cls}${done?' done':''}${nx?' next':''}"><span class="t">${t}</span><span>${d}${done?' ✅':nx?' ⏰':''}</span></li>`}).join('');
- fill('s1',s1,'');fill('s2',s2,'x');fill('s3',s3,'k');
-}
-let keiraPhase=null;
-function keiraKey(){
- const e=effective().find(a=>idOf(a)==='keira');
- if(!e)return 'none';
- if(e.room==='school')return 'school';
- return (e.status==='tidur'||e.room==='kamar')?'night':'day';
-}
-function keiraWatch(){
- const k=keiraKey();
- if(k==='none')return;
- if(keiraPhase===null){keiraPhase=k;return;}
- if(k!==keiraPhase){
-  keiraPhase=k;render();sched();
-  if(k==='night')log('Keira istirahat di sofa Ruang TV 🛋️');
-  else if(k==='day')log('Keira jaga kantor 👮‍♀️');
- }
+ fill('s1',s1,'');fill('s2',s2,'x');
+ $('s3').innerHTML='<li class="k"><span class="t">∞</span><span>Keliling sekolah & kantor</span></li>';
 }
 function tick(){
  $('clock').textContent=fmtTime(new Date()).slice(0,5)+' WITA';
  $('tgl').textContent=new Intl.DateTimeFormat('id-ID',{...tz,weekday:'long',day:'numeric',month:'long',year:'numeric'}).format(new Date());
  sched();
 }
-tick();setInterval(tick,20000);setInterval(keiraWatch,1000);
+tick();setInterval(tick,20000);
 log('Kantor buka, selamat datang Papa 🌸');
 load();setInterval(load,60000);
 if(location.hash==='#kerja')setTimeout(()=>$('btnKerja').click(),600);
