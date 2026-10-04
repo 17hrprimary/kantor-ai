@@ -67,7 +67,7 @@ aside{display:flex;flex-direction:column;gap:14px}
 .sched{list-style:none;display:flex;flex-direction:column;gap:6px}
 .sched li{display:flex;gap:10px;align-items:center;font-size:12.5px;padding:5px 8px;border-radius:12px;background:#fff6fa}
 .sched .t{font-weight:800;color:#fff;background:#f2559a;border-radius:8px;padding:2px 7px;font-size:12px;min-width:48px;text-align:center}
-.sched li.x .t{background:#9a7bff}
+.sched li.x .t{background:#9a7bff}.sched li.k .t{background:#2c3142}
 .sched li.done{opacity:.5}.sched li.next{outline:2px solid #ff9cc7}
 .sec{font-size:11px;font-weight:800;color:#a37a95;text-transform:uppercase;letter-spacing:.6px;margin:6px 0 3px}
 .clock{font-size:24px;font-weight:800;color:#c23d76}
@@ -120,6 +120,7 @@ footer{text-align:center;font-size:11px;color:#b993ab;padding:2px 0 12px}
       <h2>📅 Jadwal hari ini</h2>
       <div class="sec">IG Lia harian</div><ul class="sched" id="s1"></ul>
       <div class="sec">IG Lia x Ophelia 1</div><ul class="sched" id="s2"></ul>
+      <div class="sec">Keira</div><ul class="sched" id="s3"></ul>
     </div>
     <div class="card"><h2>📝 Log kantor</h2><div class="log" id="log"></div></div>
   </aside>
@@ -342,6 +343,7 @@ function sched(){
  const fill=(id,arr,cls)=>$(id).innerHTML=arr.map(([t,d])=>{const done=mins(t)<=m,nx=next&&next[0]===t;
   return `<li class="${cls}${done?' done':''}${nx?' next':''}"><span class="t">${t}</span><span>${d}${done?' ✅':nx?' ⏰':''}</span></li>`}).join('');
  fill('s1',s1,'');fill('s2',s2,'x');
+ $('s3').innerHTML='<li class="k"><span class="t">∞</span><span>Keliling sekolah & kantor</span></li>';
 }
 function tick(){
  $('clock').textContent=fmtTime(new Date()).slice(0,5)+' WITA';

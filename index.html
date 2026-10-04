@@ -84,7 +84,7 @@ aside{display:flex;flex-direction:column;gap:10px;overflow:auto;min-height:0}
 .sched{list-style:none;display:flex;flex-direction:column;gap:4px}
 .sched li{display:flex;gap:8px;align-items:center;font-size:12px;padding:4px 7px;border-radius:10px;background:#fff6fa}
 .sched .t{font-weight:800;color:#fff;background:#f2559a;border-radius:7px;padding:1px 6px;font-size:11.5px;min-width:44px;text-align:center}
-.sched li.x .t{background:#9a7bff}.sched li.done{opacity:.5}.sched li.next{outline:2px solid #ff9cc7}
+.sched li.x .t{background:#9a7bff}.sched li.k .t{background:#2c3142}.sched li.done{opacity:.5}.sched li.next{outline:2px solid #ff9cc7}
 .sec{font-size:10.5px;font-weight:800;color:#a37a95;text-transform:uppercase;letter-spacing:.6px;margin:5px 0 3px}
 .log{font-size:11.5px;display:flex;flex-direction:column;gap:4px;max-height:130px;overflow:auto}
 .log div{padding:4px 7px;border-radius:9px;background:#f6f3ff}
@@ -142,6 +142,7 @@ body.noinfo aside{display:none}
       <h2>📅 Jadwal hari ini</h2>
       <div class="sec">IG Lia harian</div><ul class="sched" id="s1"></ul>
       <div class="sec">IG Lia x Ophelia 1</div><ul class="sched" id="s2"></ul>
+      <div class="sec">Keira</div><ul class="sched" id="s3"></ul>
     </div>
     <div class="card"><h2>📝 Log kantor</h2><div class="log" id="log"></div></div>
   </aside>
@@ -205,7 +206,12 @@ const BED_ORDER=['ornf','love','lina','sally','sarah','hannah','geby'];
 const SOFA_SPOT={x:19.1,y:18.95,pose:'bed',bed:{sofa:true},head:[17.95,18.95],root:[18.86,18.95],rootY:.66,yaw:Math.PI/2,wake:[19.1,20.2],throwAt:[19.2,18.6]};
 const SOFA2_SPOT={x:23.5,y:18.95,pose:'bed',bed:{sofa:true},head:[22.35,18.95],root:[23.26,18.95],rootY:.66,yaw:Math.PI/2,wake:[23.5,20.2],throwAt:[23.6,18.6]};
 const WANDER=[{t:'Ruang CEO',x:6.5,y:5.6},{t:'Kantor IG',x:13.2,y:5.0},{t:'Studio Konten',x:19.0,y:4.6},{t:'Grup Just For Mature',x:22.6,y:6.9},{t:'Pojok tanaman',x:13.6,y:13.4},{t:'Meja Kerja Bersama',x:8.5,y:19.6},{t:'Ruang TV',x:21.5,y:21.8},{t:'mesin kopi',x:28.0,y:21.5},{t:'Taman',x:20.0,y:27.0},{t:'air mancur',x:25.0,y:27.6},{t:'School',x:12.2,y:26.2},{t:'Kamar Tidur',x:24.6,y:16.3}];
-const BRAIN={ophelia1:'wander',lia:'sleepOrWander',hanrin:'wander'};
+const KEIRA_STOPS=[
+ {t:'School',x:8.2,y:26.35,school:1},{t:'School',x:1.7,y:27.2,school:1},{t:'School',x:11.5,y:27.15,school:1},{t:'School',x:12.2,y:28.55,school:1},
+ {t:'Meja Kerja Bersama',x:8.5,y:19.9},{t:'Ruang TV',x:21.5,y:21.8},{t:'Taman',x:20.0,y:26.4},
+ {t:'Kamar Lia',x:3.0,y:33.85},{t:'Kamar Hanrin',x:9.0,y:33.85},{t:'Kamar Rin',x:15.0,y:33.85},{t:'Kamar Emely',x:21.0,y:33.85},{t:'Kamar HR',x:27.0,y:33.85},
+ {t:'Kamar Tidur',x:24.6,y:16.2},{t:'Grup My Bini',x:3.2,y:13.5},{t:'Ruang CEO',x:6.5,y:5.6},{t:'Kantor IG',x:13.2,y:5.0},{t:'Grup Just For Mature',x:22.6,y:6.9}];
+const BRAIN={ophelia1:'wander',lia:'sleepOrWander',hanrin:'wander',keira:'keiraWander'};
 /* ruang kerja wajib pas jam jadwal (per bot) */
 const WORK_ROOM={lia:'ig',ophelia1:'ig',hanrin:'ceo'};
 /* jam bobo malam wajib (WITA), kecuali lagi status kerja */
@@ -558,13 +564,13 @@ const WORK_WIN=30;
 function activeSlot(id){if(!BRAIN[id]||!agentsData.length)return null;const s=schedOf(id);if(!s)return null;const m=nowMin();
  return s.find(x=>x[2]!==false&&!x[3]&&m>=mins(x[0])&&m<mins(x[0])+WORK_WIN)||null;}
 function effective(){return agentsData.map(a=>{const id=idOf(a),o=overrides[id];let r=a;if(o&&(!a.updated_at||new Date(a.updated_at)<=o.at))r={...a,...o.patch};
- if(BRAIN[id]){const sl=activeSlot(id);if(sl)r={...r,room:WORK_ROOM[id]||'ig',status:'kerja',task:'⏰ '+sl[0].replace('.',':')+' '+sl[1]+' (sesuai jadwal)',auto:true};
+ if(BRAIN[id]&&id!=='keira'){const sl=activeSlot(id);if(sl)r={...r,room:WORK_ROOM[id]||'ig',status:'kerja',task:'⏰ '+sl[0].replace('.',':')+' '+sl[1]+' (sesuai jadwal)',auto:true};
   else if(r.status==='kerja')r={...r,room:WORK_ROOM[id]||'ig'};
   else if(nightNow(id))r={...r,room:'kamar',status:'tidur',task:'Bobo malam di kamar 😴 (00:00-07:00 WITA)',auto:true};}
  return r;});}
 let autoSig='';
 let autoPrev={};
-function autoCheck(){const cur={};Object.keys(BRAIN).forEach(id=>{const s=activeSlot(id);cur[id]=s?s[0]+' '+s[1]:(nightNow(id)?'night':'');});
+function autoCheck(){const cur={};Object.keys(BRAIN).forEach(id=>{if(id==='keira')return;const s=activeSlot(id);cur[id]=s?s[0]+' '+s[1]:(nightNow(id)?'night':'');});
  const sig=JSON.stringify(cur);if(sig===autoSig)return;const first=!autoSig;autoSig=sig;const prev=autoPrev;autoPrev=cur;if(first)return;
  syncActors(true);Object.keys(cur).forEach(id=>{if(cur[id]===prev[id])return;const n=nameOf(id);
   log(cur[id]==='night'?n+' waktunya bobo malam, ke kamar 😴':cur[id]?n+' masuk jam kerja ('+cur[id].replace('.',':')+'), duduk di meja '+(WORK_ROOM[id]==='ceo'?'Ruang CEO 👑':'IG 💻'):n+' selesai slot kerja, boleh santai 🌸');});}
@@ -576,7 +582,6 @@ function spotFor(a,used){
  const id=idOf(a);let room=a.room;
  if(room==='kamar'&&LUX[id])room=LUX[id].id;
  if(id==='ophelia1'&&a.status==='tidur')return SOFA2_SPOT;
- if(id==='keira'&&a.status!=='kerja')return SOFA_SPOT; // Keira: kalau nggak kerja rebahan di sofa Ruang TV
  const lx=ROOMS.find(r=>r.id===room&&r.lux);
  if(lx){const sp=bedSpot(luxBed(lx));if(a.status==='tidur')return sp;return{x:lx.x+1.2,y:lx.y+2.6,pose:'stand',face:Math.PI/2};}
  if(room==='school'){if(SCHOOL.students[id]){const s=SCHOOL.students[id];return{x:s[0],y:s[1],pose:'sit',face:Math.PI};}
@@ -603,6 +608,112 @@ function route(from,to){
  const chain=[];let c=B;while(c){chain.unshift(c);c=prev.get(c.id);}
  const pts=[];for(let i=0;i<chain.length-1;i++)pts.push(...doorBetween(chain[i],chain[i+1]));
  pts.push([to.x,to.y]);return pts;
+}
+function keiraNear(p,q,r=0.9){return Math.hypot(p[0]-q[0],p[1]-q[1])<r;}
+function keiraSchoolToLane(p){
+ if(keiraNear(p,[15,30.3]))return [[15.1,29.4],[15.3,27.2],[12.2,27.2],[12.2,28.55]];
+ if(keiraNear(p,[8.5,30.3],1.6))return [[p[0],30.6],[6.7,30.6],[6.7,28.55]];
+ if(keiraNear(p,[15.3,27],1.2))return [[12.2,27.2],[12.2,28.55]];
+ if(keiraNear(p,[3,30.3]))return [[1.7,28.55]];
+ if(keiraNear(p,[8,24.7],1.1))return [[7.4,25.2],[8,28.55]];
+ if(p[1]<26.7)return p[0]<5.4?[[1.7,25.2],[1.7,28.55]]:[[7.4,25.2],[8,28.55]];
+ if(p[1]>29.2){const x=p[0]<10?6.7:12.2;return [[x,Math.min(30.4,p[1])],[x,28.55]];}
+ const x=p[0]<5?1.7:p[0]<10?8:12.2;return [[x,28.55]];
+}
+function keiraInside(id,a,b){
+ if(id==='school'){
+  const out=keiraSchoolToLane(a).slice();
+  if(keiraNear(b,[15,30.3]))out.push([12.2,28.55],[12.2,27.2],[15.3,27.2],[15.1,29.4]);
+  else if(keiraNear(b,[8.5,30.3],1.6))out.push([6.7,28.55],[6.7,30.6],[b[0],30.6]);
+  else if(keiraNear(b,[15.3,27],1.2))out.push([12.2,28.55],[12.2,27.2]);
+  else if(keiraNear(b,[3,30.3]))out.push([1.7,28.55]);
+  else if(keiraNear(b,[8,24.7],1.1))out.push([8,28.55],[7.4,25.2]);
+  else out.push(...keiraSchoolToLane(b).slice().reverse());
+  out.push(b);return out;
+ }
+ if(id==='kerja'){
+  const gap=x=>x<7?4.8:x<11?9.3:13.45, yOf=y=>y>22.4?23.15:y<17.3?16.95:19.9;
+  const ga=gap(a[0]),gb=gap(b[0]),ya=yOf(a[1]),yb=yOf(b[1]);
+  const cross=(ya>22||yb>22)&&Math.abs(ga-gb)>3?19.9:ya;
+  return [[ga,ya],[ga,cross],[gb,cross],[gb,yb],[b[0],yb],b];
+ }
+ if(id==='lounge'){
+  const lane=20.15,clamp=x=>Math.min(27.2,Math.max(17.2,x)),pts=[];
+  if(a[1]>22.2)pts.push([21.1,22.15],[21.1,lane]);
+  else if(a[1]<18.6)pts.push([Math.min(25.2,Math.max(17.6,a[0])),17.85],[21.3,17.85],[21.3,lane]);
+  else pts.push([clamp(a[0]),lane]);
+  if(b[1]<18.6)pts.push([21.3,lane],[21.3,17.85],[Math.min(25.2,Math.max(17.6,b[0])),17.85]);
+  else if(b[1]>22.2){pts.push([21.1,lane],[21.1,22.15]);if(Math.abs(b[0]-21.1)>1.2)pts.push([Math.min(26.2,Math.max(17.4,b[0])),22.15]);}
+  else pts.push([clamp(b[0]),lane]);
+  pts.push(b);return pts;
+ }
+ if(id==='taman'){
+  const lane=26.05,pts=[];
+  if(a[1]>28)pts.push(a[0]<24.5?[21.3,29.05]:[25.2,30.05],[25.2,29.05],[25.2,lane]);
+  else pts.push([Math.min(25.2,Math.max(17.2,a[0])),lane]);
+  if(b[1]>28){pts.push([25.2,lane],[25.2,29.05]);if(b[0]<24.5)pts.push([21.3,29.05]);else pts.push([25.2,30.05]);}
+  else pts.push([Math.min(25.2,Math.max(17.2,b[0])),lane]);
+  pts.push(b);return pts;
+ }
+ if(id==='grup-mybini'){
+  const toNorth=p=>p[0]>13?[[3.2,9.5],[6.4,8.9],[13.4,8.9],p]:[[3.2,9.5],[6.4,8.9],p];
+  const fromNorth=p=>p[0]>13?[[13.4,8.9],[6.4,8.9],[3.2,9.5]]:[[6.4,8.9],[3.2,9.5]];
+  const toEast=[[3.2,15.55],[11.2,15.55],[11.2,12.7],[14.0,12.7]];
+  const fromEast=[[14.0,12.7],[11.2,12.7],[11.2,15.55],[3.2,15.55]];
+  if(b[1]<10.5)return [...(a[0]>10?fromEast:(Math.hypot(a[0]-3.2,a[1]-15.55)>.5?[[3.2,15.55]]:[])) ,...toNorth(b)];
+  if(a[1]<10.5)return [...fromNorth(a),...(b[0]>10?[...toEast,b]:[[3.2,15.55],b])];
+  if(b[0]>14)return [...toEast,b];
+  if(a[0]>14)return [...fromEast,b];
+  return [[3.2,15.55],b];
+ }
+ if(id==='kamar'){
+  const aisle=19.4,south=16.15,lane=12.45,xOf=p=>Math.min(26.2,Math.max(17.4,p[0]));
+  const toLane=(p,pts)=>{
+   if(p[1]>14.2)pts.push([aisle,south],[aisle,lane]);
+   else if(p[1]<10)pts.push([xOf(p),8.75],[aisle,8.75],[aisle,lane]);
+   else pts.push([aisle,lane]);
+  };
+  if(b[1]<10){const pts=[];toLane(a,pts);pts.push([aisle,8.75],[xOf(b),8.75],b);return pts;}
+  if(b[1]>14.2){
+   const pts=[];
+   if(a[1]<10)pts.push([xOf(a),8.75],[aisle,8.75],[aisle,lane],[aisle,south]);
+   else if(a[1]<=14.2)pts.push([aisle,lane],[aisle,south]);
+   else pts.push([aisle,south]);
+   pts.push([b[0],south],b);return pts;
+  }
+  const pts=[];toLane(a,pts);pts.push([Math.max(17.4,Math.min(26.2,b[0])),lane],b);return pts;
+ }
+ if(id==='ig'){const lane=5.15;return [[a[0],lane],[b[0]>17?19.2:b[0],lane],b];}
+ if(id==='kamar-lia')return [[4.4,33.6],b];
+ if(id==='kamar-hanrin')return b[0]<8?[[9.6,34],b]:(a[0]<8?[[9.6,34],[9.6,32.2],b]:[[9.6,32.2],b]);
+ if(id==='kamar-rin')return b[0]<14?[[15.6,34],b]:(a[0]<14?[[15.6,34],[15.6,32.2],b]:[[15.6,32.2],b]);
+ if(id==='kamar-hr')return b[0]<26?[[27.6,34],b]:(a[0]<26?[[27.6,34],[27.6,32.2],b]:[[27.6,32.2],b]);
+ return [b];
+}
+function keiraDoor(a,b){
+ const d=doorBetween(a,b);if(!d)return null;
+ if(!d.every(p=>{const r=roomAt(p[0],p[1]);return r&&(r.id===a.id||r.id===b.id);}))return null;
+ return d;
+}
+function keiraRaw(from,to){
+ const A=roomAt(from.x,from.y),B=roomAt(to.x,to.y);
+ if(!A||!B||A===B)return [[to.x,to.y]];
+ const prev=new Map([[A.id,null]]),q=[A];
+ while(q.length){const r=q.shift();if(r===B)break;ROOMS.forEach(n=>{if(!prev.has(n.id)&&keiraDoor(r,n)){prev.set(n.id,r);q.push(n);}});}
+ if(!prev.has(B.id))return route(from,to);
+ const chain=[];let c=B;while(c){chain.unshift(c);c=prev.get(c.id);}
+ const pts=[];for(let i=0;i<chain.length-1;i++)pts.push(...keiraDoor(chain[i],chain[i+1]));
+ pts.push([to.x,to.y]);return pts;
+}
+function keiraRoute(from,to){
+ const raw=keiraRaw(from,to),seq=[[from.x,from.y],...raw],out=[];
+ const add=(x,y)=>{const l=out[out.length-1];if(!l||Math.hypot(l[0]-x,l[1]-y)>.12)out.push([x,y]);};
+ for(let i=0;i<seq.length-1;i++){
+  const a=seq[i],b=seq[i+1],ra=roomAt(a[0],a[1]),rb=roomAt(b[0],b[1]);
+  if(ra&&rb&&ra.id===rb.id)keiraInside(ra.id,a,b).forEach(p=>add(p[0],p[1]));
+  else add(b[0],b[1]);
+ }
+ return out.length?out:[[to.x,to.y]];
 }
 function makeTag(id){
  const d=document.createElement('div');d.className='ntag';d.innerHTML='<div class="n"><span class="d"></span><span class="nm"></span><span class="zz2">Zzz</span></div><div class="act" style="display:none"></div>';
@@ -633,19 +744,22 @@ function syncActors(walk){
  const used={},eff=effective();
  eff.forEach(a=>{
   const id=idOf(a),s=spotFor(a,used);let ac=actors[id];
-  if(ac&&(ac.brain||ac.napUntil)&&ac.brain&&a.status===ac.brain.status&&ac.home&&Math.hypot(ac.home.x-s.x,ac.home.y-s.y)<.05){ac.a=a;ac.home=s;return;}
-  if(!ac){ac=actors[id]={id,a,c:makeChar(id),spot:s,home:s,pos:{x:s.x,y:s.y},path:[],tag:makeTag(id)};scene.add(ac.c.root);placeActor(ac);
-   if(id==='keira'&&a.room==='school'&&a.status==='kerja'){ac.spot=SOFA_SPOT;startWalk(ac,route({x:SOFA_SPOT.wake[0],y:SOFA_SPOT.wake[1]},s),()=>{ac.demo=null;placeActor(ac);});ac.spot=s;ac.demo='Bangun, jalan ke kelas jaga murid 🍎';}
-   return;}
+  if(ac&&ac.home&&Math.hypot(ac.home.x-s.x,ac.home.y-s.y)<.05){
+   if(id==='keira'&&(ac.brain||ac.walking||ac.waitUntil||ac.napUntil||ac.nextBrain)){ac.a=a;ac.home=s;return;}
+   if(id!=='keira'&&(ac.brain||ac.napUntil)&&ac.brain&&a.status===ac.brain.status){ac.a=a;ac.home=s;return;}
+  }
+  if(!ac){ac=actors[id]={id,a,c:makeChar(id),spot:s,home:s,pos:{x:s.x,y:s.y},path:[],tag:makeTag(id)};scene.add(ac.c.root);placeActor(ac);return;}
   const prevSpot=ac.spot;ac.a=a;
-  let cancelled=false;if((ac.brain||ac.napUntil||ac.waitUntil)&&(!ac.brain||a.status!==ac.brain.status)){cancelled=true;ac.brain=null;ac.napUntil=0;ac.afterNap=null;ac.waitUntil=0;ac.afterWait=null;ac.after=null;ac.demo=null;}
+  let cancelled=false;if(id!=='keira'&&(ac.brain||ac.napUntil||ac.waitUntil)&&(!ac.brain||a.status!==ac.brain.status)){cancelled=true;ac.brain=null;ac.napUntil=0;ac.afterNap=null;ac.waitUntil=0;ac.afterWait=null;ac.after=null;ac.demo=null;}
   ac.home=s;
   const moved=Math.hypot(prevSpot.x-s.x,prevSpot.y-s.y)>.05||prevSpot.pose!==s.pose;
   if(moved&&walk&&!(prevSpot.pose==='bed'&&s.pose==='bed')){
-   ac.demo=null;const from=prevSpot.pose==='bed'?{x:prevSpot.wake[0],y:prevSpot.wake[1]}:(ac.walking?ac.pos:{x:prevSpot.x,y:prevSpot.y});
-   const dest=s.pose==='bed'?{x:s.wake[0],y:s.wake[1]}:s;startWalk(ac,route(from,dest),null);ac.spot=s;
+   if(id==='keira'){ac.brain=null;ac.napUntil=0;ac.afterNap=null;ac.waitUntil=0;ac.afterWait=null;ac.nextBrain=0;ac.demo=null;}
+   ac.demo=null;let from=prevSpot.pose==='bed'?{x:prevSpot.wake[0],y:prevSpot.wake[1]}:(ac.walking?ac.pos:{x:prevSpot.x,y:prevSpot.y});
+   if(id==='keira'&&ac.pos&&prevSpot.pose!=='bed')from={x:ac.pos.x,y:ac.pos.y};
+   const dest=s.pose==='bed'?{x:s.wake[0],y:s.wake[1]}:s;startWalk(ac,id==='keira'?keiraRoute(from,dest):route(from,dest),null);ac.spot=s;
    if(prevSpot.pose==='bed'){ac.spot=s;}
-  }else if(cancelled&&walk&&(ac.walking||Math.hypot(ac.pos.x-s.x,ac.pos.y-s.y)>.05)){
+  }else if(id!=='keira'&&cancelled&&walk&&(ac.walking||Math.hypot(ac.pos.x-s.x,ac.pos.y-s.y)>.05)){
    ac.spot=s;const dest=s.pose==='bed'?{x:s.wake[0],y:s.wake[1]}:s;startWalk(ac,route({x:ac.pos.x,y:ac.pos.y},dest),()=>{ac.demo=null;placeActor(ac);});ac.demo='Balik ke meja 🏃‍♀️';
   }else{ac.spot=s;if(!ac.walking){ac.pos={x:s.x,y:s.y};placeActor(ac);}}
  });
@@ -655,7 +769,8 @@ function syncActors(walk){
 /* perilaku santai: jalan-jalan & tidur siang */
 const rnd=a=>a[Math.floor(Math.random()*a.length)];
 function napAt(ac,sp,label,ms,done){ac.demo=label;const from=ac.walking?ac.pos:(ac.spot.pose==='bed'?{x:ac.spot.wake[0],y:ac.spot.wake[1]}:{x:ac.pos.x,y:ac.pos.y});
- startWalk(ac,route(from,{x:sp.wake[0],y:sp.wake[1]}),()=>{ac.spot=sp;placeActor(ac);ac.demo='Bobo dulu 😴';ac.napUntil=performance.now()+ms;ac.afterNap=done;});}
+ const pathOf=ac.id==='keira'?keiraRoute:route;
+ startWalk(ac,pathOf(from,{x:sp.wake[0],y:sp.wake[1]}),()=>{ac.spot=sp;placeActor(ac);ac.demo='Bobo dulu 😴';ac.napUntil=performance.now()+ms;ac.afterNap=done;});}
 function wakeUp(ac){const sp=ac.spot;ac.napUntil=0;ac.spot=ac.home;ac.pos={x:sp.wake[0],y:sp.wake[1]};placeActor({...ac,spot:{pose:'stand',x:ac.pos.x,y:ac.pos.y,face:0}});}
 function tourStep(ac,left,done){
  if(left<=0){done();return;}
@@ -665,21 +780,46 @@ function tourStep(ac,left,done){
  startWalk(ac,route(from,w),()=>{ac.demo='Lihat-lihat '+w.t+' 👀';ac.waitUntil=performance.now()+2500+Math.random()*2500;ac.afterWait=()=>tourStep(ac,left-1,done);});
 }
 function goHome(ac,done){const h=ac.home;ac.demo='Balik dulu 🏠';startWalk(ac,route({x:ac.pos.x,y:ac.pos.y},{x:h.x,y:h.y}),()=>{ac.demo=null;placeActor(ac);done&&done();});}
+function shuffle(a){const b=a.slice();for(let i=b.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));const t=b[i];b[i]=b[j];b[j]=t;}return b;}
+function keiraTour(ac,done){
+ const school=shuffle(KEIRA_STOPS.filter(s=>s.school)).slice(0,3+Math.floor(Math.random()*2));
+ const stops=school.concat(shuffle(KEIRA_STOPS.filter(s=>!s.school)));
+ const step=i=>{
+  if(i>=stops.length){done();return;}
+  const w=stops[i],inSchool=!!w.school;
+  ac.demo=inSchool?'Mondar-mandir di sekolah 🚶‍♀️':'Keliling ke '+w.t+' 🚶‍♀️';
+  const from=ac.spot.pose==='bed'&&!ac.walking?{x:ac.spot.wake[0],y:ac.spot.wake[1]}:{x:ac.pos.x,y:ac.pos.y};
+  startWalk(ac,keiraRoute(from,w),()=>{
+   ac.demo=inSchool?'Lihat-lihat sekolah 👀':'Mampir di '+w.t+' 👀';
+   ac.waitUntil=performance.now()+1800+Math.random()*1600;
+   ac.afterWait=()=>step(i+1);
+  });
+ };
+ step(0);
+}
 function brainTick(now){
  Object.values(actors).forEach(ac=>{
-  const kind=BRAIN[ac.id];if(!kind||ac.a.status!=='santai')return;
+  const kind=BRAIN[ac.id];if(!kind)return;
+  if(kind!=='keiraWander'&&ac.a.status!=='santai')return;
   if(ac.napUntil){if(now>ac.napUntil){const f=ac.afterNap;ac.afterNap=null;wakeUp(ac);f&&f();}return;}
   if(ac.walking||ac.waitUntil||ac.brain)return;
   if(ac.nextBrain&&now<ac.nextBrain)return;
   ac.brain={status:ac.a.status};const finish=(pause)=>{ac.brain=null;ac.nextBrain=performance.now()+(pause||1500);};
-  if(kind==='wander'){
+  if(kind==='keiraWander'){
+   keiraTour(ac,()=>{
+    if(Math.random()<.38)napAt(ac,SOFA_SPOT,'Capek, ke sofa Ruang TV 🛋️',22000+Math.random()*18000,()=>finish(1200));
+    else finish(800);
+   });
+   log('Keira keliling sekolah & kantor 🚶‍♀️');
+  }else if(kind==='wander'){
    const n=3+Math.floor(Math.random()*3);
    const nap=napSpotOf(ac.id);tourStep(ac,n,()=>napAt(ac,nap.sp,nap.label,30000+Math.random()*20000,()=>finish(2000)));
+   log(nameOf(ac.id)+' lagi santai: '+(ac.demo||'jalan-jalan'));
   }else{
    if(Math.random()<.5){const lx=LUX[ac.id];napAt(ac,bedSpot(luxBed(lx)),'Ngantuk, ke Kamar Lia 🌹',30000+Math.random()*25000,()=>goHome(ac,()=>finish(6000)));}
    else tourStep(ac,2+Math.floor(Math.random()*2),()=>goHome(ac,()=>finish(6000)));
+   log(nameOf(ac.id)+' lagi santai: '+(ac.demo||'jalan-jalan'));
   }
-  log(nameOf(ac.id)+' lagi santai: '+(ac.demo||'jalan-jalan'));
  });
 }
 function updateActors(now,dt){
@@ -834,7 +974,8 @@ const s1=[['08.19','Posting pagi Lia'],['12.19','Posting siang Lia'],['19.19','P
 const s2=[['10.47','Cek & support Ophelia 1'],['16.47','Cek & support Ophelia 1'],['21.47','Cek & support Ophelia 1']];
 function sched(){const m=nowMin();const next=[...s1,...s2].filter(x=>mins(x[0])>m).sort((a,b)=>mins(a[0])-mins(b[0]))[0];
  const fillS=(id,arr,cls)=>$(id).innerHTML=arr.map(([t,d])=>{const done=mins(t)<=m,nx=next&&next[0]===t;return `<li class="${cls}${done?' done':''}${nx?' next':''}"><span class="t">${t}</span><span>${d}${done?' ✅':nx?' ⏰':''}</span></li>`}).join('');
- fillS('s1',s1,'');fillS('s2',s2,'x');}
+ fillS('s1',s1,'');fillS('s2',s2,'x');
+ $('s3').innerHTML='<li class="k"><span class="t">∞</span><span>Keliling sekolah & kantor</span></li>';}
 function tick(){$('clock').textContent=fmtTime(new Date()).slice(0,5)+' WITA';$('tgl').textContent=new Intl.DateTimeFormat('id-ID',{...tz2,weekday:'long',day:'numeric',month:'long',year:'numeric'}).format(new Date());sched();if(agentsData.length){autoCheck();renderJadwal();}}
 
 /* ================= Loop ================= */
