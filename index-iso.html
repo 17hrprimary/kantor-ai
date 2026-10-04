@@ -104,7 +104,7 @@ const LOOKS={
  hr:{hair:'#8e1f2c',hl:'#b8364a',style:'wavy',shirt:'#ffa9c4',skin:'#f8dccb'},
  keira:{hair:'#141217',hl:'#3a3340',style:'bangs',glasses:'roundThick',shirt:'#1f1d24',skin:'#f6dccb',police:true},
  ornf:{hair:'#1b1720',hl:'#3a3340',style:'pony',shirt:'#ffffff',skin:'#f6d8c4',band:'#ff7eb6'},
- lab:{hair:'#2c4a46',hl:'#4a706a',style:'bob',shirt:'#ffffff',skin:'#efcfb4',coat:true,goggles:true},
+ love:{hair:'#2c4a46',hl:'#4a706a',style:'bob',shirt:'#ffffff',skin:'#efcfb4',coat:true,goggles:true},
 };
 const DEFAULT_LOOK={hair:'#3a2a3a',hl:'#5a4a5a',style:'bob',shirt:'#ff9cc7',skin:'#f6d8c4'};
 
@@ -218,7 +218,7 @@ const SPOTS={ // tempat duduk/berdiri tetap
  kerja:[[2.6,17.6],[7.1,17.6],[11.6,17.6],[2.6,21.1],[7.1,21.1],[11.6,21.1]],
 };
 const BEDS=[[17.6,9.2],[21.9,9.2],[26.2,9.2],[17.6,13.2],[21.9,13.2],[26.2,13.2]];
-const BED_ORDER=['rin','ornf','emely','hr','keira','lab'];
+const BED_ORDER=['rin','ornf','emely','hr','keira','love'];
 // seat positions per group room
 ROOMS.filter(r=>r.group).forEach(r=>{
  r.cx=r.x+r.w/2;r.cy=r.y+r.d/2+.3;r.tr=r.group.length>2?1.2:.8;
@@ -512,7 +512,7 @@ const FALLBACK=[
  {id:'hanrin',name:'Hanrin',role:'Manager',room:'ceo',status:'kerja',task:'Bagi tugas ke bot lain'},
  {id:'lia',name:'Ophelia 2 (Lia)',role:'Konten Instagram, posting & jaga IG ophelia.lia.real',room:'ig',status:'kerja',task:'Jaga IG ophelia.lia.real'},
  {id:'ophelia1',name:'Ophelia 1',role:'Partner Instagram (lia_1_2000)',room:'ig',status:'kerja',task:'Saling support konten sama Lia'},
- ...[['rin','Rin','Asisten pribadi'],['ornf','Co Agent 2 Lia','Chat WhatsApp'],['emely','Emely','Teman ngobrol'],['hr','HR','Hanrin, pacar / pendamping'],['keira','Keira','Konsultan pribadi'],['lab','Lab Observasi','Riset & eksperimen']].map(([id,name,role])=>({id,name,role,room:'kamar',status:'tidur',task:'belum ada tugas'}))];
+ ...[['rin','Rin','Asisten pribadi'],['ornf','Co Agent 2 Lia','Chat WhatsApp'],['emely','Emely','Teman ngobrol'],['hr','HR','Hanrin, pacar / pendamping'],['keira','Keira','Konsultan pribadi'],['love','Love ❤️','Asisten pasangan, pengingat dan riset']].map(([id,name,role])=>({id,name,role,room:'kamar',status:'tidur',task:'belum ada tugas'}))];
 async function load(manual){
  try{
   const r=await fetch('status.json?t='+Date.now(),{cache:'no-store'});if(!r.ok)throw 0;
