@@ -548,7 +548,20 @@ let agentsData=[],overrides={},lastSig='',fileUpdated=null;
 const actors={};
 const idOf=a=>a.id||String(a.name).toLowerCase().replace(/[^a-z0-9]+/g,'-');
 const short=n=>n.replace(/ \(Lia\)/,' · Lia');
-function effective(){return agentsData.map(a=>{const o=overrides[idOf(a)];if(o&&(!a.updated_at||new Date(a.updated_at)<=o.at))return{...a,...o.patch};return a;});}
+/* Aturan Papa: pas jam jadwal (30 menit dari tiap jam jadwal, WITA), Lia & Ophelia 1 otomatis kerja & duduk di meja Kantor IG */
+const WORK_WIN=30;
+function activeSlot(id){if(!BRAIN[id]||!agentsData.length)return null;const s=schedOf(id);if(!s)return null;const m=nowMin();
+ return s.find(x=>x[2]!==false&&m>=mins(x[0])&&m<mins(x[0])+WORK_WIN)||null;}
+function effective(){return agentsData.map(a=>{const id=idOf(a),o=overrides[id];let r=a;if(o&&(!a.updated_at||new Date(a.updated_at)<=o.at))r={...a,...o.patch};
+ if(BRAIN[id]){const sl=activeSlot(id);if(sl)r={...r,room:'ig',status:'kerja',task:'⏰ '+sl[0].replace('.',':')+' '+sl[1]+' (sesuai jadwal)',auto:true};
+  else if(r.status==='kerja')r={...r,room:'ig'};}
+ return r;});}
+let autoSig='';
+let autoPrev={};
+function autoCheck(){const cur={};Object.keys(BRAIN).forEach(id=>{const s=activeSlot(id);cur[id]=s?s[0]+' '+s[1]:'';});
+ const sig=JSON.stringify(cur);if(sig===autoSig)return;const first=!autoSig;autoSig=sig;const prev=autoPrev;autoPrev=cur;if(first)return;
+ syncActors(true);Object.keys(cur).forEach(id=>{if(cur[id]===prev[id])return;const n=id==='lia'?'Lia':'Ophelia 1';
+  log(cur[id]?n+' masuk jam kerja ('+cur[id].replace('.',':')+'), duduk di meja IG 💻':n+' selesai slot kerja, boleh santai 🌸');});}
 function spotFor(a,used){
  const id=idOf(a);let room=a.room;
  if(room==='kamar'&&LUX[id])room=LUX[id].id;
@@ -613,13 +626,15 @@ function syncActors(walk){
   if(ac&&(ac.brain||ac.napUntil)&&ac.brain&&a.status===ac.brain.status&&ac.home&&Math.hypot(ac.home.x-s.x,ac.home.y-s.y)<.05){ac.a=a;ac.home=s;return;}
   if(!ac){ac=actors[id]={id,a,c:makeChar(id),spot:s,home:s,pos:{x:s.x,y:s.y},path:[],tag:makeTag(id)};scene.add(ac.c.root);placeActor(ac);return;}
   const prevSpot=ac.spot;ac.a=a;
-  if(ac.brain&&(a.status!==ac.brain.status)){ac.brain=null;ac.napUntil=0;ac.waitUntil=0;ac.afterWait=null;ac.demo=null;if(!ac.walking&&prevSpot!==ac.home){}}
+  let cancelled=false;if((ac.brain||ac.napUntil||ac.waitUntil)&&(!ac.brain||a.status!==ac.brain.status)){cancelled=true;ac.brain=null;ac.napUntil=0;ac.afterNap=null;ac.waitUntil=0;ac.afterWait=null;ac.after=null;ac.demo=null;}
   ac.home=s;
   const moved=Math.hypot(prevSpot.x-s.x,prevSpot.y-s.y)>.05||prevSpot.pose!==s.pose;
   if(moved&&walk&&!(prevSpot.pose==='bed'&&s.pose==='bed')){
    ac.demo=null;const from=prevSpot.pose==='bed'?{x:prevSpot.wake[0],y:prevSpot.wake[1]}:(ac.walking?ac.pos:{x:prevSpot.x,y:prevSpot.y});
    const dest=s.pose==='bed'?{x:s.wake[0],y:s.wake[1]}:s;startWalk(ac,route(from,dest),null);ac.spot=s;
    if(prevSpot.pose==='bed'){ac.spot=s;}
+  }else if(cancelled&&walk&&(ac.walking||Math.hypot(ac.pos.x-s.x,ac.pos.y-s.y)>.05)){
+   ac.spot=s;const dest=s.pose==='bed'?{x:s.wake[0],y:s.wake[1]}:s;startWalk(ac,route({x:ac.pos.x,y:ac.pos.y},dest),()=>{ac.demo=null;placeActor(ac);});ac.demo='Balik ke meja 🏃‍♀️';
   }else{ac.spot=s;if(!ac.walking){ac.pos={x:s.x,y:s.y};placeActor(ac);}}
  });
  Object.keys(actors).forEach(id=>{if(!eff.some(a=>idOf(a)===id)){const ac=actors[id];scene.remove(ac.c.root,ac.tag.o,ac.tag.zo);if(ac.blanket)ac.blanket.forEach(m=>scene.remove(m));delete actors[id];}});
@@ -654,18 +669,6 @@ function brainTick(now){
   }
   log((ac.id==='lia'?'Lia':'Ophelia 1')+' lagi santai: '+(ac.demo||'jalan-jalan'));
  });
-}
-/* demo jalan-jalan Lia */
-const DEMO=[{t:'Ambil kopi ☕',x:28.2,y:21.6},{t:'Cek studio 🎬',x:19.2,y:2.4},{t:'Lapor ke Hanrin 📋',x:4.6,y:5.4},{t:'Nyapa yang bobo 💤',x:23.5,y:16.2},{t:'Ngobrol di lounge 🛋️',x:21,y:20.4}];
-let demoIdx=0,nextDemo=performance.now()+6000;
-function demoTick(now){
- const ac=actors.lia;if(!ac||ac.walking||ac.a.status!=='kerja'||ac.a.room!=='ig'||ac.waitUntil)return;
- if(now<nextDemo)return;
- const d=DEMO[demoIdx++%DEMO.length];ac.demo=d.t;
- const home=ac.spot;startWalk(ac,route({x:home.x,y:home.y},{x:d.x,y:d.y}),()=>{
-  ac.waitUntil=performance.now()+3500;ac.afterWait=()=>{ac.demo='Balik ke meja 🏃‍♀️';startWalk(ac,route({x:d.x,y:d.y},{x:home.x,y:home.y}),()=>{ac.demo=null;nextDemo=performance.now()+25000;});};
- });
- log('Lia jalan: '+d.t);
 }
 function updateActors(now,dt){
  Object.values(actors).forEach(ac=>{
@@ -742,7 +745,7 @@ const roomName=id=>{const r=ROOMS.find(r=>r.id===id);return r?r.name:id;};
 function nowMin(){const p=new Intl.DateTimeFormat('en-GB',{...tz2,hour:'2-digit',minute:'2-digit',hour12:false}).format(new Date()).split(':');return +p[0]*60+ +p[1];}
 const mins=t=>{const[h,mm]=t.split('.').map(Number);return h*60+mm};
 function todayMD(){const p=new Intl.DateTimeFormat('en-US',{...tz2,month:'numeric',day:'numeric'}).formatToParts(new Date());return[+p.find(x=>x.type==='month').value,+p.find(x=>x.type==='day').value];}
-function schedOf(id){const a=actors[id]&&actors[id].a;let s=a&&Array.isArray(a.schedule)&&a.schedule.length?a.schedule.map(x=>Array.isArray(x)?x:[String(x.time).replace(':','.'),x.label,x.from?x.from.split('-').map(Number):undefined,x.to?x.to.split('-').map(Number):undefined]):SCHEDULE[id];
+function schedOf(id){const a=agentsData.find(x=>idOf(x)===id)||(actors[id]&&actors[id].a);let s=a&&Array.isArray(a.schedule)&&a.schedule.length?a.schedule.map(x=>Array.isArray(x)?x:[String(x.time).replace(':','.'),x.label,x.from?x.from.split('-').map(Number):undefined,x.to?x.to.split('-').map(Number):undefined]):SCHEDULE[id];
  if(!s)return null;const [m,d]=todayMD(),v=m*100+d;
  return s.map(x=>{const f=x[2]?x[2][0]*100+x[2][1]:0,t=x[3]?x[3][0]*100+x[3][1]:9999;return[x[0],x[1],v>=f&&v<=t];}).sort((p,q)=>mins(p[0])-mins(q[0]));}
 function schedHTML(id){const s=schedOf(id);if(!s)return '<div class="idle">Belum ada jadwal (idle) 💤</div>';const m=nowMin();const nx=s.find(x=>x[2]!==false&&mins(x[0])>m);
@@ -803,6 +806,7 @@ async function load(manual){
   $('live').className='live';$('src').textContent='Live dari status.json';
   if(sig!==lastSig){const first=!lastSig;lastSig=sig;syncActors(!first);if(!first)log('Status baru dari status.json 📥');}
   else if(manual)log('Status dicek, belum ada perubahan');
+  autoCheck();
  }catch(e){if(!agentsData.length){agentsData=FALLBACK;syncActors(false);}$('live').className='live off';$('src').textContent='status.json gagal dimuat (data bawaan)';}
  $('lastUpd').textContent=fileUpdated?fmtFull(fileUpdated):'-';$('lastCheck').textContent=fmtTime(new Date())+' WITA';
  if(popId)openPop(popId);
@@ -810,7 +814,7 @@ async function load(manual){
 $('btnKerja').onclick=()=>{
  const lazy=effective().filter(a=>a.status!=='kerja');
  if(!lazy.length){log('Semua udah kerja kok, Papa 😄');return;}
- const now=new Date();lazy.forEach(a=>overrides[idOf(a)]={at:now,patch:{room:'kerja',status:'kerja',task:'Bangun! Nunggu tugas dari Hanrin'}});
+ const now=new Date();lazy.forEach(a=>overrides[idOf(a)]={at:now,patch:{room:BRAIN[idOf(a)]?'ig':'kerja',status:'kerja',task:'Bangun! Nunggu tugas dari Hanrin'}});
  syncActors(true);log(`Papa nyuruh balik kerja! ${lazy.length} bot bangun & jalan ke Meja Kerja Bersama 💪`);
 };
 $('btnReload').onclick=()=>{overrides={};lastSig='x';load(true).then(()=>log('Status dimuat ulang dari status.json 🔄'));};
@@ -819,7 +823,7 @@ const s2=[['10.47','Cek & support Ophelia 1'],['16.47','Cek & support Ophelia 1'
 function sched(){const m=nowMin();const next=[...s1,...s2].filter(x=>mins(x[0])>m).sort((a,b)=>mins(a[0])-mins(b[0]))[0];
  const fillS=(id,arr,cls)=>$(id).innerHTML=arr.map(([t,d])=>{const done=mins(t)<=m,nx=next&&next[0]===t;return `<li class="${cls}${done?' done':''}${nx?' next':''}"><span class="t">${t}</span><span>${d}${done?' ✅':nx?' ⏰':''}</span></li>`}).join('');
  fillS('s1',s1,'');fillS('s2',s2,'x');}
-function tick(){$('clock').textContent=fmtTime(new Date()).slice(0,5)+' WITA';$('tgl').textContent=new Intl.DateTimeFormat('id-ID',{...tz2,weekday:'long',day:'numeric',month:'long',year:'numeric'}).format(new Date());sched();if(agentsData.length)renderJadwal();}
+function tick(){$('clock').textContent=fmtTime(new Date()).slice(0,5)+' WITA';$('tgl').textContent=new Intl.DateTimeFormat('id-ID',{...tz2,weekday:'long',day:'numeric',month:'long',year:'numeric'}).format(new Date());sched();if(agentsData.length){autoCheck();renderJadwal();}}
 
 /* ================= Loop ================= */
 function applyShift(){const w=stage.clientWidth,h=stage.clientHeight;if(Math.abs(viewShift)<.5)camera.clearViewOffset();else camera.setViewOffset(w,h,viewShift,0,w,h);camera.updateProjectionMatrix();}
@@ -836,7 +840,7 @@ function loop(now){
  OUTER_WALLS.forEach(w=>{tmpV.copy(camera.position).sub(w.g.position);const facing=tmpV.dot(w.n)>0;const th=facing?.35:w.h;
   const cur=w.w.scale.y+(th-w.w.scale.y)*Math.min(1,dt*8);w.w.scale.y=cur;w.w.position.y=cur/2;w.cap.position.y=cur+.03;});
  const far=camera.position.distanceTo(controls.target)>(stage.clientWidth<700?30:44);labBox.classList.toggle('far',far);
- demoTick(now);brainTick(now);updateActors(now,dt);placePop();
+ brainTick(now);updateActors(now,dt);placePop();
  renderer.render(scene,camera);labelR.render(scene,camera);
  requestAnimationFrame(loop);
 }
@@ -847,7 +851,7 @@ log('Kantor 3D buka, selamat datang Papa 🌸');
 await load();setInterval(load,60000);
 $('loading').remove();
 requestAnimationFrame(loop);
-// opsi URL buat preview: #zoom, #kerja, #pop=lia, #demo
+// opsi URL buat preview: #zoom, #kerja, #pop=lia
 const hs=location.hash;
 if(hs.includes('lux')){const t=new THREE.Vector3(tx(15),0.6,tz(34.5));camera.position.copy(t.clone().add(new THREE.Vector3(3,8,-7.5)));controls.target.copy(t);}
 else if(hs.includes('tvroom')){const t=new THREE.Vector3(tx(20),0.5,tz(20.5));camera.position.copy(t.clone().add(new THREE.Vector3(4,6.5,8)));controls.target.copy(t);}
@@ -855,6 +859,5 @@ else if(hs.includes('school')){const t=new THREE.Vector3(tx(7.5),0.4,tz(27.3));c
 else if(hs.includes('close')){const t=new THREE.Vector3(tx(13.3),0.9,tz(2.8));camera.position.copy(t.clone().add(new THREE.Vector3(1.5,2.6,5.5)));controls.target.copy(t);}
 else if(hs.includes('zoom')){const t=new THREE.Vector3(tx(13),0.5,tz(3.5));camera.position.copy(t.clone().add(new THREE.Vector3(7,8.5,10)));controls.target.copy(t);}
 if(hs.includes('kerja'))setTimeout(()=>$('btnKerja').click(),300);
-if(hs.includes('demo'))nextDemo=performance.now()+200;
 const pm=hs.match(/pop=(\w+)/);if(pm)setTimeout(()=>openPop(pm[1]),400);
 </script></body></html>
