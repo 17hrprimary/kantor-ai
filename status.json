@@ -1,5 +1,5 @@
 {
-  "updated_at": "2026-10-05T08:55:00+08:00",
+  "updated_at": "2026-10-05T08:55:54+08:00",
   "agents": [
     {
       "id": "hanrin",
@@ -152,11 +152,34 @@
     {
       "id": "love",
       "name": "Love ❤️",
-      "role": "Asisten pasangan, pengingat dan riset",
-      "room": "kamar",
-      "status": "tidur",
-      "task": "belum ada tugas",
-      "updated_at": "2026-10-04T23:58:00+08:00"
+      "role": "Love ❤️ · Urusan pasangan (date, kado, pengingat)",
+      "room": "grup-mybini",
+      "status": "santai",
+      "task": "Nongkrong di Grup My Bini 💬",
+      "updated_at": "2026-10-05T08:55:54+08:00",
+      "schedule": [
+        {
+          "time": "08:00",
+          "label": "Nongkrong di Grup My Bini 💬",
+          "room": "grup-mybini",
+          "status": "santai",
+          "task": "Nongkrong di Grup My Bini 💬"
+        },
+        {
+          "time": "17:00",
+          "label": "Nonton TV di Ruang TV 📺",
+          "room": "lounge",
+          "status": "santai",
+          "task": "Nonton TV di Ruang TV 📺"
+        },
+        {
+          "time": "21:00",
+          "label": "Bobo di Kamar Love 😴",
+          "room": "kamar-love",
+          "status": "tidur",
+          "task": "Bobo di Kamar Love 😴"
+        }
+      ]
     },
     {
       "id": "lina",

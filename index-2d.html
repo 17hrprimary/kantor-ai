@@ -137,7 +137,7 @@ const LOOKS={
  hr:{hair:'#8e1f2c',hl:'#b8364a',style:'wavy',shirt:'#ffa9c4',skin:'#f8dccb'},
  keira:{hair:'#141217',hl:'#3a3340',style:'bangs',glasses:'roundThick',shirt:'#1f1d24',skin:'#f6dccb',police:true},
  ornf:{hair:'#1b1720',hl:'#3a3340',style:'pony',shirt:'#ffffff',skin:'#f6d8c4',band:'#ff7eb6'},
- love:{hair:'#2c4a46',hl:'#4a706a',style:'bob',shirt:'#ffffff',skin:'#efcfb4',coat:true,goggles:true},
+ love:{hair:'#3b2418',hl:'#5c3a26',style:'bangs',shirt:'#d42a3a',skin:'#fbe4d6',butterfly:'#ff8fc0'}, // rambut panjang coklat tua + poni, jepit kupu-kupu pink, baju merah
 };
 const DEFAULT_LOOK={hair:'#3a2a3a',hl:'#5a4a5a',style:'bob',shirt:'#ff9cc7',skin:'#f6d8c4'};
 
@@ -197,6 +197,7 @@ function hairAcc(L){
  if(L.bunny)s+=`<g transform="translate(11,-15) rotate(15)"><ellipse cx="-2.5" cy="-6" rx="1.8" ry="4.5" fill="#ffb3d1" stroke="#ff7eb6" stroke-width=".6"/><ellipse cx="2.5" cy="-6" rx="1.8" ry="4.5" fill="#ffb3d1" stroke="#ff7eb6" stroke-width=".6"/><circle r="4" fill="#ffc8de" stroke="#ff7eb6" stroke-width=".6"/></g>`;
  if(L.band)s+=`<path d="M-17 -10 Q0 -24 17 -10" stroke="${L.band}" stroke-width="3" fill="none"/>`;
  if(L.goggles)s+=`<rect x="-15" y="-19" width="30" height="7" rx="3.5" fill="#bdeee0" stroke="#3fb894" stroke-width="1.2"/>`;
+ if(L.butterfly)[[-12,-21,-18],[12,-21,18]].forEach(([x,y,r])=>{s+=`<g transform="translate(${x},${y}) rotate(${r})"><path d="M0 0 C-4 -6 -8 -3 -5 1 C-8 4 -3 6 0 1 C3 6 8 4 5 1 C8 -3 4 -6 0 0Z" fill="${L.butterfly}" stroke="#d6457f" stroke-width=".6"/><path d="M0 -2.5 L0 2.5" stroke="#9a2a5a" stroke-width="1.2" stroke-linecap="round"/></g>`;}); // jepit kupu-kupu
  return s;
 }
 function head(L,sleep){return `${hairBack(L)}${face(L,sleep)}${hairFront(L)}${hairAcc(L)}`}
@@ -255,11 +256,12 @@ function bedSVG(a){
 }
 
 /* ===== Data & realtime ===== */
+const LOVE_SCHEDULE=[{time:'08:00',label:'Nongkrong di Grup My Bini 💬',room:'grup-mybini',status:'santai',task:'Nongkrong di Grup My Bini 💬'},{time:'17:00',label:'Nonton TV di Ruang TV 📺',room:'lounge',status:'santai',task:'Nonton TV di Ruang TV 📺'},{time:'21:00',label:'Bobo di Kamar Love 😴',room:'kamar-love',status:'tidur',task:'Bobo di Kamar Love 😴'}];
 const FALLBACK={updated_at:null,agents:[
  {id:'hanrin',name:'Hanrin',role:'Manager',room:'desk',status:'kerja',task:'Bagi tugas ke bot lain'},
  {id:'lia',name:'Ophelia (Lia)',role:'Konten Instagram, posting & jaga IG ophelia.lia.real',room:'desk',status:'kerja',task:'Jaga IG ophelia.lia.real'},
- ...[['rin','Rin','Asisten pribadi'],['ornf','Co Agent 2 Lia','Chat WhatsApp'],['emely','Emely','Teman ngobrol'],['hr','HR','Hanrin, pacar / pendamping'],['keira','Keira','Konsultan pribadi'],['love','Love ❤️','Asisten pasangan, pengingat dan riset']]
- .map(([id,name,role])=>({id,name,role,room:'kamar',status:'tidur',task:'belum ada tugas'}))]};
+ ...[['rin','Rin','Asisten pribadi'],['ornf','Co Agent 2 Lia','Chat WhatsApp'],['emely','Emely','Teman ngobrol'],['hr','HR','Hanrin, pacar / pendamping'],['keira','Keira','Konsultan pribadi'],['love','Love ❤️','Love ❤️ · Urusan pasangan (date, kado, pengingat)']]
+ .map(([id,name,role])=>({id,name,role,room:'kamar',status:'tidur',task:'belum ada tugas',...(id==='love'?{schedule:LOVE_SCHEDULE}:{})}))]};
 let agents=[],overrides={},lastSig='',fileUpdated=null;
 const $=id=>document.getElementById(id);
 const tz={timeZone:'Asia/Makassar'};
@@ -267,8 +269,12 @@ const fmtTime=d=>new Intl.DateTimeFormat('id-ID',{...tz,hour:'2-digit',minute:'2
 const fmtFull=d=>new Intl.DateTimeFormat('id-ID',{...tz,day:'numeric',month:'short',hour:'2-digit',minute:'2-digit',hour12:false}).format(d).replace('.',':')+' WITA';
 const idOf=a=>a.id||String(a.name).toLowerCase().replace(/[^a-z0-9]+/g,'-');
 
+/* jadwal ber-ruangan (schedule item punya room): posisi/status dihitung dari jam WITA sekarang (Love) */
+function timedSlot(a){const s=a&&Array.isArray(a.schedule)?a.schedule.filter(x=>x&&!Array.isArray(x)&&x.room&&/^\d{1,2}[:.]\d\d$/.test(String(x.time))):[];if(!s.length)return null;
+ const t=x=>{const[h,mm]=String(x.time).split(/[:.]/).map(Number);return h*60+mm},m=nowMin(),srt=s.slice().sort((p,q)=>t(p)-t(q));return srt.filter(x=>t(x)<=m).pop()||srt[srt.length-1];}
+function applyTimed(a){const ts=timedSlot(a);return ts?{...a,room:ts.room,status:ts.status||a.status,task:ts.task||ts.label}:a;}
 function effective(){
- return agents.map(a=>{const o=overrides[idOf(a)];
+ return agents.map(a0=>{const a=applyTimed(a0),o=overrides[idOf(a)];
   if(o&&(!a.updated_at||new Date(a.updated_at)<=o.at))return {...a,...o.patch};
   return a;});
 }
@@ -345,7 +351,9 @@ function sched(){
  fill('s1',s1,'');fill('s2',s2,'x');
  $('s3').innerHTML='<li class="k"><span class="t">∞</span><span>Keliling sekolah & kantor</span></li>';
 }
+let timedSig='';function timedCheck(){if(!agents.length)return;const sig=agents.map(a=>{const t=timedSlot(a);return t?idOf(a)+'@'+t.time:''}).join();if(timedSig&&sig!==timedSig)render();timedSig=sig;}
 function tick(){
+ timedCheck();
  $('clock').textContent=fmtTime(new Date()).slice(0,5)+' WITA';
  $('tgl').textContent=new Intl.DateTimeFormat('id-ID',{...tz,weekday:'long',day:'numeric',month:'long',year:'numeric'}).format(new Date());
  sched();
