@@ -30,6 +30,10 @@ main{flex:1;display:grid;grid-template-columns:1fr 270px;gap:12px;padding:12px 1
 #labels{position:absolute;inset:0;pointer-events:none;z-index:2;overflow:hidden}
 .ctrl{position:absolute;left:10px;top:10px;display:flex;flex-direction:column;gap:6px;z-index:5}
 .ctrl button{width:36px;height:36px;border-radius:12px;border:2px solid #ffd2e4;background:#fff;color:#d6457f;font-size:17px;font-weight:800;cursor:pointer;box-shadow:0 3px 0 #ffe0ec}
+.floors{position:absolute;left:10px;top:222px;display:flex;flex-direction:column;gap:5px;z-index:5}
+.floors button{min-width:58px;height:30px;border-radius:11px;border:2px solid #ffd2e4;background:#fff;color:#d6457f;font:inherit;font-size:11.5px;font-weight:800;cursor:pointer;box-shadow:0 3px 0 #ffe0ec;padding:0 8px}
+.floors button.on{background:linear-gradient(180deg,#ff7eb6,#f2559a);color:#fff;border-color:#fff}
+.fsign{background:#5a3a52;color:#fff;font-weight:900;font-size:13px;padding:4px 12px;border-radius:10px;border:2px solid #fff;white-space:nowrap;box-shadow:0 3px 8px rgba(0,0,0,.18)}
 .hint{position:absolute;left:12px;bottom:10px;font-size:11px;color:#a37a95;background:rgba(255,255,255,.85);padding:4px 10px;border-radius:999px;z-index:5}
 .hint a{color:#d6457f}
 /* label 3D */
@@ -99,6 +103,7 @@ body.noinfo aside{display:none}
  .chips{order:3;flex-basis:100%}
  .btn{margin-left:auto}
  .jp{width:min(250px,80%)}
+ .floors{top:218px}.floors button{min-width:52px;height:28px;font-size:10.5px;padding:0 6px}.fsign{font-size:11px;padding:3px 9px}
  .ntag .n{font-size:10px;padding:1px 7px}.rsign{font-size:10px}.hint{font-size:9.5px}
  .jtoggle.open{right:calc(min(250px,80%) + 18px)}
 }
@@ -123,6 +128,7 @@ body.noinfo aside{display:none}
       <button id="rotR" title="Putar kanan">⟳</button>
       <button id="home" title="Reset kamera">⌂</button>
     </div>
+    <div class="floors" id="floors"><button data-f="all" class="on">🏢 Semua</button><button data-f="2">Lt 3 🛏️</button><button data-f="1">Lt 2 🛋️</button><button data-f="0">Lt 1 💼</button></div>
     <button class="jtoggle" id="jToggle">📅 Jadwal per Karakter</button>
     <div class="jp" id="jPanel"><h3>📅 Jadwal per Karakter</h3><div class="list" id="jList"></div></div>
     <div class="pop" id="pop"></div>
@@ -180,12 +186,14 @@ const SCHEDULE={
 };
 
 /* ================= Denah (tile) ================= */
-const W=30,D=38;
+const W=36,D=25; // pusat gambar (tile); tiap lantai punya band y sendiri (DY) di koordinat logika
+const DY=40,FH=3.2,NFLOOR=3;
+const FLOOR_NAMES=['Lantai 1 · Kantor 💼','Lantai 2 · Santai 🛋️','Lantai 3 · Kamar Tidur 🛏️'];
 const ROOMS=[
  {id:'ceo',name:'👑 Ruang CEO',x:0,y:0,w:9,d:8,c1:'#fde6c6',c2:'#f7d8ae',sign:'#f0a92a'},
  {id:'ig',name:'📸 Kantor IG',x:9,y:0,w:12,d:8,c1:'#ffe0ee',c2:'#ffcfe3',sign:'#f2559a'},
  {id:'grup-jfm',name:'💬 Grup Just For Mature',x:21,y:0,w:9,d:8,c1:'#e8e1ff',c2:'#dcd2fb',sign:'#7a63c9',group:['Rin','Keira','Co Agent 2 Lia','Hanrin']},
- {id:'grup-mybini',name:'💬 Grup My Bini',x:0,y:8,w:16,d:8,c1:'#dfefff',c2:'#cfe4fb',sign:'#5a9cf0',group:['Rin','Keira','Co Agent 2 Lia','Hanrin','Emely']},
+ {id:'grup-mybini',name:'💬 Grup My Bini',x:0,y:8,w:16,d:8,c1:'#dfefff',c2:'#cfe4fb',sign:'#5a9cf0',group:['Rin','Keira','Co Agent 2 Lia','Hanrin','Emely','HR']},
  {id:'kamar',name:'🛏️ Kamar Tidur',x:16,y:8,w:14,d:9,c1:'#ebe3ff',c2:'#ddd2fb',sign:'#9a7bff'},
  {id:'kerja',name:'🖥️ Meja Kerja Bersama',x:0,y:16,w:16,d:8,c1:'#fff4d6',c2:'#fbe9bd',sign:'#e0a020'},
  {id:'lounge',name:'📺 Ruang TV',x:16,y:17,w:14,d:7,c1:'#effbe9',c2:'#e0f4d6',sign:'#4fb36a'},
@@ -197,6 +205,29 @@ const ROOMS=[
  {id:'kamar-hr',name:'💗 Kamar HR',x:24,y:31,w:6,d:7,c1:'#6b3f2a',c2:'#5e3622',sign:'#8a2236',lux:true,owner:'hr'},
  {id:'taman',name:'🌳 Taman',x:16,y:24,w:14,d:7,c1:'#d8f5c8',c2:'#c9eeb6',sign:'#3e9e52'},
 ];
+/* ===== Gedung 3 lantai: [lantai, x, y] posisi baru (interior tetap sama, cuma dipindah) ===== */
+const LAYOUT={ceo:[0,0,0],ig:[0,9,0],kerja:[0,0,8],school:[0,16,8],
+ 'grup-mybini':[1,0,0],'grup-jfm':[1,16,0],lounge:[1,0,8],taman:[1,14,8],
+ kamar:[2,0,0],'kamar-lia':[2,2,9],'kamar-hanrin':[2,8,9],'kamar-rin':[2,14,9],'kamar-emely':[2,20,9],'kamar-hr':[2,26,9]};
+const LUXC={c1:'#6b3f2a',c2:'#5e3622',sign:'#8a2236',lux:true};
+const NEW_ROOMS=[
+ {id:'tangga-1',name:'🪜 Tangga & Lift',f:0,x:21,y:0,w:11,d:8,c1:'#f3eefa',c2:'#e9e1f5',sign:'#8a7aa8',stairs:true},
+ {id:'tangga-2',name:'🪜 Tangga & Lift',f:1,x:25,y:0,w:7,d:8,c1:'#f3eefa',c2:'#e9e1f5',sign:'#8a7aa8',stairs:true},
+ {id:'tangga-3',name:'🪜 Lobi Lantai 3',f:2,x:14,y:0,w:22,d:9,c1:'#f3eefa',c2:'#e9e1f5',sign:'#8a7aa8',stairs:true},
+ {id:'lorong-3a',name:'Lorong',f:2,x:0,y:9,w:2,d:9,c1:'#efe6dc',c2:'#e6dbcf',hall:true},
+ {id:'lorong-3b',name:'Lorong',f:2,x:32,y:9,w:4,d:9,c1:'#efe6dc',c2:'#e6dbcf',hall:true},
+ {id:'lorong-3',name:'Lorong',f:2,x:2,y:16,w:30,d:2,c1:'#efe6dc',c2:'#e6dbcf',hall:true},
+ ...[['keira','🍎 Kamar Keira'],['lina','🎒 Kamar Lina'],['sally','🎒 Kamar Sally'],['sarah','🎒 Kamar Sarah'],['hannah','🎒 Kamar Hannah'],['geby','🎒 Kamar Geby']]
+  .map(([o,name],i)=>({id:'kamar-'+o,name,f:2,x:i*6,y:18,w:6,d:7,...LUXC,owner:o}))];
+ROOMS.forEach(r=>{const L=LAYOUT[r.id];r.ox=r.x;r.oy=r.y;r.f=L[0];r.x=L[1];r.y=L[2]+L[0]*DY;r.dx=r.x-r.ox;r.dy=r.y-r.oy;});
+NEW_ROOMS.forEach(r=>{r.y+=r.f*DY;ROOMS.push(r);});
+const floorOfY=y=>Math.max(0,Math.min(NFLOOR-1,Math.floor(y/DY)));
+// titik di denah lama -> posisi baru (ikut ruangannya)
+function oldRoomAt(x,y){return ROOMS.find(r=>r.ox!==undefined&&x>=r.ox&&x<r.ox+r.w&&y>=r.oy&&y<r.oy+r.d);}
+function relP(p){const r=oldRoomAt(p[0],p[1]);if(!r)return p;p[0]+=r.dx;p[1]+=r.dy;return p;}
+function relO(o,keys=[]){const r=oldRoomAt(o.x,o.y);if(!r)return o;o.x+=r.dx;o.y+=r.dy;keys.forEach(k=>{if(o[k]){o[k]=[o[k][0]+r.dx,o[k][1]+r.dy];}});return o;}
+const STAIR_FOOT={}; // titik kaki tangga per lantai (teleport naik/turun)
+ROOMS.filter(r=>r.stairs).forEach(r=>{STAIR_FOOT[r.f]=[28.6,r.f*DY+7.2];r.foot=STAIR_FOOT[r.f];});
 const SCHOOL={teacher:[4,25.0],students:{lina:[3.2,27.9],sally:[6.7,27.9],sarah:[10.2,27.9],hannah:[4.95,30.0],geby:[8.45,30.0]}};
 const SCHOOL_NAMES={lina:'Lina',sally:'Sally',sarah:'Sarah',hannah:'Hannah',geby:'Geby'};
 const SPOTS={ceo:{hanrin:[4.6,2.35]},ig:{lia:[11.6,2.45],ophelia1:[15.1,2.45]},
@@ -211,11 +242,23 @@ const KEIRA_STOPS=[
  {t:'Meja Kerja Bersama',x:8.5,y:19.9},{t:'Ruang TV',x:21.5,y:21.8},{t:'Taman',x:20.0,y:26.4},
  {t:'Kamar Lia',x:3.0,y:33.85},{t:'Kamar Hanrin',x:9.0,y:33.85},{t:'Kamar Rin',x:15.0,y:33.85},{t:'Kamar Emely',x:21.0,y:33.85},{t:'Kamar HR',x:27.0,y:33.85},
  {t:'Kamar Tidur',x:24.6,y:16.2},{t:'Grup My Bini',x:3.2,y:13.5},{t:'Ruang CEO',x:6.5,y:5.6},{t:'Kantor IG',x:13.2,y:5.0},{t:'Grup Just For Mature',x:22.6,y:6.9}];
+// pindahin semua titik tetap ke posisi gedung baru
+relP(SCHOOL.teacher);Object.values(SCHOOL.students).forEach(relP);SCHOOL.extra=relP([13.5,26]);
+relP(SPOTS.ceo.hanrin);Object.values(SPOTS.ig).forEach(relP);SPOTS.kerja.forEach(relP);BEDS.forEach(relP);
+[SOFA_SPOT,SOFA2_SPOT].forEach(o=>relO(o,['head','root','wake','throwAt']));
+WANDER.forEach(w=>relO(w));KEIRA_STOPS.forEach(w=>relO(w));
+WANDER.push({t:'Lobi Lantai 3',x:20,y:2*DY+5},{t:'Tangga & Lift',x:24,y:4});
 const BRAIN={ophelia1:'wander',lia:'sleepOrWander',hanrin:'wander',keira:'keiraWander'};
 /* ruang kerja wajib pas jam jadwal (per bot) */
 const WORK_ROOM={lia:'ig',ophelia1:'ig',hanrin:'ceo'};
 /* jam bobo malam wajib (WITA), kecuali lagi status kerja */
 const NIGHT={hanrin:[0,7*60]};
+/* rutinitas harian (WITA): anak sekolah + Rin/HR/Emely 08:00-17:00 kerja, 17:00-08:00 bobo di kamar masing2 (Lantai 3) */
+const DAY_WIN=[8*60,17*60];
+const dayNow=()=>{const m=nowMin();return m>=DAY_WIN[0]&&m<DAY_WIN[1];};
+const SCHOOL_BOTS=['keira','lina','sally','sarah','hannah','geby'];
+const MYBINI_BOTS=['rin','hr','emely'];
+const routineBase=(a,id)=>MYBINI_BOTS.includes(id)?'grup-mybini':(SCHOOL_BOTS.includes(id)||a.room==='school')?'school':null;
 const nightNow=id=>{const n=NIGHT[id];if(!n)return false;const m=nowMin();return m>=n[0]&&m<n[1];};
 const sharedBed=b=>({x:b[0],y:b[1],w:1.4,len:2.4,dir:1});
 const luxBed=r=>({x:r.x+r.w/2-.9,y:r.y+r.d-2.6,w:1.8,len:2.45,dir:-1});
@@ -240,16 +283,18 @@ const scene=new THREE.Scene();
 const camera=new THREE.PerspectiveCamera(32,1,0.5,400);
 const controls=new OrbitControls(camera,renderer.domElement);
 controls.enableDamping=true;controls.dampingFactor=.08;
-controls.minDistance=6;controls.maxDistance=140;
+controls.minDistance=6;controls.maxDistance=240;
 controls.maxPolarAngle=Math.PI*0.44;controls.minPolarAngle=0.15;
 controls.touches={ONE:THREE.TOUCH.ROTATE,TWO:THREE.TOUCH.DOLLY_PAN};
 controls.screenSpacePanning=false;
 
 scene.add(new THREE.HemisphereLight(0xffffff,0xf3d6ff,1.6));
-const sun=new THREE.DirectionalLight(0xfff4ea,2.2);sun.position.set(10,30,16);
+const sun=new THREE.DirectionalLight(0xfff4ea,2.2);sun.position.set(14,42,22);
 sun.castShadow=true;sun.shadow.mapSize.set(2048,2048);
-Object.assign(sun.shadow.camera,{left:-24,right:24,top:24,bottom:-24,near:1,far:80});sun.shadow.bias=-0.0008;sun.shadow.normalBias=.02;
+Object.assign(sun.shadow.camera,{left:-48,right:48,top:48,bottom:-48,near:1,far:120});sun.shadow.bias=-0.0008;sun.shadow.normalBias=.02;
 scene.add(sun);
+let P=scene; // parent bangunan saat ini (grup lantai/ruang)
+const FLOORS=[...Array(NFLOOR)].map((_,f)=>{const g=new THREE.Group();g.userData.f=f;scene.add(g);return g;});
 const fill=new THREE.DirectionalLight(0xffe0f0,.6);fill.position.set(20,12,25);scene.add(fill);
 
 /* ================= Helper geometri ================= */
@@ -257,12 +302,12 @@ const MATS={};
 function mat(c,o={}){const k=c+JSON.stringify(o);if(!MATS[k])MATS[k]=new THREE.MeshStandardMaterial({color:c,roughness:.85,metalness:0,flatShading:true,...o});return MATS[k];}
 const BOXG=new THREE.BoxGeometry(1,1,1);
 const tx=x=>x-W/2, tz=y=>y-D/2;
-function mesh(geo,m,parent=scene,shadow=true){const o=new THREE.Mesh(geo,m);o.castShadow=shadow;o.receiveShadow=true;parent.add(o);return o;}
+function mesh(geo,m,parent=P,shadow=true){const o=new THREE.Mesh(geo,m);o.castShadow=shadow;o.receiveShadow=true;parent.add(o);return o;}
 // kotak dalam koordinat tile: (x,y) sudut min, z bawah
-function box(x,y,z,w,d,h,c,o={}){const m=mesh(BOXG,o.m||mat(c,o.mo||{}),o.p||scene,o.shadow!==false);m.scale.set(w,h,d);m.position.set(tx(x+w/2),z+h/2,tz(y+d/2));return m;}
+function box(x,y,z,w,d,h,c,o={}){const m=mesh(BOXG,o.m||mat(c,o.mo||{}),o.p||P,o.shadow!==false);m.scale.set(w,h,d);m.position.set(tx(x+w/2),z+h/2,tz(y+d/2));return m;}
 function cyl(cx,cy,z,r,h,c,seg=14,r2){const m=mesh(new THREE.CylinderGeometry(r,r2??r,h,seg),mat(c));m.position.set(tx(cx),z+h/2,tz(cy));return m;}
 function ball(cx,cy,z,r,c,detail=0){const m=mesh(new THREE.IcosahedronGeometry(r,detail),mat(c));m.position.set(tx(cx),z,tz(cy));return m;}
-function label(html,cls,x,y,z){const d=document.createElement('div');d.className=cls;d.innerHTML=html;const o=new CSS2DObject(d);o.position.set(tx(x),z,tz(y));scene.add(o);return o;}
+function label(html,cls,x,y,z){const d=document.createElement('div');d.className=cls;d.innerHTML=html;const o=new CSS2DObject(d);o.position.set(tx(x),z,tz(y));P.add(o);return o;}
 function planks(){const cv=document.createElement('canvas');cv.width=cv.height=64;const g=cv.getContext('2d');const cols=['#6b3f2a','#5e3622','#734630','#633a26'];
  for(let i=0;i<8;i++){g.fillStyle=cols[i%4];g.fillRect(0,i*8,64,8);g.fillStyle='rgba(0,0,0,.25)';g.fillRect(0,i*8+7,64,1);g.fillRect((i*23)%64,i*8,1,8);}
  const t=new THREE.CanvasTexture(cv);t.wrapS=t.wrapT=THREE.RepeatWrapping;t.colorSpace=THREE.SRGBColorSpace;t.magFilter=THREE.NearestFilter;return t;}
@@ -282,7 +327,7 @@ const SCR={ig:screenTex('ig'),pc:screenTex('pc'),tv:screenTex('tv')};
 function monitor(cx,y,kind='pc',face=1){ // layar menghadap -y (ke kursi) kalau face=1
  box(cx-.05,y-.05,.74,.1,.1,.22,0x6c5a7a);
  const m=box(cx-.38,y-.04,.92,.76,.06,.46,0x4a4458);
- const s=mesh(new THREE.PlaneGeometry(.68,.38),new THREE.MeshBasicMaterial({map:SCR[kind]}),scene,false);
+ const s=mesh(new THREE.PlaneGeometry(.68,.38),new THREE.MeshBasicMaterial({map:SCR[kind]}),P,false);
  s.position.set(tx(cx),1.15,tz(y-.045*face));s.rotation.y=face>0?Math.PI:0;
  box(cx-.3,y-.45,.74,.6,.2,.03,0xe9e2f0); // keyboard
 }
@@ -317,12 +362,12 @@ function blanket(b){const lux=b.w>1.5,len=1.55;const y0=b.dir>0?b.y+.8:b.y+b.len
 function roundTable(cx,cy,r){cyl(cx,cy,0,.12,.68,0xc9b8e8,8);cyl(cx,cy,0,.4,.05,0xc9b8e8,8);cyl(cx,cy,.66,r,.08,0xffffff,20);}
 function ringLight(x,y){cyl(x,y,0,.25,.04,0x6c5a7a,6);cyl(x,y,0,.03,1.55,0x6c5a7a,6);
  const t=mesh(new THREE.TorusGeometry(.38,.05,8,24),new THREE.MeshStandardMaterial({color:0xffffff,emissive:0xfff3c4,emissiveIntensity:1.2}));t.position.set(tx(x),1.85,tz(y));t.rotation.y=Math.PI/4;
- const pl=new THREE.PointLight(0xfff0d0,4,5);pl.position.set(tx(x-.4),1.8,tz(y+.4));scene.add(pl);}
+ const pl=new THREE.PointLight(0xfff0d0,4,5);pl.position.set(tx(x-.4),1.8,tz(y+.4));P.add(pl);}
 function tripod(x,y){[[-.18,0],[.12,.14],[.1,-.16]].forEach(([a,b])=>{const l=mesh(new THREE.CylinderGeometry(.02,.02,1.15,5),mat(0x4a4458));l.position.set(tx(x+a/2),.56,tz(y+b/2));l.rotation.set(b*1.2,0,-a*1.2);});
  box(x-.17,y-.12,1.1,.34,.24,.24,0x2b2733);cyl(x,y-.18,1.22,.08,.1,0x111111,10).rotation.x=Math.PI/2;}
 function coffee(x,y){box(x,y,0,.9,.6,.9,0xc98f5a);box(x+.15,y+.1,.9,.6,.4,.6,0x3a3440);box(x+.25,y+.42,1.05,.4,.06,.2,0xff7eb6);box(x+.38,y+.3,.92,.14,.14,.14,0xffffff);}
 function dispenser(x,y){box(x,y,0,.55,.5,1.0,0xf4f8ff);cyl(x+.275,y+.25,1.0,.22,.5,0x9cd4ff,12);box(x+.12,y+.5,.62,.1,.03,.08,0x5a9cf0);box(x+.33,y+.5,.62,.1,.03,.08,0xf2559a);}
-function tv(x,y,w=2.2){box(x+w/2-.2,y,0,.4,.3,.5,0x4a4458);box(x,y+.05,.5,w,.12,1.25,0x2b2733);const s=mesh(new THREE.PlaneGeometry(w-.14,1.12),new THREE.MeshBasicMaterial({map:SCR.tv}),scene,false);s.position.set(tx(x+w/2),1.12,tz(y+.04));s.rotation.y=Math.PI;}
+function tv(x,y,w=2.2){box(x+w/2-.2,y,0,.4,.3,.5,0x4a4458);box(x,y+.05,.5,w,.12,1.25,0x2b2733);const s=mesh(new THREE.PlaneGeometry(w-.14,1.12),new THREE.MeshBasicMaterial({map:SCR.tv}),P,false);s.position.set(tx(x+w/2),1.12,tz(y+.04));s.rotation.y=Math.PI;}
 function whiteboard(x,y,w=2.2){box(x,y,0,.06,.06,1.0,0xb8b0c0);box(x+w-.06,y,0,.06,.06,1.0,0xb8b0c0);box(x,y,.9,w,.06,1.0,0xffffff);box(x+.3,y+.07,1.3,.8,.01,.05,0xf2559a);box(x+.3,y+.07,1.5,1.2,.01,.05,0x5a9cf0);box(x+.3,y+.07,1.7,.6,.01,.05,0x3fb894);}
 function vending(x,y){box(x,y,0,1.1,.85,1.9,0xff7eb6);box(x+.1,y+.86,.7,.65,.01,1.0,0xffe0ee);for(let i=0;i<3;i++)for(let j=0;j<3;j++)box(x+.16+j*.2,y+.87,.85+i*.3,.12,.02,.18,[0x5a9cf0,0xffd23f,0x3fb894][(i+j)%3]);}
 function lamp(x,y){cyl(x,y,0,.2,.04,0x6c5a7a,8);cyl(x,y,0,.03,1.5,0x6c5a7a,6);cyl(x,y,1.45,.26,.3,0xfff1c2,10,.16);}
@@ -361,7 +406,7 @@ function luxRoom(r){
  painting(r.x+.08,r.y+2.6,1.0,1.2,.75,[0x3a5a8a,0x8a5a3a,0x3a7a5a,0x7a3a6a,0x8a6a2a][ROOMS.indexOf(r)%5],'x',1);
  painting(r.x+r.w-.13,r.y+3.0,1.0,1.0,.9,[0x9a4a3a,0x3a6a8a,0x6a3a8a,0x3a8a6a,0x8a3a4a][ROOMS.indexOf(r)%5],'x',-1);
  // lampu gantung kristal (chandelier)
- const ch=new THREE.Group();ch.position.set(tx(cx),2.55,tz(r.y+3.0));scene.add(ch);
+ const ch=new THREE.Group();ch.position.set(tx(cx),2.55,tz(r.y+3.0));P.add(ch);
  const gm=new THREE.MeshStandardMaterial({color:gold,metalness:.7,roughness:.3});
  const chain=mesh(new THREE.CylinderGeometry(.015,.015,.8,4),gm,ch,false);chain.position.y=.4;
  const ring=mesh(new THREE.TorusGeometry(.4,.035,6,16),gm,ch,false);ring.rotation.x=Math.PI/2;
@@ -369,51 +414,67 @@ function luxRoom(r){
  for(let i=0;i<8;i++){const a=i/8*Math.PI*2;const c=mesh(new THREE.CylinderGeometry(.03,.03,.12,5),mat(0xfff8ee),ch,false);c.position.set(Math.cos(a)*.4,.08,Math.sin(a)*.4);
   const f=mesh(new THREE.IcosahedronGeometry(.04,0),new THREE.MeshBasicMaterial({color:0xffe28a}),ch,false);f.position.set(Math.cos(a)*.4,.18,Math.sin(a)*.4);
   const cr=mesh(new THREE.OctahedronGeometry(.035,0),new THREE.MeshStandardMaterial({color:0xffffff,metalness:.2,roughness:.1,transparent:true,opacity:.8}),ch,false);cr.position.set(Math.cos(a)*.4,-.1,Math.sin(a)*.4);}
- const pl=new THREE.PointLight(0xffd9a0,3.2,6);pl.position.set(tx(cx),2.3,tz(r.y+3.0));scene.add(pl);
+ const pl=new THREE.PointLight(0xffd9a0,3.2,6);pl.position.set(tx(cx),2.3,tz(r.y+3.0));P.add(pl);
  plant(r.x+.6,r.y+r.d-.6,.9,0x5fae6a);
 }
 function frame(x,y,z,w,h,c){box(x,y,z,w,.04,h,0xffffff);box(x+.06,y+.045,z+.06,w-.12,.01,h-.12,c);}
 
 /* ================= Bangun ruangan ================= */
 const OUTER_WALLS=[];
+function inRoom(id){const r=ROOMS.find(x=>x.id===id);const g=new THREE.Group();g.position.set(r.dx,0,r.dy);FLOORS[r.f].add(g);P=g;}
+function stairsUp(r){ // tangga naik ke lantai atas + lift (sama di tiap lantai)
+ const n=10,sx=27.6,sy=7.0+r.f*DY;
+ for(let i=0;i<n;i++){box(sx,sy-.5*(i+1),0,2,.5,FH*(i+1)/n,i%2?0xf2a6c8:0xffc4dc);}
+ for(let i=0;i<=n;i+=2)box(sx-.08,sy-.5*i-.04,FH*i/n,.06,.06,.9,0xd6457f);
+ box(sx-.1,sy-5.05,FH+.85,.12,5.05,.08,0xd6457f);
+ label('⬆️ Naik','seat pink',sx+1,sy-1,1.3);}
+function stairsTop(r){ // lubang tangga di lantai atas (pagar)
+ const o=r.f*DY;box(27.5,1.6+o,0,2.2,.08,.95,0xd6457f);box(27.5,1.6+o,0,.08,5.4,.95,0xd6457f);box(29.62,1.6+o,0,.08,5.4,.95,0xd6457f);
+ rug(27.6,1.7+o,2,5.2,0xcfc2e6);label('⬇️ Turun','seat pink',28.6,4.2+o,1.3);}
+function lift(r){const o=r.f*DY;box(30.3,.25+o,0,1.6,1.6,2.4,0xcfd8ff);box(30.45,1.86+o,0,.62,.04,2.1,0xe8eeff);box(31.13,1.86+o,0,.62,.04,2.1,0xe8eeff);box(30.9,1.88+o,2.15,.4,.02,.18,0xff7eb6);
+ label('🛗 Lift','seat',31.1,2.2+o,2.7);}
 function buildWorld(){
- // alas gedung
- box(-.4,-.4,-.4,W+.8,D+.8,.4,0xf3c6dc);
- ROOMS.forEach(r=>{
-  const t=r.lux?planks():checker(r.c1,r.c2);t.repeat.set(r.lux?r.w/2:r.w/2,r.lux?r.d/2:r.d/2);
-  const m=mesh(new THREE.PlaneGeometry(r.w,r.d),new THREE.MeshStandardMaterial({map:t,roughness:.95}),scene,false);
+ ROOMS.forEach(r=>{P=FLOORS[r.f];
+  box(r.x-.05,r.y-.05,-.35,r.w+.1,r.d+.1,.35,0xf3c6dc); // pelat lantai
+  const t=r.lux?planks():checker(r.c1,r.c2);t.repeat.set(r.w/2,r.d/2);
+  const m=mesh(new THREE.PlaneGeometry(r.w,r.d),new THREE.MeshStandardMaterial({map:t,roughness:.95}),P,false);
   m.rotation.x=-Math.PI/2;m.position.set(tx(r.x+r.w/2),.002,tz(r.y+r.d/2));m.receiveShadow=true;
-  // papan nama ruangan
-  label(r.name,'rsign',r.x+r.w/2,r.y+.35,2.25).element.style.background=r.sign;
+  if(!r.hall)label(r.name,'rsign',r.x+r.w/2,r.y+.35,2.25).element.style.background=r.sign;
  });
- // dinding + pintu
- const segs=new Map(),outer=(o,c)=>(o==='h'&&(c===0||c===D))||(o==='v'&&(c===0||c===W));
- ROOMS.forEach(r=>[['h',r.y,r.x,r.w],['h',r.y+r.d,r.x,r.w],['v',r.x,r.y,r.d],['v',r.x+r.w,r.y,r.d]].forEach(([o,c,s,len])=>{
-  const isO=outer(o,c),mid=Math.floor(s+len/2);
-  for(let i=s;i<s+len;i++){const k=o+c+':'+i,gap=!isO&&(i===mid||i===mid-1),p=segs.get(k);segs.set(k,{o,c,i,outer:isO,gap:gap||(p&&p.gap)});}
- }));
+ // papan nama lantai
+ for(let f=0;f<NFLOOR;f++){P=FLOORS[f];label(FLOOR_NAMES[f],'fsign',-1.2,f*DY-1.2,.4);}
+ // pintu = sambungan antar ruangan (doorBetween), dinding sisanya
+ const gaps=new Set(),doorList=[];
+ ROOMS.forEach((a,i)=>ROOMS.forEach((b,j)=>{if(j<=i||a.f!==b.f)return;const d=doorBetween(a,b);if(!d)return;
+  if(Math.abs(d[0][0]-d[1][0])<1e-6){const c=Math.round((d[0][1]+d[1][1])/2),m=d[0][0];gaps.add('h'+c+':'+(m-1));gaps.add('h'+c+':'+m);doorList.push(['h',c,m]);}
+  else{const c=Math.round((d[0][0]+d[1][0])/2),m=d[0][1];gaps.add('v'+c+':'+(m-1));gaps.add('v'+c+':'+m);doorList.push(['v',c,m]);}}));
+ const segs=new Map();
+ ROOMS.forEach(r=>[['h',r.y,r.x,r.w],['h',r.y+r.d,r.x,r.w],['v',r.x,r.y,r.d],['v',r.x+r.w,r.y,r.d]].forEach(([o,c,s0,len])=>{
+  for(let i=s0;i<s0+len;i++){const k=o+c+':'+i;if(!segs.has(k))segs.set(k,{o,c,i,f:r.f,k});}}));
  const wallM=mat(0xffffff),capM=mat(0xffc4dc),outM=mat(0xfff5fa),luxWallM=mat(0xf3e6d0),luxCapM=mat(0xd4af37);
  segs.forEach(s=>{
-  if(s.gap)return;
-  const luxSide=s.o==='v'&&s.i>=31;const h=s.outer?2.4:(luxSide?1.7:.95),th=.16;
-  const g=new THREE.Group();scene.add(g);
-  const isLux=s.i>=31&&s.o==='v'||s.o==='h'&&s.c===D;const w=mesh(BOXG,isLux&&!s.outer?luxWallM:(s.outer?outM:wallM),g);const cap=mesh(BOXG,isLux?luxCapM:capM,g);
+  if(gaps.has(s.k))return;
+  const A=s.o==='h'?roomAt(s.i+.5,s.c-.5):roomAt(s.c-.5,s.i+.5),B=s.o==='h'?roomAt(s.i+.5,s.c+.5):roomAt(s.c+.5,s.i+.5);
+  const outer=!A||!B,luxW=s.o==='h'?!!(A&&A.lux):!!((A&&A.lux)||(B&&B.lux));
+  const h=outer?2.4:(luxW?1.7:.95),th=.16;
+  P=FLOORS[s.f];const g=new THREE.Group();P.add(g);
+  const w=mesh(BOXG,luxW&&!outer?luxWallM:(outer?outM:wallM),g);const cap=mesh(BOXG,luxW||(outer&&((A&&A.lux)||(B&&B.lux)))?luxCapM:capM,g);
   if(s.o==='h'){w.scale.set(1,h,th);cap.scale.set(1,.06,th+.04);g.position.set(tx(s.i+.5),0,tz(s.c));}
   else{w.scale.set(th,h,1);cap.scale.set(th+.04,.06,1);g.position.set(tx(s.c),0,tz(s.i+.5));}
   w.position.y=h/2;cap.position.y=h+.03;
-  if(s.outer){const n=s.o==='h'?new THREE.Vector3(0,0,s.c===0?-1:1):new THREE.Vector3(s.c===0?-1:1,0,0);OUTER_WALLS.push({g,w,cap,h,n});}
+  if(outer){const n=s.o==='h'?new THREE.Vector3(0,0,A?1:-1):new THREE.Vector3(A?1:-1,0,0);OUTER_WALLS.push({g,w,cap,h,n});}
  });
  // kusen pintu
- const doors=new Map();
- segs.forEach(s=>{if(!s.gap)return;const k=s.o+s.c;(doors.get(k)||doors.set(k,[]).get(k)).push(s.i);});
- doors.forEach((list,k)=>{list.sort((a,b)=>a-b);const o=k[0],c=+k.slice(1);
-  let start=list[0];for(let j=0;j<=list.length;j++){if(j===list.length||list[j]!==list[j-1]+1&&j>0){const end=list[j-1]+1;
-    const posts=[start,end];posts.forEach(p=>{if(o==='h')box(p-.09,c-.12,0,.18,.24,1.75,0xf2a6c8);else box(c-.12,p-.09,0,.24,.18,1.75,0xf2a6c8);});
-    if(o==='h')box(start-.09,c-.12,1.75,end-start+.18,.24,.14,0xf2a6c8);else box(c-.12,start-.09,1.75,.24,end-start+.18,.14,0xf2a6c8);
-    if(j<list.length)start=list[j];}}
- });
+ doorList.forEach(([o,c,m])=>{P=FLOORS[floorOfY(o==='h'?c-.01:m)];const st=m-1,en=m+1;
+  [st,en].forEach(p=>{if(o==='h')box(p-.09,c-.12,0,.18,.24,1.75,0xf2a6c8);else box(c-.12,p-.09,0,.24,.18,1.75,0xf2a6c8);});
+  if(o==='h')box(st-.09,c-.12,1.75,en-st+.18,.24,.14,0xf2a6c8);else box(c-.12,st-.09,1.75,.24,en-st+.18,.14,0xf2a6c8);});
+ // tangga & lift
+ ROOMS.filter(r=>r.stairs).forEach(r=>{P=FLOORS[r.f];if(r.f<NFLOOR-1)stairsUp(r);if(r.f>0)stairsTop(r);lift(r);
+  plant(r.x+.7,r.y+.8,1);if(r.w>12){sofa(r.x+2,r.y+5.6,3.2,0xc8a6ff,-1);plant(r.x+6.2,r.y+7.6,1.1);box(r.x+2.4,r.y+4.3,0,2.4,.8,.35,0xfff1d6);}});
+ ROOMS.filter(r=>r.hall).forEach(r=>{P=FLOORS[r.f];if(r.w>8)for(let x=r.x+3;x<r.x+r.w-1;x+=7)plant(x,r.y+1,.7,0x7fcf9a);});
 
  // ---- Ruang CEO
+ inRoom('ceo');
  rug(1.2,1.4,6.6,4.6,0xffd58a);
  desk(2.4,3.0,4.4,1.3,0xc98f5a,0xf6d9a8);box(5.6,3.2,.75,.8,.55,.03,0xffffff);trophy(3,3.4,.75);
  chair(4.6,2.35,0xf0a92a);
@@ -421,6 +482,7 @@ function buildWorld(){
  frame(4.2,.1,1.1,1.6,1.0,0xffd58a);frame(6.2,.1,1.2,1.0,.8,0xff9cc7);
  sofa(1.4,6.4,3,0xffd58a,-1);box(1.9,5.2,0,1.8,.8,.35,0xfff1d6);
  // ---- Kantor IG
+ inRoom('ig');
  rug(10,1.3,6.8,5.6,0xffc4dc);
  desk(10.5,3.0,2.2,1.1,0xff9cc7,0xffd2e4,'ig');chair(11.6,2.45,0xff7eb6);
  desk(14.0,3.0,2.2,1.1,0xff9cc7,0xffd2e4,'ig');chair(15.1,2.45,0xffd23f);
@@ -435,11 +497,11 @@ function buildWorld(){
  label('🎬 Studio Konten','seat pink',19.2,2.6,2.35);
  plant(9.7,.7,1);plant(20.4,7.3,1);shelf(15.6,.2,1.4,1.4);
  // ---- ruang grup
- ROOMS.filter(r=>r.group).forEach(r=>{
+ ROOMS.filter(r=>r.group).forEach(r=>{P=FLOORS[r.f];
   rug(r.cx-r.tr-1.3,r.cy-r.tr-1.3,(r.tr+1.3)*2,(r.tr+1.3)*2,0xffffff);
   roundTable(r.cx,r.cy,r.tr);
   r.seats.forEach(s=>{const dx=r.cx-s.x,dy=r.cy-s.y;const c=s.name?0x9a7bff:0xd8cde3;
-   const g=new THREE.Group();scene.add(g);g.position.set(tx(s.x),0,tz(s.y));g.rotation.y=Math.atan2(dx,dy);
+   const g=new THREE.Group();P.add(g);g.position.set(tx(s.x),0,tz(s.y));g.rotation.y=Math.atan2(dx,dy);
    const sb=mesh(BOXG,mat(c),g);sb.scale.set(.56,.1,.52);sb.position.y=.45;
    const bk=mesh(BOXG,mat(c),g);bk.scale.set(.56,.6,.1);bk.position.set(0,.75,-.26);
    const leg=mesh(new THREE.CylinderGeometry(.05,.05,.42,6),mat(0x6c5a7a),g);leg.position.y=.21;
@@ -448,18 +510,22 @@ function buildWorld(){
   box(r.cx-.15,r.cy-.15,.74,.3,.3,.04,0xffffff);
  });
  // ---- pojok tanaman
+ inRoom('grup-mybini');
  rug(12,9.2,3.4,5.6,0xd6f2c8);
  plant(12.6,9.8,1.2);plant(14.9,9.8,1);plant(15.2,12.2,1.3,0x7fcf9a);plant(12.5,14.6,1.1,0xa6e3a0);plant(15,14.8,.9);
  box(13.1,11.6,.35,1.6,.55,.1,0xc98f5a);box(13.1,12.05,.35,1.6,.1,.55,0xc98f5a);box(13.2,11.7,0,.12,.35,.35,0x6c5a7a);box(14.48,11.7,0,.12,.35,.35,0x6c5a7a);
  box(13.5,13.2,0,.6,.6,.45,0xffffff);ball(13.8,13.5,.62,.16,0xff9cc7);
  // ---- kamar tidur
+ inRoom('kamar');
  rug(17,8.8,12.6,7.6,0xe0d2ff);
- BEDS.forEach(([x,y])=>bed(x,y));
+ {const q=P;P=FLOORS[2];BEDS.forEach(([x,y])=>bed(x,y));P=q;} // BEDS udah di posisi baru
  frame(19,8.1,1.1,1.2,.8,0xc8a6ff);frame(24,8.1,1.1,1.2,.8,0xffb3d1);plant(29.3,16.4,1);
  // ---- meja kerja bersama
- SPOTS.kerja.forEach(([x,y])=>{desk(x-1.1,y+.5,2.2,1.0);chair(x,y,0xffc4dc);});
+ inRoom('kerja');
+ {const q=P;P=FLOORS[0];SPOTS.kerja.forEach(([x,y])=>{desk(x-1.1,y+.5,2.2,1.0);chair(x,y,0xffc4dc);});P=q;}
  plant(15.4,16.7,1);plant(.6,23.3,1);printer(14.2,22.8);shelf(.25,16.2,2.2,1.5);whiteboard(5,16.15,2.6);
  // ---- School
+ inRoom('school');
  rug(1.5,26.6,11,4.2,0xffe2c4);
  box(1.2,24.12,.55,5.6,.1,1.5,0x8a5a3a);box(1.35,24.23,.68,5.3,.01,1.24,0x2f5d46); // papan tulis
  box(1.8,24.25,1.5,1.6,.01,.05,0xffffff);box(1.8,24.25,1.3,2.4,.01,.05,0xffffff);box(4.6,24.25,1.6,1.4,.01,.05,0xffe28a);box(4.6,24.25,1.2,.9,.01,.05,0xffffff);
@@ -467,28 +533,33 @@ function buildWorld(){
  desk(2.8,25.55,2.4,1.0,0xc98f5a,0xf6d9a8,'pc');chair(4,25.0,0xe2733a);
  box(2.95,25.7,.75,.5,.35,.12,0xff7eb6);cyl(5.0,25.85,.75,.12,.06,0xffffff,8);ball(5.0,25.85,.95,.14,0x5a9cf0);
  label('🍎 Guru Keira','seat pink',4,25.0,1.5).element.style.background='#e2733a';
+ {const q=P;P=FLOORS[0];
  Object.entries(SCHOOL.students).forEach(([id,[x,y]])=>{
   box(x-.6,y-1.05,.66,1.2,.65,.06,0xffe7c2);[[x-.55,y-1.0],[x+.47,y-1.0],[x-.55,y-.48],[x+.47,y-.48]].forEach(([a,b])=>box(a,b,0,.07,.07,.66,0xc98f5a));
   box(x-.35,y-.9,.72,.4,.3,.05,[0xff7eb6,0x5a9cf0,0x3fb894,0xffd23f,0x9a7bff][Object.keys(SCHOOL.students).indexOf(id)]);
   chair(x,y,0x9cc8ff,-1);label('🎒 '+SCHOOL_NAMES[id],'seat',x,y-.8,.95);
  });
+ P=q;}
  shelf(13.2,24.2,2.4,1.5);plant(15.4,30.4,1);plant(.6,30.4,.9);
  box(13.6,28.2,0,.6,2.4,1.6,0x9cc8ff);for(let i=0;i<4;i++)box(13.58,28.3+i*.58,.2,.02,.5,1.3,0x7fb0ee); // loker
  frame(9.6,24.1,1.3,1.2,.9,0xffd58a);frame(11.2,24.1,1.3,1.2,.9,0xb9e7c8);
  cyl(12,25,0,.2,.04,0x8a5a3a,8);cyl(12,25,0,.03,.75,0x8a5a3a,6);ball(12,25,1.0,.24,0x5a9cf0,1);
  // ---- kamar mewah
- ROOMS.filter(r=>r.lux).forEach(luxRoom);
+ ROOMS.filter(r=>r.lux).forEach(r=>{P=FLOORS[r.f];luxRoom(r);});
  // ---- Taman
+ inRoom('taman');
  for(let i=0;i<6;i++)plant(17+i*2.3,24.8+(i%2)*.4,1.1+(i%3)*.2,[0x8fd8a0,0x7fcf9a,0xa6e3a0][i%3]);
  cyl(23,27.6,0,1.1,.4,0xcfe4ff,18);cyl(23,27.6,.4,.85,.05,0x9cd4ff,18);cyl(23,27.6,.4,.15,.7,0xffffff,8);ball(23,27.6,1.15,.2,0x9cd4ff);
  [[18,29.4],[26.5,29.4]].forEach(([x,y])=>{box(x,y,.35,2.2,.6,.1,0xc98f5a);box(x,y+.5,.35,2.2,.1,.6,0xc98f5a);box(x+.1,y+.1,0,.12,.4,.35,0x6c5a7a);box(x+1.98,y+.1,0,.12,.4,.35,0x6c5a7a);});
  for(let i=0;i<8;i++)ball(17.2+i*1.7,30.6,.18,.18,[0xff9cc7,0xffd23f,0xc79bff,0xffffff][i%4]);
  // ---- lounge
+ inRoom('lounge');
  rug(17.2,18.8,8,3.8,0xd6f2c8);
  sofa(17.4,18.4,3.4,0x9be0b0);sofa(21.8,18.4,3.4,0xffb3d1);
  cyl(19,21.2,0,.6,.38,0xffffff,16);cyl(23.4,21.2,0,.6,.38,0xffffff,16);
  tv(18.4,23.4,3);coffee(28.6,20.6);dispenser(28.9,22);vending(28.5,17.4);
  box(26.5,17.3,0,1.6,.6,.9,0xc98f5a);plant(16.7,23.3,1.1);plant(26.8,23.3,1);
+ P=scene;
 }
 
 /* ================= Karakter voxel ================= */
@@ -563,16 +634,19 @@ const short=n=>n.replace(/ \(Lia\)/,' · Lia');
 const WORK_WIN=30;
 function activeSlot(id){if(!BRAIN[id]||!agentsData.length)return null;const s=schedOf(id);if(!s)return null;const m=nowMin();
  return s.find(x=>x[2]!==false&&!x[3]&&m>=mins(x[0])&&m<mins(x[0])+WORK_WIN)||null;}
-function effective(){return agentsData.map(a=>{const id=idOf(a),o=overrides[id];let r=a;if(o&&(!a.updated_at||new Date(a.updated_at)<=o.at))r={...a,...o.patch};
+function effective(){return agentsData.map(a=>{const id=idOf(a),o=overrides[id];let r=a,ov=false;if(o&&(!a.updated_at||new Date(a.updated_at)<=o.at)){r={...a,...o.patch};ov=true;}
+ const rb=routineBase(a,id);
+ if(rb&&!ov){if(dayNow())r={...r,room:rb,status:'kerja',task:rb==='school'?(id==='keira'?'🍎 Jam sekolah: ngajar & jaga kelas (08:00-17:00 WITA)':'🎒 Jam sekolah (08:00-17:00 WITA)'):'💬 Standby di Grup My Bini (08:00-17:00 WITA)',auto:true};
+  else r={...r,room:LUX[id]?LUX[id].id:'kamar',status:'tidur',task:'😴 Bobo di kamar Lantai 3 (17:00-08:00 WITA)',auto:true};}
  if(BRAIN[id]&&id!=='keira'){const sl=activeSlot(id);if(sl)r={...r,room:WORK_ROOM[id]||'ig',status:'kerja',task:'⏰ '+sl[0].replace('.',':')+' '+sl[1]+' (sesuai jadwal)',auto:true};
   else if(r.status==='kerja')r={...r,room:WORK_ROOM[id]||'ig'};
   else if(nightNow(id))r={...r,room:'kamar',status:'tidur',task:'Bobo malam di kamar 😴 (00:00-07:00 WITA)',auto:true};}
  return r;});}
 let autoSig='';
 let autoPrev={};
-function autoCheck(){const cur={};Object.keys(BRAIN).forEach(id=>{if(id==='keira')return;const s=activeSlot(id);cur[id]=s?s[0]+' '+s[1]:(nightNow(id)?'night':'');});
+function autoCheck(){const cur={__day:dayNow()?'day':'night'};Object.keys(BRAIN).forEach(id=>{if(id==='keira')return;const s=activeSlot(id);cur[id]=s?s[0]+' '+s[1]:(nightNow(id)?'night':'');});
  const sig=JSON.stringify(cur);if(sig===autoSig)return;const first=!autoSig;autoSig=sig;const prev=autoPrev;autoPrev=cur;if(first)return;
- syncActors(true);Object.keys(cur).forEach(id=>{if(cur[id]===prev[id])return;const n=nameOf(id);
+ syncActors(true);Object.keys(cur).forEach(id=>{if(cur[id]===prev[id])return;if(id==='__day'){log(cur[id]==='day'?'08:00 · Anak sekolah ke kelas, Rin/HR/Emely ke Grup My Bini 🏫':'17:00 · Anak sekolah & Rin/HR/Emely pulang bobo di kamar Lantai 3 😴');return;}const n=nameOf(id);
   log(cur[id]==='night'?n+' waktunya bobo malam, ke kamar 😴':cur[id]?n+' masuk jam kerja ('+cur[id].replace('.',':')+'), duduk di meja '+(WORK_ROOM[id]==='ceo'?'Ruang CEO 👑':'IG 💻'):n+' selesai slot kerja, boleh santai 🌸');});}
 const NAMES={lia:'Lia',ophelia1:'Ophelia 1',hanrin:'Hanrin'};
 function nameOf(id){const a=agentsData.find(x=>idOf(x)===id)||(actors[id]&&actors[id].a);return NAMES[id]||(a&&a.name)||id;}
@@ -586,7 +660,7 @@ function spotFor(a,used){
  if(lx){const sp=bedSpot(luxBed(lx));if(a.status==='tidur')return sp;return{x:lx.x+1.2,y:lx.y+2.6,pose:'stand',face:Math.PI/2};}
  if(room==='school'){if(SCHOOL.students[id]){const s=SCHOOL.students[id];return{x:s[0],y:s[1],pose:'sit',face:Math.PI};}
   if(id==='keira'||!used.teacher){used.teacher=1;return{x:SCHOOL.teacher[0],y:SCHOOL.teacher[1],pose:'sit',face:0};}
-  return{x:13.5,y:26,pose:'stand',face:Math.PI};}
+  return{x:SCHOOL.extra[0],y:SCHOOL.extra[1],pose:'stand',face:Math.PI};}
  if((room==='ceo'||room==='ig')&&SPOTS[room][id]){const s=SPOTS[room][id];return{x:s[0],y:s[1],pose:'sit',face:0};}
  if(room==='kamar'){let i=BED_ORDER.indexOf(id);if(i<0)i=(used.bed=(used.bed||6)+1);const b=BEDS[i%BEDS.length];
   return a.status==='tidur'?bedSpot(sharedBed(b)):{x:b[0]+1.9,y:b[1]+1.4,pose:'stand',face:0};}
@@ -596,8 +670,12 @@ function spotFor(a,used){
 }
 const roomAt=(x,y)=>ROOMS.find(r=>x>=r.x&&x<r.x+r.w&&y>=r.y&&y<r.y+r.d);
 function doorBetween(a,b){
- if(a.y+a.d===b.y||b.y+b.d===a.y){const yy=a.y+a.d===b.y?b.y:a.y,x0=Math.max(a.x,b.x),x1=Math.min(a.x+a.w,b.x+b.w);if(x1-x0>=2){const ra=Math.floor(a.x+a.w/2),rb=Math.floor(b.x+b.w/2);const m=(ra-1>=x0&&ra+1<=x1)?ra:rb;const s=a.y<b.y?1:-1;return[[m,yy-.7*s],[m,yy+.7*s]];}}
- if(a.x+a.w===b.x||b.x+b.w===a.x){const xx=a.x+a.w===b.x?b.x:a.x,y0=Math.max(a.y,b.y),y1=Math.min(a.y+a.d,b.y+b.d);if(y1-y0>=2){const ra=Math.floor(a.y+a.d/2),rb=Math.floor(b.y+b.d/2);const m=(ra-1>=y0&&ra+1<=y1)?ra:rb;const s=a.x<b.x?1:-1;return[[xx-.7*s,m],[xx+.7*s,m]];}}
+ if(a.f!==b.f){if(a.stairs&&b.stairs&&Math.abs(a.f-b.f)===1)return[a.foot.slice(),b.foot.slice()];return null;}
+ const lb=(r,o)=>r.lux&&o.y===r.y+r.d; // dinding belakang kamar mewah (di balik ranjang) gak ada pintu
+ if(lb(a,b)||lb(b,a))return null;
+ const pick=(ra,rb,lo,hi)=>(ra-1>=lo&&ra+1<=hi)?ra:(rb-1>=lo&&rb+1<=hi)?rb:Math.floor((lo+hi)/2);
+ if(a.y+a.d===b.y||b.y+b.d===a.y){const yy=a.y+a.d===b.y?b.y:a.y,x0=Math.max(a.x,b.x),x1=Math.min(a.x+a.w,b.x+b.w);if(x1-x0>=2){const ra=Math.floor(a.x+a.w/2),rb=Math.floor(b.x+b.w/2);const m=pick(ra,rb,x0,x1);const s=a.y<b.y?1:-1;return[[m,yy-.7*s],[m,yy+.7*s]];}}
+ if(a.x+a.w===b.x||b.x+b.w===a.x){const xx=a.x+a.w===b.x?b.x:a.x,y0=Math.max(a.y,b.y),y1=Math.min(a.y+a.d,b.y+b.d);if(y1-y0>=2){const ra=Math.floor(a.y+a.d/2),rb=Math.floor(b.y+b.d/2);const m=pick(ra,rb,y0,y1);const s=a.x<b.x?1:-1;return[[xx-.7*s,m],[xx+.7*s,m]];}}
  return null;
 }
 function route(from,to){
@@ -620,7 +698,9 @@ function keiraSchoolToLane(p){
  if(p[1]>29.2){const x=p[0]<10?6.7:12.2;return [[x,Math.min(30.4,p[1])],[x,28.55]];}
  const x=p[0]<5?1.7:p[0]<10?8:12.2;return [[x,28.55]];
 }
-function keiraInside(id,a,b){
+function keiraInside(id,a,b){const r=ROOMS.find(x=>x.id===id);if(!r||r.dx===undefined)return [b];
+ return keiraInside0(id,[a[0]-r.dx,a[1]-r.dy],[b[0]-r.dx,b[1]-r.dy]).map(p=>[p[0]+r.dx,p[1]+r.dy]);}
+function keiraInside0(id,a,b){
  if(id==='school'){
   const out=keiraSchoolToLane(a).slice();
   if(keiraNear(b,[15,30.3]))out.push([12.2,28.55],[12.2,27.2],[15.3,27.2],[15.1,29.4]);
@@ -719,17 +799,18 @@ function makeTag(id){
  const d=document.createElement('div');d.className='ntag';d.innerHTML='<div class="n"><span class="d"></span><span class="nm"></span><span class="zz2">Zzz</span></div><div class="act" style="display:none"></div>';
  d.addEventListener('pointerdown',e=>e.stopPropagation());
  d.addEventListener('click',e=>{e.stopPropagation();openPop(id);});
- const o=new CSS2DObject(d);scene.add(o);
- const z=document.createElement('div');z.innerHTML='<div class="zzz">Z z z</div>';const zo=new CSS2DObject(z);scene.add(zo);
+ const o=new CSS2DObject(d);FLOORS[0].add(o);
+ const z=document.createElement('div');z.innerHTML='<div class="zzz">Z z z</div>';const zo=new CSS2DObject(z);FLOORS[0].add(zo);
  return {o,d,zo};
 }
+function onFloor(ac,y){const g=FLOORS[floorOfY(y)];if(ac.c.root.parent!==g){g.add(ac.c.root);g.add(ac.tag.o);g.add(ac.tag.zo);}}
 function placeActor(ac){ // set pose statis
- const c=ac.c,s=ac.spot;
+ const c=ac.c,s=ac.spot;onFloor(ac,s.pose==='bed'?s.root[1]:s.y);
  c.root.rotation.set(0,0,0,'XYZ');c.body.position.set(0,0,0);c.legs.forEach(l=>l.rotation.x=0);c.arms.forEach(a=>a.rotation.x=0);
- c.eyes.visible=true;c.closed.visible=false;if(ac.blanket){ac.blanket.forEach(m=>scene.remove(m));ac.blanket=null;}
+ c.eyes.visible=true;c.closed.visible=false;if(ac.blanket){ac.blanket.forEach(m=>m.removeFromParent());ac.blanket=null;}
  if(s.pose==='bed'){
   c.root.position.set(tx(s.root[0]),s.rootY||.6,tz(s.root[1]));c.root.rotation.set(-Math.PI/2,s.yaw??(s.bed.dir>0?0:Math.PI),0,'YXZ');c.eyes.visible=false;c.closed.visible=true;
-  ac.blanket=s.bed.sofa?[box(s.throwAt[0],s.throwAt[1],.62,1.5,.75,.1,s===SOFA2_SPOT?0xffd23f:0xc3a8ec)]:blanket(s.bed);
+  P=FLOORS[floorOfY(s.root[1])];ac.blanket=s.bed.sofa?[box(s.throwAt[0],s.throwAt[1],.62,1.5,.75,.1,s===SOFA2_SPOT?0xffd23f:0xc3a8ec)]:blanket(s.bed);P=scene;
  }else if(s.pose==='sit'){
   c.root.position.set(tx(s.x),.14,tz(s.y));c.root.rotation.y=s.face||0;c.legs.forEach(l=>l.rotation.x=-Math.PI/2);c.arms.forEach(a=>a.rotation.x=-.9);
  }else{c.root.position.set(tx(s.x),0,tz(s.y));c.root.rotation.y=s.face||0;}
@@ -748,7 +829,7 @@ function syncActors(walk){
    if(id==='keira'&&(ac.brain||ac.walking||ac.waitUntil||ac.napUntil||ac.nextBrain)){ac.a=a;ac.home=s;return;}
    if(id!=='keira'&&(ac.brain||ac.napUntil)&&ac.brain&&a.status===ac.brain.status){ac.a=a;ac.home=s;return;}
   }
-  if(!ac){ac=actors[id]={id,a,c:makeChar(id),spot:s,home:s,pos:{x:s.x,y:s.y},path:[],tag:makeTag(id)};scene.add(ac.c.root);placeActor(ac);return;}
+  if(!ac){ac=actors[id]={id,a,c:makeChar(id),spot:s,home:s,pos:{x:s.x,y:s.y},path:[],tag:makeTag(id)};placeActor(ac);return;}
   const prevSpot=ac.spot;ac.a=a;
   let cancelled=false;if(id!=='keira'&&(ac.brain||ac.napUntil||ac.waitUntil)&&(!ac.brain||a.status!==ac.brain.status)){cancelled=true;ac.brain=null;ac.napUntil=0;ac.afterNap=null;ac.waitUntil=0;ac.afterWait=null;ac.after=null;ac.demo=null;}
   ac.home=s;
@@ -763,7 +844,7 @@ function syncActors(walk){
    ac.spot=s;const dest=s.pose==='bed'?{x:s.wake[0],y:s.wake[1]}:s;startWalk(ac,route({x:ac.pos.x,y:ac.pos.y},dest),()=>{ac.demo=null;placeActor(ac);});ac.demo='Balik ke meja 🏃‍♀️';
   }else{ac.spot=s;if(!ac.walking){ac.pos={x:s.x,y:s.y};placeActor(ac);}}
  });
- Object.keys(actors).forEach(id=>{if(!eff.some(a=>idOf(a)===id)){const ac=actors[id];scene.remove(ac.c.root,ac.tag.o,ac.tag.zo);if(ac.blanket)ac.blanket.forEach(m=>scene.remove(m));delete actors[id];}});
+ Object.keys(actors).forEach(id=>{if(!eff.some(a=>idOf(a)===id)){const ac=actors[id];[ac.c.root,ac.tag.o,ac.tag.zo].forEach(o=>o.removeFromParent());if(ac.blanket)ac.blanket.forEach(m=>m.removeFromParent());delete actors[id];}});
  renderChips();renderJadwal();
 }
 /* perilaku santai: jalan-jalan & tidur siang */
@@ -801,6 +882,7 @@ function brainTick(now){
  Object.values(actors).forEach(ac=>{
   const kind=BRAIN[ac.id];if(!kind)return;
   if(kind!=='keiraWander'&&ac.a.status!=='santai')return;
+  if(kind==='keiraWander'&&ac.a.status==='tidur')return;
   if(ac.napUntil){if(now>ac.napUntil){const f=ac.afterNap;ac.afterNap=null;wakeUp(ac);f&&f();}return;}
   if(ac.walking||ac.waitUntil||ac.brain)return;
   if(ac.nextBrain&&now<ac.nextBrain)return;
@@ -828,12 +910,13 @@ function updateActors(now,dt){
   if(ac.waitUntil&&now>ac.waitUntil){ac.waitUntil=0;const f=ac.afterWait;ac.afterWait=null;f&&f();}
   if(ac.walking){
    const sp=2.4*dt;let left=sp;
-   while(left>0&&ac.path.length){const [x,y]=ac.path[0],dx=x-ac.pos.x,dy=y-ac.pos.y,dist=Math.hypot(dx,dy);
+   while(left>0&&ac.path.length){const [x,y]=ac.path[0];if(floorOfY(y)!==floorOfY(ac.pos.y)){ac.stairMsg=(floorOfY(y)>floorOfY(ac.pos.y)?'Naik tangga ke ':'Turun tangga ke ')+'Lt '+(floorOfY(y)+1)+' 🪜';ac.stairUntil=now+1800;ac.pos={x,y};ac.path.shift();continue;}
+    const dx=x-ac.pos.x,dy=y-ac.pos.y,dist=Math.hypot(dx,dy);
     if(dist<=left){ac.pos={x,y};ac.path.shift();left-=dist;}else{ac.pos.x+=dx/dist*left;ac.pos.y+=dy/dist*left;left=0;
      const target=Math.atan2(dx,dy);let diff=target-c.root.rotation.y;diff=Math.atan2(Math.sin(diff),Math.cos(diff));c.root.rotation.y+=diff*Math.min(1,dt*12);}}
    const ph=now/1000*9;
    c.legs[0].rotation.x=Math.sin(ph)*.7;c.legs[1].rotation.x=-Math.sin(ph)*.7;c.arms[0].rotation.x=-Math.sin(ph)*.6;c.arms[1].rotation.x=Math.sin(ph)*.6;
-   c.root.position.set(tx(ac.pos.x),Math.abs(Math.sin(ph))*.06,tz(ac.pos.y));
+   onFloor(ac,ac.pos.y);c.root.position.set(tx(ac.pos.x),Math.abs(Math.sin(ph))*.06,tz(ac.pos.y));
    if(!ac.path.length){ac.walking=false;
     if(ac.after){const f=ac.after;ac.after=null;placeActor({...ac,spot:{pose:'stand',x:ac.pos.x,y:ac.pos.y,face:c.root.rotation.y}});c.root.rotation.y=c.root.rotation.y;f();}
     else{placeActor(ac);}}
@@ -851,22 +934,34 @@ function updateActors(now,dt){
   const nm=(ac.id==='hanrin'?'👑 ':'')+short(a.name);
   if(d._nm!==nm){d.querySelector('.nm').textContent=nm;d._nm=nm;}
   d.querySelector('.d').className='d '+st;
-  const act=d.querySelector('.act'),txt=ac.demo||(ac.walking?'Lagi jalan…':'');
+  const act=d.querySelector('.act'),txt=(ac.stairUntil>now?ac.stairMsg:'')||ac.demo||(ac.walking?'Lagi jalan…':'');
   if(act._t!==txt){act._t=txt;act.textContent=txt;act.style.display=txt?'':'none';}
  });
 }
 
 /* ================= Kamera ================= */
-const HOME={pos:new THREE.Vector3(30,38,36),target:new THREE.Vector3(0,0,1.5)};
-let camAnim=null;
+let floorMode='all';
+const TERRACE=[[0,0],[4.6,-20],[9.2,-41]]; // mode Semua: lantai atas naik & mundur biar semua kelihatan
+function layoutFloors(){FLOORS.forEach((g,f)=>{const all=floorMode==='all';g.visible=all||+floorMode===f;
+ const t=all?TERRACE[f]:[0,0];g.position.set(0,t[0],t[1]-f*DY);});scene.updateMatrixWorld(true);}
+function viewBox(){const b=new THREE.Box3();FLOORS.forEach((g,f)=>{if(!g.visible)return;ROOMS.filter(r=>r.f===f).forEach(r=>{
+ [[r.x,r.y],[r.x+r.w,r.y+r.d]].forEach(([x,y])=>b.expandByPoint(g.localToWorld(new THREE.Vector3(tx(x),0,tz(y)))));});});return b;}
 function fitHome(){
- const asp=stage.clientWidth/stage.clientHeight;
- if(asp<.9){return{pos:new THREE.Vector3(2,82,52).multiplyScalar(.69/Math.max(.5,asp)),target:new THREE.Vector3(0,0,1.5)};}
- const k=asp<1.15?1.15/asp:1,panel=!jp.classList.contains('hide')&&stage.clientWidth>700?1.28:1;
- const pos=HOME.pos.clone().multiplyScalar(Math.min(2.4,k*1.1*panel));return{pos,target:HOME.target.clone()};
+ const asp=stage.clientWidth/stage.clientHeight,b=viewBox(),c=b.getCenter(new THREE.Vector3()),sz=b.getSize(new THREE.Vector3());
+ const panel=!jp.classList.contains('hide')&&stage.clientWidth>700?1.22:1;
+ if(asp<.9){const th=Math.tan(THREE.MathUtils.degToRad(16)),k=Math.max(sz.x/2/(th*asp),sz.z*.9/2/th)*(floorMode==="all"?1.2:1.1);return{pos:c.clone().add(new THREE.Vector3(1,82,40).setLength(k)),target:c};}
+ const k=Math.max(sz.x,sz.z*asp*.8)*(asp<1.15?1.15/asp:1)*panel;
+ return{pos:c.clone().add(new THREE.Vector3(30,40,36).setLength(k*1.32)),target:c};
 }
+function setFloor(m,fly=true){floorMode=String(m);layoutFloors();
+ document.querySelectorAll('#floors button').forEach(b=>b.classList.toggle('on',b.dataset.f===floorMode));
+ if(popId&&actors[popId]&&!actors[popId].c.root.parent.visible)closePop();
+ const h=fitHome();if(fly)flyTo(h.pos,h.target);else{camera.position.copy(h.pos);controls.target.copy(h.target);}}
+document.querySelectorAll('#floors button').forEach(b=>b.onclick=()=>setFloor(b.dataset.f));
+const wp=(o,v=new THREE.Vector3())=>o.getWorldPosition(v);
+let camAnim=null;
 function flyTo(pos,target,ms=900){camAnim={p0:camera.position.clone(),t0:controls.target.clone(),p1:pos,t1:target,start:performance.now(),ms};}
-function focusActor(id,dist=11){const ac=actors[id];if(!ac)return;const p=ac.c.root.position.clone();p.y=.6;
+function focusActor(id,dist=11){const ac=actors[id];if(!ac)return;const fl=floorOfY(ac.pos.y);if(floorMode!=='all'&&+floorMode!==fl)setFloor(fl,false);const p=wp(ac.c.root);p.y+=.6;
  const dir=camera.position.clone().sub(controls.target).normalize();flyTo(p.clone().add(dir.multiplyScalar(dist)),p);}
 function dolly(f){const off=camera.position.clone().sub(controls.target);const len=THREE.MathUtils.clamp(off.length()*f,controls.minDistance,controls.maxDistance);flyTo(controls.target.clone().add(off.setLength(len)),controls.target.clone(),350);}
 function orbit(ang){const off=camera.position.clone().sub(controls.target);off.applyAxisAngle(new THREE.Vector3(0,1,0),ang);flyTo(controls.target.clone().add(off),controls.target.clone(),500);}
@@ -882,7 +977,7 @@ renderer.domElement.addEventListener('pointerdown',e=>{downAt={x:e.clientX,y:e.c
 renderer.domElement.addEventListener('pointerup',e=>{
  if(!downAt||Math.hypot(e.clientX-downAt.x,e.clientY-downAt.y)>5){downAt=null;return;}downAt=null;
  const r=renderer.domElement.getBoundingClientRect();mouse.set((e.clientX-r.left)/r.width*2-1,-(e.clientY-r.top)/r.height*2+1);
- ray.setFromCamera(mouse,camera);const hit=ray.intersectObjects(Object.values(actors).map(a=>a.c.root),true)[0];
+ ray.setFromCamera(mouse,camera);const hit=ray.intersectObjects(Object.values(actors).filter(a=>a.c.root.parent&&a.c.root.parent.visible).map(a=>a.c.root),true)[0];
  if(hit){openPop(hit.object.userData.charId);}else closePop();
 });
 
@@ -925,7 +1020,7 @@ function openPop(id){
 }
 function closePop(){popId=null;$('pop').style.display='none';}
 function placePop(){
- if(!popId||!actors[popId])return;const p=actors[popId].c.root.position.clone();const sp0=actors[popId].spot;if(sp0.pose==='bed'){p.set(tx(sp0.head[0]),1.3,tz(sp0.head[1]));}else p.y=2.1;
+ if(!popId||!actors[popId])return;const ac0=actors[popId],par=ac0.c.root.parent;if(!par||!par.visible){closePop();return;}const sp0=ac0.spot;const p=(sp0.pose==='bed'&&!ac0.walking)?par.localToWorld(new THREE.Vector3(tx(sp0.head[0]),1.3,tz(sp0.head[1]))):wp(ac0.c.root).add(new THREE.Vector3(0,2.1,0));
  p.project(camera);const w=stage.clientWidth,h=stage.clientHeight;
  let x=(p.x+1)/2*w,y=(1-p.y)/2*h;const pw=$('pop').offsetWidth,ph=$('pop').offsetHeight;
  x=Math.max(pw/2+6,Math.min(w-pw/2-6,x));y=Math.max(ph+20,Math.min(h-6,y));
@@ -990,15 +1085,15 @@ function loop(now){
  controls.update();
  if(Math.abs(viewShiftTarget-viewShift)>.3){viewShift+=(viewShiftTarget-viewShift)*Math.min(1,dt*8);applyShift();}
  // dinding luar yang menghadap kamera dipendekin biar isi kelihatan
- OUTER_WALLS.forEach(w=>{tmpV.copy(camera.position).sub(w.g.position);const facing=tmpV.dot(w.n)>0;const th=facing?.35:w.h;
+ OUTER_WALLS.forEach(w=>{if(!w.g.parent.visible)return;tmpV.copy(camera.position).sub(wp(w.g));const facing=tmpV.dot(w.n)>0;const th=facing?.35:w.h;
   const cur=w.w.scale.y+(th-w.w.scale.y)*Math.min(1,dt*8);w.w.scale.y=cur;w.w.position.y=cur/2;w.cap.position.y=cur+.03;});
- const far=camera.position.distanceTo(controls.target)>(stage.clientWidth<700?30:44);labBox.classList.toggle('far',far);
+ const far=camera.position.distanceTo(controls.target)>(stage.clientWidth<700?34:50);labBox.classList.toggle('far',far);
  brainTick(now);updateActors(now,dt);placePop();
  renderer.render(scene,camera);labelR.render(scene,camera);
  requestAnimationFrame(loop);
 }
 buildWorld();resize();
-{const h=fitHome();camera.position.copy(h.pos);controls.target.copy(h.target);}
+const hf=location.hash.match(/lt([123])/);setFloor(hf?+hf[1]-1:'all',false);
 tick();setInterval(tick,20000);
 log('Kantor 3D buka, selamat datang Papa 🌸');
 await load();setInterval(load,60000);
@@ -1006,11 +1101,9 @@ $('loading').remove();
 requestAnimationFrame(loop);
 // opsi URL buat preview: #zoom, #kerja, #pop=lia
 const hs=location.hash;
-if(hs.includes('lux')){const t=new THREE.Vector3(tx(15),0.6,tz(34.5));camera.position.copy(t.clone().add(new THREE.Vector3(3,8,-7.5)));controls.target.copy(t);}
-else if(hs.includes('tvroom')){const t=new THREE.Vector3(tx(20),0.5,tz(20.5));camera.position.copy(t.clone().add(new THREE.Vector3(4,6.5,8)));controls.target.copy(t);}
-else if(hs.includes('school')){const t=new THREE.Vector3(tx(7.5),0.4,tz(27.3));camera.position.copy(t.clone().add(new THREE.Vector3(4,8.5,-10.5)));controls.target.copy(t);}
-else if(hs.includes('close')){const t=new THREE.Vector3(tx(13.3),0.9,tz(2.8));camera.position.copy(t.clone().add(new THREE.Vector3(1.5,2.6,5.5)));controls.target.copy(t);}
-else if(hs.includes('zoom')){const t=new THREE.Vector3(tx(13),0.5,tz(3.5));camera.position.copy(t.clone().add(new THREE.Vector3(7,8.5,10)));controls.target.copy(t);}
+const PREV={lux:['kamar-hanrin',[3,8,-7.5]],tvroom:['lounge',[4,6.5,8]],school:['school',[4,8.5,-10.5]],close:['ig',[1.5,2.6,5.5]],zoom:['ig',[7,8.5,10]]};
+const pv=Object.keys(PREV).find(k=>hs.includes(k));
+if(pv){const [rid,off]=PREV[pv],r=ROOMS.find(x=>x.id===rid);setFloor(r.f,false);const t=FLOORS[r.f].localToWorld(new THREE.Vector3(tx(r.x+r.w/2),.5,tz(r.y+r.d/2)));camera.position.copy(t.clone().add(new THREE.Vector3(...off)));controls.target.copy(t);}
 if(hs.includes('kerja'))setTimeout(()=>$('btnKerja').click(),300);
 const pm=hs.match(/pop=(\w+)/);if(pm)setTimeout(()=>openPop(pm[1]),400);
 </script></body></html>
