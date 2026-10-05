@@ -138,6 +138,7 @@ const LOOKS={
  keira:{hair:'#141217',hl:'#3a3340',style:'bangs',glasses:'roundThick',shirt:'#1f1d24',skin:'#f6dccb',police:true},
  ornf:{hair:'#1b1720',hl:'#3a3340',style:'pony',shirt:'#ffffff',skin:'#f6d8c4',band:'#ff7eb6'},
  love:{hair:'#3b2418',hl:'#5c3a26',style:'bangs',shirt:'#d42a3a',skin:'#fbe4d6',butterfly:'#ff8fc0'}, // rambut panjang coklat tua + poni, jepit kupu-kupu pink, baju merah
+ han:{hair:'#3a2418',hl:'#5c4030',style:'short',shirt:'#7eb6e0',skin:'#f3d2bb',pants:'#2c3e6b'}, // Han: rambut pendek, kemeja biru muda, celana navy
 };
 const DEFAULT_LOOK={hair:'#3a2a3a',hl:'#5a4a5a',style:'bob',shirt:'#ff9cc7',skin:'#f6d8c4'};
 
@@ -155,6 +156,7 @@ function hairBack(L){
   case 'braids':{let b='';for(let i=0;i<5;i++){b+=`<ellipse cx="-20" cy="${14+i*7}" rx="5" ry="4.5" fill="${c}" stroke="${L.hl}" stroke-width=".8"/><ellipse cx="20" cy="${14+i*7}" rx="5" ry="4.5" fill="${c}" stroke="${L.hl}" stroke-width=".8"/>`}
    return `<path d="M-19 -2 Q-22 -24 0 -24 Q22 -24 19 -2 L20 12 L-20 12Z" fill="${c}"/>${b}<circle cx="-20" cy="50" r="2.5" fill="#c3a8ec"/><circle cx="20" cy="50" r="2.5" fill="#c3a8ec"/>`;}
   case 'pony':return `<path d="M-19 -2 Q-22 -24 0 -24 Q22 -24 19 -2 L18 10 Q0 14 -18 10Z" fill="${c}"/><path d="M16 -12 Q34 -6 28 22 Q26 36 30 44 Q18 36 20 14 Z" fill="${c}"/>`;
+  case 'short':return `<path d="M-18 -2 Q-20 -24 0 -25 Q20 -24 18 -2 L17 6 Q0 10 -17 6Z" fill="${c}"/>`;
   case 'bob':default:return `<path d="M-20 -2 Q-23 -25 0 -25 Q23 -25 20 -2 L21 16 Q0 21 -21 16Z" fill="${c}"/>`;
  }
 }
@@ -172,6 +174,7 @@ function hairFront(L){
   case 'bun':return `<path d="M-18 2 Q-19 -20 0 -20 Q19 -20 18 2 Q10 -12 -4 -10 Q-12 -8 -18 2Z" fill="${c}"/><path d="M-17 0 q-3 8 0 14" stroke="${c}" stroke-width="2.5" fill="none" stroke-linecap="round"/>`;
   case 'braids':return `<path d="M-18 4 Q-19 -20 0 -20 Q19 -20 18 4 Q12 -10 0 -14 Q-12 -10 -18 4Z" fill="${c}"/><path d="M0 -20 L0 -13" stroke="${h}" stroke-width="1.3"/>`;
   case 'pony':return `<path d="M-18 4 Q-19 -20 0 -20 Q19 -20 18 4 Q8 -10 -6 -10 Q-14 -6 -18 4Z" fill="${c}"/>`;
+  case 'short':return `<path d="M-16 2 Q-17 -18 0 -19 Q17 -18 16 2 Q10 -8 0 -10 Q-10 -8 -16 2Z" fill="${c}"/>`;
   case 'bob':default:return `<path d="M-19 8 Q-20 -20 0 -20 Q20 -20 19 8 Q16 -6 10 -8 L-10 -8 Q-16 -6 -19 8Z" fill="${c}"/>`;
  }
 }
@@ -260,6 +263,7 @@ const LOVE_SCHEDULE=[{time:'08:00',label:'Nongkrong di Grup My Bini 💬',room:'
 const FALLBACK={updated_at:null,agents:[
  {id:'hanrin',name:'Hanrin',role:'Manager',room:'desk',status:'kerja',task:'Bagi tugas ke bot lain'},
  {id:'lia',name:'Ophelia (Lia)',role:'Konten Instagram, posting & jaga IG ophelia.lia.real',room:'desk',status:'kerja',task:'Jaga IG ophelia.lia.real'},
+ {id:'han',name:'Han',role:'Owner · Kantor AI',room:'kamar-keira-han',status:'santai',task:'Di kamar taman, nunggu Keira 🔒❤️'},
  ...[['rin','Rin','Asisten pribadi'],['ornf','Co Agent 2 Lia','Chat WhatsApp'],['emely','Emely','Teman ngobrol'],['hr','HR','Hanrin, pacar / pendamping'],['keira','Keira','Konsultan pribadi'],['love','Love ❤️','Love ❤️ · Urusan pasangan (date, kado, pengingat)']]
  .map(([id,name,role])=>({id,name,role,room:'kamar',status:'tidur',task:'belum ada tugas',...(id==='love'?{schedule:LOVE_SCHEDULE}:{})}))]};
 let agents=[],overrides={},lastSig='',fileUpdated=null;
@@ -330,7 +334,7 @@ function hearts(el){
 function log(t){const d=document.createElement('div');d.textContent=fmtTime(new Date()).slice(0,5)+' · '+t;$('log').prepend(d);}
 
 $('btnKerja').onclick=()=>{
- const lazy=effective().filter(a=>a.status!=='kerja');
+ const lazy=effective().filter(a=>a.status!=='kerja'&&idOf(a)!=='han');
  if(!lazy.length){log('Semua udah kerja kok, Papa 😄');return;}
  const now=new Date();
  lazy.forEach(a=>overrides[idOf(a)]={at:now,patch:{room:'desk',status:'kerja',task:a.room==='desk'?a.task:'Bangun! Nunggu tugas dari Hanrin'}});

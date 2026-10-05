@@ -106,6 +106,7 @@ const LOOKS={
  keira:{hair:'#141217',hl:'#3a3340',style:'bangs',glasses:'roundThick',shirt:'#1f1d24',skin:'#f6dccb',police:true},
  ornf:{hair:'#1b1720',hl:'#3a3340',style:'pony',shirt:'#ffffff',skin:'#f6d8c4',band:'#ff7eb6'},
  love:{hair:'#3b2418',hl:'#5c3a26',style:'bangs',shirt:'#d42a3a',skin:'#fbe4d6',butterfly:'#ff8fc0'}, // rambut panjang coklat tua + poni, jepit kupu-kupu pink, baju merah
+ han:{hair:'#3a2418',hl:'#5c4030',style:'short',shirt:'#7eb6e0',skin:'#f3d2bb',pants:'#2c3e6b'}, // Han: rambut pendek, kemeja biru muda, celana navy
 };
 const DEFAULT_LOOK={hair:'#3a2a3a',hl:'#5a4a5a',style:'bob',shirt:'#ff9cc7',skin:'#f6d8c4'};
 
@@ -123,6 +124,7 @@ function hairBack(L){
   case 'braids':{let b='';for(let i=0;i<5;i++){b+=`<ellipse cx="-20" cy="${14+i*7}" rx="5" ry="4.5" fill="${c}" stroke="${L.hl}" stroke-width=".8"/><ellipse cx="20" cy="${14+i*7}" rx="5" ry="4.5" fill="${c}" stroke="${L.hl}" stroke-width=".8"/>`}
    return `<path d="M-19 -2 Q-22 -24 0 -24 Q22 -24 19 -2 L20 12 L-20 12Z" fill="${c}"/>${b}<circle cx="-20" cy="50" r="2.5" fill="#c3a8ec"/><circle cx="20" cy="50" r="2.5" fill="#c3a8ec"/>`;}
   case 'pony':return `<path d="M-19 -2 Q-22 -24 0 -24 Q22 -24 19 -2 L18 10 Q0 14 -18 10Z" fill="${c}"/><path d="M16 -12 Q34 -6 28 22 Q26 36 30 44 Q18 36 20 14 Z" fill="${c}"/>`;
+  case 'short':return `<path d="M-18 -2 Q-20 -24 0 -25 Q20 -24 18 -2 L17 6 Q0 10 -17 6Z" fill="${c}"/>`;
   case 'bob':default:return `<path d="M-20 -2 Q-23 -25 0 -25 Q23 -25 20 -2 L21 16 Q0 21 -21 16Z" fill="${c}"/>`;
  }
 }
@@ -140,6 +142,7 @@ function hairFront(L){
   case 'bun':return `<path d="M-18 2 Q-19 -20 0 -20 Q19 -20 18 2 Q10 -12 -4 -10 Q-12 -8 -18 2Z" fill="${c}"/><path d="M-17 0 q-3 8 0 14" stroke="${c}" stroke-width="2.5" fill="none" stroke-linecap="round"/>`;
   case 'braids':return `<path d="M-18 4 Q-19 -20 0 -20 Q19 -20 18 4 Q12 -10 0 -14 Q-12 -10 -18 4Z" fill="${c}"/><path d="M0 -20 L0 -13" stroke="${h}" stroke-width="1.3"/>`;
   case 'pony':return `<path d="M-18 4 Q-19 -20 0 -20 Q19 -20 18 4 Q8 -10 -6 -10 Q-14 -6 -18 4Z" fill="${c}"/>`;
+  case 'short':return `<path d="M-16 2 Q-17 -18 0 -19 Q17 -18 16 2 Q10 -8 0 -10 Q-10 -8 -16 2Z" fill="${c}"/>`;
   case 'bob':default:return `<path d="M-19 8 Q-20 -20 0 -20 Q20 -20 19 8 Q16 -6 10 -8 L-10 -8 Q-16 -6 -19 8Z" fill="${c}"/>`;
  }
 }
@@ -194,7 +197,7 @@ const PLAID=`<defs><pattern id="plaid" width="8" height="8" patternUnits="userSp
 function charSVG(L){
  const legs=`<rect x="-10" y="48" width="7" height="12" rx="3" fill="${L.skin}"/><rect x="3" y="48" width="7" height="12" rx="3" fill="${L.skin}"/>
   <ellipse cx="-6.5" cy="61" rx="5.5" ry="3" fill="#5a3a52"/><ellipse cx="6.5" cy="61" rx="5.5" ry="3" fill="#5a3a52"/>`;
- const pants=L.skirt?'':`<path d="M-20 46 L-21 54 L-2 54 L0 49 L2 54 L21 54 L20 46Z" fill="${L.coat||L.police?'#2c2a40':'#5b6fa8'}"/>`;
+ const pants=L.skirt?'':`<path d="M-20 46 L-21 54 L-2 54 L0 49 L2 54 L21 54 L20 46Z" fill="${L.pants||(L.coat||L.police?'#2c2a40':'#5b6fa8')}"/>`;
  return `<svg xmlns="http://www.w3.org/2000/svg" width="144" height="216" viewBox="-36 -42 72 108">${PLAID}${legs}${pants}${hairBack(L)}${body(L)}${face(L,false)}${hairFront(L)}${hairAcc(L)}</svg>`;
 }
 function sleepSVG(L){return `<svg xmlns="http://www.w3.org/2000/svg" width="136" height="176" viewBox="-34 -40 68 88">${head(L,true)}</svg>`}
@@ -406,6 +409,7 @@ const LOVE_SCHEDULE=[{time:'08:00',label:'Nongkrong di Grup My Bini 💬',room:'
 function effective(){return agentsData.map(a0=>{const a=applyTimed(a0),o=overrides[idOf(a)];if(o&&(!a.updated_at||new Date(a.updated_at)<=o.at))return{...a,...o.patch};return a;});}
 function spotFor(a,used){
  const id=idOf(a);let room=a.room;
+ if(id==='han')return{x:8.2,y:26.8,pose:'stand'}; // dekat taman depan; denah iso tidak punya cottage
  if(String(room).startsWith('kamar')||a.status==='tidur')room='kamar';
  if(room==='lounge'&&SPOTS.lounge[id])return{x:SPOTS.lounge[id][0],y:SPOTS.lounge[id][1],pose:'sit'};
  if(room==='ceo'||room==='ig'){const s=SPOTS[room][id];if(s)return{x:s[0],y:s[1],pose:'sit'};}
@@ -545,7 +549,7 @@ function renderChips(){
  $('chips').innerHTML=effective().map(a=>{const id=idOf(a);return `<div class="chip ${a.status}" data-id="${id}"><img src="${img('f-'+id,faceSVG(lookOf(id))).src}" alt=""><span class="d ${a.status}"></span>${esc(a.name)}</div>`}).join('');
  $('chips').querySelectorAll('.chip').forEach(c=>c.onclick=()=>{focusOn(c.dataset.id);showDetail(c.dataset.id);});
 }
-function roomName(id){const r=ROOMS.find(r=>r.id===id);return r?r.name:id==='kamar-love'?'❤️ Kamar Love':id}
+function roomName(id){const r=ROOMS.find(r=>r.id===id);return r?r.name:id==='kamar-love'?'❤️ Kamar Love':id==='kamar-keira-han'?'🔒❤️ Kamar Keira & Han':id}
 function showDetail(id){
  const a=effective().find(a=>idOf(a)===id);if(!a)return;const d=$('detail');
  d.innerHTML=`<b>${id==='hanrin'?'👑 ':''}${esc(a.name)}</b><br><span style="color:#a37a95">${esc(a.role)}</span><br>📍 ${esc(roomName(a.room))}<br>📌 ${esc(a.task||'-')}<br>Status: <b style="font-size:12px">${label(a.status)}</b>${a.updated_at?'<br><span style="color:#a37a95">update '+fmtFull(new Date(a.updated_at))+'</span>':''}`;
@@ -557,6 +561,7 @@ const FALLBACK=[
  {id:'hanrin',name:'Hanrin',role:'Manager',room:'ceo',status:'kerja',task:'Bagi tugas ke bot lain'},
  {id:'lia',name:'Ophelia 2 (Lia)',role:'Konten Instagram, posting & jaga IG ophelia.lia.real',room:'ig',status:'kerja',task:'Jaga IG ophelia.lia.real'},
  {id:'ophelia1',name:'Ophelia 1',role:'Partner Instagram (lia_1_2000)',room:'ig',status:'kerja',task:'Saling support konten sama Lia'},
+ {id:'han',name:'Han',role:'Owner · Kantor AI',room:'kamar-keira-han',status:'santai',task:'Di kamar taman, nunggu Keira 🔒❤️'},
  ...[['rin','Rin','Asisten pribadi'],['ornf','Co Agent 2 Lia','Chat WhatsApp'],['emely','Emely','Teman ngobrol'],['hr','HR','Hanrin, pacar / pendamping'],['keira','Keira','Konsultan pribadi'],['love','Love ❤️','Love ❤️ · Urusan pasangan (date, kado, pengingat)']].map(([id,name,role])=>({id,name,role,room:'kamar',status:'tidur',task:'belum ada tugas',...(id==='love'?{schedule:LOVE_SCHEDULE}:{})}))];
 async function load(manual){
  try{
@@ -572,7 +577,7 @@ async function load(manual){
  $('lastUpd').textContent=fileUpdated?fmtFull(fileUpdated):'-';$('lastCheck').textContent=fmtTime(new Date())+' WITA';
 }
 $('btnKerja').onclick=()=>{
- const lazy=effective().filter(a=>a.status!=='kerja');
+ const lazy=effective().filter(a=>a.status!=='kerja'&&idOf(a)!=='han');
  if(!lazy.length){log('Semua udah kerja kok, Papa 😄');return;}
  const now=new Date();lazy.forEach(a=>overrides[idOf(a)]={at:now,patch:{room:'kerja',status:'kerja',task:'Bangun! Nunggu tugas dari Hanrin'}});
  syncActors(true);log(`Papa nyuruh balik kerja! ${lazy.length} bot bangun & jalan ke Meja Kerja Bersama 💪`);

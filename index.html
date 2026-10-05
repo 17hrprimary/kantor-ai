@@ -175,6 +175,7 @@ const LOOKS={
  hannah:{hair:0x7a1830,style:'wavy',shirt:0x2f6fd6,skin:0xf6d8c4,pants:0xf5f0ff,clip:0xffffff},
  geby:{hair:0x141217,style:'straight',glasses:'roundBlack',shirt:0xff8fc0,skin:0xf8dccb,pants:0x5b6fa8,streak:true},
  love:{hair:0x3b2418,style:'bangs',shirt:0xd42a3a,skin:0xfbe4d6,pants:0x2c2a40,butterfly:0xff8fc0}, // rambut panjang coklat tua + poni, jepit kupu-kupu pink, baju merah
+ han:{hair:0x3a2418,style:'short',shirt:0x7eb6e0,skin:0xf3d2bb,pants:0x2c3e6b}, // Han: rambut pendek coklat, kemeja biru muda, celana navy
 };
 const DEF_LOOK={hair:0x3a2a3a,style:'bob',shirt:0xff9cc7,skin:0xf6d8c4,pants:0x5b6fa8};
 const lookOf=id=>Object.assign({},DEF_LOOK,LOOKS[id]||{});
@@ -213,7 +214,7 @@ const ROOMS=[
 /* ===== Gedung 3 lantai: [lantai, x, y] posisi baru (interior tetap sama, cuma dipindah) ===== */
 const LAYOUT={ceo:[0,0,0],ig:[0,9,0],kerja:[0,0,8],school:[0,16,8],
  'grup-mybini':[1,0,0],'grup-jfm':[1,16,0],lounge:[1,0,8],taman:[1,14,8],
- kamar:[2,0,0],'kamar-lia':[2,4,9],'kamar-hanrin':[2,9,9],'kamar-rin':[2,14,9],'kamar-emely':[2,19,9],'kamar-hr':[2,24,9]}; // + kamar-love (2,29,9) dan kamar-keira-han (2,36,9) di NEW_ROOMS
+ kamar:[2,0,0],'kamar-lia':[2,4,9],'kamar-hanrin':[2,9,9],'kamar-rin':[2,14,9],'kamar-emely':[2,19,9],'kamar-hr':[2,24,9]}; // + kamar-love (2,29,9) di NEW_ROOMS. Kamar Keira & Han ada di taman depan (cottage), bukan Lantai 3
 const LUXC={c1:'#6b3f2a',c2:'#5e3622',sign:'#8a2236',lux:true};
 const NEW_ROOMS=[
  {id:'tangga-1',name:'🪜 Tangga & Lift',f:0,x:21,y:0,w:11,d:8,c1:'#f3eefa',c2:'#e9e1f5',sign:'#8a7aa8',stairs:true},
@@ -223,12 +224,13 @@ const NEW_ROOMS=[
  {id:'lorong-3b',name:'Lorong',f:2,x:34,y:9,w:2,d:9,c1:'#efe6dc',c2:'#e6dbcf',hall:true},
  {id:'lorong-3',name:'Lorong',f:2,x:4,y:16,w:30,d:2,c1:'#efe6dc',c2:'#e6dbcf',hall:true},
  {id:'kamar-love',name:'❤️ Kamar Love',f:2,x:29,y:9,w:5,d:7,...LUXC,owner:'love'},
- {id:'kamar-keira-han',name:'🔒❤️ Kamar Keira & Han',f:2,x:36,y:9,w:6,d:7,...LUXC,owner:'keira-han'},
  ...[['keira','🍎 Kamar Keira'],['lina','🎒 Kamar Lina'],['sally','🎒 Kamar Sally'],['sarah','🎒 Kamar Sarah'],['hannah','🎒 Kamar Hannah'],['geby','🎒 Kamar Geby']]
   .map(([o,name],i)=>({id:'kamar-'+o,name,f:2,x:i*6,y:18,w:6,d:7,...LUXC,owner:o})),
  // area luar (outdoor) di DEPAN gedung, lantai dasar: taman depan + teras depan School. Karakter di luar gedung cuma boleh di area outdoor ini.
  {id:'taman-depan',name:'🌳 Taman Depan',f:0,x:0,y:16,w:32,d:8,c1:'#bfe8a6',c2:'#b1e095',sign:'#3e9e52',outdoor:true},
- {id:'teras-depan',name:'Teras',f:0,x:16,y:15,w:16,d:1,c1:'#efe3d0',c2:'#e6d8c2',hall:true,outdoor:true}];
+ {id:'teras-depan',name:'Teras',f:0,x:16,y:15,w:16,d:1,c1:'#efe3d0',c2:'#e6d8c2',hall:true,outdoor:true},
+ // kamar kecil di luar gedung, nempel sisi selatan Taman Depan (bukan kamar mewah Lantai 3)
+ {id:'kamar-keira-han',name:'🔒❤️ Kamar Keira & Han',f:0,x:8,y:24,w:6,d:5,c1:'#f6e6d4',c2:'#f0d8c4',sign:'#c45b6a'}];
 ROOMS.forEach(r=>{const L=LAYOUT[r.id];r.ox=r.x;r.oy=r.y;r.f=L[0];r.x=L[1];r.y=L[2]+L[0]*DY;r.dx=r.x-r.ox;r.dy=r.y-r.oy;});
 NEW_ROOMS.forEach(r=>{r.y+=r.f*DY;ROOMS.push(r);});
 const floorOfY=y=>Math.max(0,Math.min(NFLOOR-1,Math.floor(y/DY)));
@@ -292,6 +294,11 @@ const sharedBed=b=>({x:b[0],y:b[1],w:1.4,len:2.4,dir:1});
 const luxBed=r=>({x:r.x+r.w/2-.9,y:r.y+r.d-2.6,w:1.8,len:2.45,dir:-1});
 const LUX={};
 function bedSpot(b){const hy=b.dir>0?b.y+.4:b.y+b.len-.4;return{x:b.x+b.w/2,y:b.y+b.len/2,pose:'bed',bed:b,head:[b.x+b.w/2,hy],root:[b.x+b.w/2,hy+.91*b.dir],wake:[b.x+b.w+.45,b.y+b.len/2]};}
+/* ranjang ganda di cottage taman: dua orang berdampingan, satu selimut, baju tetap */
+const COTTAGE_BED={x:9.05,y:26.35,w:3.5,len:1.9,dir:-1,noBlanket:true};
+function coupleSpot(side){const sp=bedSpot(COTTAGE_BED),dx=side*0.4;
+ sp.head=[sp.head[0]+dx,sp.head[1]];sp.root=[sp.root[0]+dx,sp.root[1]];sp.x+=dx;sp.wake=[11,25.15];sp.bed=COTTAGE_BED;return sp;}
+function hanSeat(){return{x:10.8,y:25.62,pose:'sit',face:0};}
 ROOMS.filter(r=>r.lux).forEach(r=>{LUX[r.owner]=r;});
 ROOMS.filter(r=>r.group).forEach(r=>{
  r.cx=r.x+r.w/2;r.cy=r.y+r.d/2+.3;r.tr=r.group.length>2?1.2:.8;
@@ -592,6 +599,7 @@ function buildWorld(){
  tv(18.4,23.4,3);coffee(28.6,20.6);dispenser(28.9,22);vending(28.5,17.4);
  box(26.5,17.3,0,1.6,.6,.9,0xc98f5a);plant(16.7,23.3,1.1);plant(26.8,23.3,1);
  buildFrontGarden();
+ const cot=ROOMS.find(r=>r.id==='kamar-keira-han');if(cot)cottageRoom(cot);
  P=scene;
 }
 function tree(x,y,s=1){cyl(x,y,0,.16*s,1.1*s,0x8a5a3a,8,.2*s);ball(x,y,1.45*s,.75*s,0x5fae6a,1);ball(x+.35*s,y-.2*s,1.85*s,.5*s,0x7fcf9a,1);ball(x-.3*s,y+.25*s,1.75*s,.48*s,0x6bbf7a,1);}
@@ -619,6 +627,21 @@ function buildFrontGarden(){ // 🌳 Taman Depan (outdoor) di depan gedung, Lant
  lamp(6.6,y0+3.1);lamp(25.4,y0+5.0);
  [[6.7,y0+7.55],[9.0,y0+7.55]].forEach(([x,y])=>{box(x,y,0,.3,.3,1.2,0xf2a6c8);ball(x+.15,y+.15,1.32,.14,0xffd23f);});
  label('🚪 Gerbang','seat',7.85,y0+7.7,1.0);
+}
+function cottageRoom(r){ // kamar kecil cozy di taman: ranjang, lampu hangat, bangku Han. Baju tetap, satu selimut.
+ P=FLOORS[r.f];const wood=0x8a5a3a,cream=0xfff6ee,rose=0xc45b6a,b=COTTAGE_BED;
+ rug(r.x+.45,r.y+.55,r.w-.9,2.15,0xf3d0c8);
+ box(b.x,b.y,0,b.w,b.len,.28,wood);
+ box(b.x+.06,b.y+.06,.28,b.w-.12,b.len-.12,.14,cream);
+ box(b.x,b.y+b.len-.1,0,b.w,.12,.72,0x6b3f2a);
+ box(b.x+.25,b.y+b.len-.55,.44,.78,.4,.12,cream);
+ box(b.x+b.w-1.03,b.y+b.len-.55,.44,.78,.4,.12,cream);
+ box(b.x+.12,b.y+.22,.48,b.w-.24,b.len-.95,.1,rose); // satu selimut, berhenti sebelum bantal
+ box(r.x+.32,b.y+b.len-.65,0,.52,.42,.4,wood);
+ cyl(r.x+.58,b.y+b.len-.44,.4,.03,.26,0xc9a24a,6);cyl(r.x+.58,b.y+b.len-.44,.64,.11,.14,0xfff1c2,8,.07);
+ box(10.15,25.45,.22,1.3,.42,.08,wood);box(10.2,25.5,0,.08,.32,.22,0x6c5a7a);box(11.32,25.5,0,.08,.32,.22,0x6c5a7a);
+ plant(r.x+r.w-.4,r.y+r.d-.4,.65,0x7fcf9a);
+ const pl=new THREE.PointLight(0xffd9a8,1.5,4.2);pl.position.set(tx(r.x+r.w/2),1.65,tz(r.y+2.2));P.add(pl);
 }
 
 /* ================= Karakter voxel ================= */
@@ -658,7 +681,7 @@ function makeChar(id){
  // rambut
  const H=L.hair;
  B(.54,.14,.48,0,.25,0,H,head); // atap
- const longY={messy:-.62,neat:-.6,straight:-.6,bangs:-.62,wavy:-.62,bun:-.12,braids:-.12,pony:-.12,bob:-.2}[L.style]??-.2;
+ const longY={messy:-.62,neat:-.6,straight:-.6,bangs:-.62,wavy:-.62,bun:-.12,braids:-.12,pony:-.12,bob:-.2,short:.06}[L.style]??-.2;
  const backH=.3-longY;B(.54,backH,.1,0,.3-backH/2,-.25,H,head);
  [-1,1].forEach(s=>{const sideBottom=L.style==='bun'||L.style==='pony'||L.style==='braids'?-.05:longY+.12;const sh=.28-sideBottom;
   B(.08,sh,L.style==='bob'?.46:.36,.27*s,.28-sh/2,-.04,H,head);
@@ -722,6 +745,7 @@ function nameOf(id){const a=agentsData.find(x=>idOf(x)===id)||(actors[id]&&actor
 function napSpotOf(id){if(id==='ophelia1')return{sp:SOFA2_SPOT,label:'Capek, ke Ruang TV 🛋️'};const lx=LUX[id];if(lx)return{sp:bedSpot(luxBed(lx)),label:'Ngantuk, ke '+lx.name.replace(/^\S+ /,'')+' 😴'};return{sp:SOFA2_SPOT,label:'Capek, ke Ruang TV 🛋️'};}
 function spotFor(a,used){
  const id=idOf(a);let room=a.room;
+ if(id==='han')return hanSeat();
  if(room==='kamar'&&LUX[id])room=LUX[id].id;
  if(id==='ophelia1'&&a.status==='tidur')return SOFA2_SPOT;
  const lx=ROOMS.find(r=>r.id===room&&r.lux);
@@ -767,12 +791,24 @@ function keiraSchoolToLane(p){
  if(p[1]>29.2){const x=p[0]<10?6.7:12.2;return [[x,Math.min(30.4,p[1])],[x,28.55]];}
  const x=p[0]<5?1.7:p[0]<10?8:12.2;return [[x,28.55]];
 }
-function keiraHanInside(a,b){const r=ROOMS.find(x=>x.id==='kamar-keira-han'),laneY=r.y+3,east=r.x+r.w-1.45;
- const north=p=>p[1]>r.y+4.3,clamp=x=>Math.min(r.x+r.w-1.3,Math.max(r.x+1.3,x)),pts=[];
- if(north(a))pts.push([east,Math.min(a[1],r.y+5.7)],[east,laneY]);else pts.push([clamp(a[0]),laneY]);
- if(north(b))pts.push([east,laneY],[east,Math.min(b[1],r.y+5.7)]);else pts.push([clamp(b[0]),laneY]);
+function keiraGardenInside(a,b){ // jalur utara (hindari air mancur & pohon), lalu lorong barat ke pintu cottage
+ const south=p=>p[1]>22.4&&p[0]>=7.5&&p[0]<=13.5,xClamp=x=>Math.min(30.2,Math.max(1.6,x));
+ const toLane=p=>[xClamp(p[0]),18.8];
+ const toSouth=p=>{const x=Math.min(12.2,Math.max(8.5,p[0]));return[[9.2,18.8],[9.2,22.7],[x,22.7]];};
+ if(south(a)&&south(b))return [b];
+ const pts=[];
+ if(south(a))pts.push(...[...toSouth(a)].reverse());else pts.push(toLane(a));
+ if(south(b))pts.push(...toSouth(b));else pts.push(toLane(b));
  pts.push(b);return pts;}
-function keiraInside(id,a,b){if(id==='kamar-keira-han')return keiraHanInside(a,b);const r=ROOMS.find(x=>x.id===id);if(!r||r.dx===undefined)return [b];
+function keiraCottageInside(a,b){const r=ROOMS.find(x=>x.id==='kamar-keira-han'),laneY=r.y+1.15,east=r.x+r.w-.7;
+ const xOf=x=>Math.min(r.x+r.w-.55,Math.max(r.x+.55,x)),deep=p=>p[1]>r.y+2.05,pts=[];
+ if(deep(a))pts.push([east,Math.min(a[1],r.y+r.d-.55)],[east,laneY]);else pts.push([xOf(a[0]),laneY]);
+ if(deep(b))pts.push([east,laneY],[east,Math.min(b[1],r.y+r.d-.55)]);else pts.push([xOf(b[0]),laneY]);
+ pts.push(b);return pts;}
+function keiraInside(id,a,b){
+ if(id==='kamar-keira-han')return keiraCottageInside(a,b);
+ if(id==='taman-depan')return keiraGardenInside(a,b);
+ const r=ROOMS.find(x=>x.id===id);if(!r||r.dx===undefined)return [b];
  return keiraInside0(id,[a[0]-r.dx,a[1]-r.dy],[b[0]-r.dx,b[1]-r.dy]).map(p=>[p[0]+r.dx,p[1]+r.dy]);}
 function keiraInside0(id,a,b){
  if(id==='school'){
@@ -881,7 +917,7 @@ function placeActor(ac){ // set pose statis
  c.eyes.visible=true;c.closed.visible=false;if(ac.blanket){ac.blanket.forEach(m=>m.removeFromParent());ac.blanket=null;}
  if(s.pose==='bed'){
   c.root.position.set(tx(s.root[0]),s.rootY||.6,tz(s.root[1]));c.root.rotation.set(-Math.PI/2,s.yaw??(s.bed.dir>0?0:Math.PI),0,'YXZ');c.eyes.visible=false;c.closed.visible=true;
-  P=FLOORS[floorOfY(s.root[1])];ac.blanket=s.bed.sofa?[box(s.throwAt[0],s.throwAt[1],.62,1.5,.75,.1,s===SOFA2_SPOT?0xffd23f:0xc3a8ec)]:blanket(s.bed);P=scene;
+  P=FLOORS[floorOfY(s.root[1])];ac.blanket=s.bed.sofa?[box(s.throwAt[0],s.throwAt[1],.62,1.5,.75,.1,s===SOFA2_SPOT?0xffd23f:0xc3a8ec)]:(s.bed.noBlanket?[]:blanket(s.bed));P=scene;
  }else if(s.pose==='sit'){
   c.root.position.set(tx(s.x),.14,tz(s.y));c.root.rotation.y=s.face||0;c.legs.forEach(l=>l.rotation.x=-Math.PI/2);c.arms.forEach(a=>a.rotation.x=-.9);
  }else{c.root.position.set(tx(s.x),0,tz(s.y));c.root.rotation.y=s.face||0;}
@@ -905,6 +941,7 @@ function syncActors(walk){
  const used={},eff=effective();
  eff.forEach(a=>{
   const id=idOf(a),s=spotFor(a,used);let ac=actors[id];
+  if(ac&&id==='han'&&ac.together){ac.a=a;return;}
   if(ac&&ac.home&&Math.hypot(ac.home.x-s.x,ac.home.y-s.y)<.05){
    if(id==='keira'&&(ac.brain||ac.walking||ac.waitUntil||ac.napUntil||ac.nextBrain)){ac.a=a;ac.home=s;return;}
    if(id!=='keira'&&(ac.brain||ac.napUntil)&&ac.brain&&a.status===ac.brain.status){ac.a=a;ac.home=s;return;}
@@ -942,6 +979,21 @@ function tourStep(ac,left,done){
 }
 function goHome(ac,done){const h=ac.home;ac.demo='Balik dulu 🏠';startWalk(ac,route({x:ac.pos.x,y:ac.pos.y},{x:h.x,y:h.y}),()=>{ac.demo=null;placeActor(ac);done&&done();});}
 function shuffle(a){const b=a.slice();for(let i=b.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));const t=b[i];b[i]=b[j];b[j]=t;}return b;}
+function hanSitBack(){const han=actors.han;if(!han)return;han.together=false;han.demo=null;han.walking=false;han.path=[];han.after=null;
+ const hs=han.home||hanSeat();han.spot=hs;han.pos={x:hs.x,y:hs.y};placeActor(han);}
+function keiraWithHan(ac,done){ // sekali per putaran, sebelum keliling ruangan: jalan ke cottage, rebahan bareng Han (baju tetap)
+ const room=ROOMS.find(r=>r.id==='kamar-keira-han');if(!room){done();return;}
+ const sp=coupleSpot(-1);
+ ac.demo='Ke kamar taman, nemuin Han 🚶‍♀️';
+ const from=ac.spot&&ac.spot.pose==='bed'&&!ac.walking?{x:ac.spot.wake[0],y:ac.spot.wake[1]}:{x:ac.pos.x,y:ac.pos.y};
+ startWalk(ac,keiraRoute(from,{x:sp.wake[0],y:sp.wake[1]}),()=>{
+  const kSp=coupleSpot(-1),hSp=coupleSpot(1),han=actors.han;
+  ac.spot=kSp;placeActor(ac);ac.demo='Bareng Han di kamar taman 🔒❤️';
+  if(han){han.together=true;han.walking=false;han.path=[];han.after=null;han.waitUntil=0;han.spot=hSp;placeActor(han);han.demo='Bareng Keira 🔒❤️';}
+  ac.waitUntil=performance.now()+16000;
+  ac.afterWait=()=>{hanSitBack();done();};
+ });
+}
 function keiraTour(ac,done){
  const school=shuffle(KEIRA_STOPS.filter(s=>s.school)).slice(0,3+Math.floor(Math.random()*2));
  const stops=school.concat(shuffle(KEIRA_STOPS.filter(s=>!s.school)));
@@ -968,14 +1020,11 @@ function brainTick(now){
   if(ac.nextBrain&&now<ac.nextBrain)return;
   ac.brain={status:ac.a.status};const finish=(pause)=>{ac.brain=null;ac.nextBrain=performance.now()+(pause||1500);};
   if(kind==='keiraWander'){
-   keiraTour(ac,()=>{
-    if(Math.random()<.38){
-     const room=ROOMS.find(r=>r.id==='kamar-keira-han');
-     if(Math.random()<.5)napAt(ac,bedSpot(luxBed(room)),'Capek, ke Kamar Keira & Han 🔒❤️',22000+Math.random()*18000,()=>finish(1200));
-     else napAt(ac,SOFA_SPOT,'Capek, ke sofa Ruang TV 🛋️',22000+Math.random()*18000,()=>finish(1200));
-    }else finish(800);
-   });
-   log('Keira keliling sekolah & kantor 🚶‍♀️');
+   keiraWithHan(ac,()=>keiraTour(ac,()=>{
+    if(Math.random()<.38)napAt(ac,SOFA_SPOT,'Capek, ke sofa Ruang TV 🛋️',22000+Math.random()*18000,()=>finish(1200));
+    else finish(800);
+   }));
+   log('Keira ke kamar taman, lalu keliling sekolah & kantor 🚶‍♀️');
   }else if(kind==='wander'){
    const n=3+Math.floor(Math.random()*3);
    const nap=napSpotOf(ac.id);tourStep(ac,n,()=>napAt(ac,nap.sp,nap.label,30000+Math.random()*20000,()=>finish(2000)));
@@ -1125,6 +1174,7 @@ const FALLBACK=[
  {id:'hanrin',name:'Hanrin',role:'Manager',room:'ceo',status:'kerja',task:'Bagi tugas ke bot lain'},
  {id:'lia',name:'Ophelia 2 (Lia)',role:'Konten Instagram, posting & jaga IG ophelia.lia.real',room:'ig',status:'kerja',task:'Jaga IG ophelia.lia.real'},
  {id:'ophelia1',name:'Ophelia 1',role:'Partner Instagram (lia_1_2000)',room:'ig',status:'kerja',task:'Saling support konten sama Lia'},
+ {id:'han',name:'Han',role:'Owner · Kantor AI',room:'kamar-keira-han',status:'santai',task:'Di kamar taman, nunggu Keira 🔒❤️'},
  ...[['rin','Rin','Asisten pribadi'],['ornf','Co Agent 2 Lia','Chat WhatsApp'],['emely','Emely','Teman ngobrol'],['hr','HR','Hanrin, pacar / pendamping'],['keira','Keira','Konsultan pribadi'],['love','Love ❤️','Love ❤️ · Urusan pasangan (date, kado, pengingat)']].map(([id,name,role])=>({id,name,role,room:'kamar',status:'tidur',task:'belum ada tugas',...(id==='love'?{schedule:LOVE_SCHEDULE}:{})})),
  ...Object.entries(SCHOOL_NAMES).map(([id,name])=>({id,name,role:'Murid · Grup School',room:'school',status:'santai',task:'Duduk di kelas, nunggu pelajaran'}))];
 async function load(manual){
@@ -1143,7 +1193,7 @@ async function load(manual){
  if(popId)openPop(popId);
 }
 $('btnKerja').onclick=()=>{
- const lazy=effective().filter(a=>a.status!=='kerja');
+ const lazy=effective().filter(a=>a.status!=='kerja'&&idOf(a)!=='han');
  if(!lazy.length){log('Semua udah kerja kok, Papa 😄');return;}
  const now=new Date();lazy.forEach(a=>overrides[idOf(a)]={at:now,patch:{room:WORK_ROOM[idOf(a)]||'kerja',status:'kerja',task:'Bangun! Nunggu tugas dari Hanrin'}});
  syncActors(true);log(`Papa nyuruh balik kerja! ${lazy.length} bot bangun & jalan ke Meja Kerja Bersama 💪`);
@@ -1185,7 +1235,7 @@ $('loading').remove();
 requestAnimationFrame(loop);
 // opsi URL buat preview: #zoom, #kerja, #pop=lia
 const hs=location.hash;
-const PREV={keirahan:['kamar-keira-han',[5,8,-6]],kamarlove:['kamar-love',[3,8,-7.5]],lux:['kamar-hanrin',[3,8,-7.5]],tvroom:['lounge',[4,6.5,8]],school:['school',[4,8.5,-10.5]],close:['ig',[1.5,2.6,5.5]],zoom:['ig',[7,8.5,10]]};
+const PREV={keirahan:['kamar-keira-han',[0.8,4.2,-4]],kamarlove:['kamar-love',[3,8,-7.5]],lux:['kamar-hanrin',[3,8,-7.5]],tvroom:['lounge',[4,6.5,8]],school:['school',[4,8.5,-10.5]],close:['ig',[1.5,2.6,5.5]],zoom:['ig',[7,8.5,10]]};
 const pv=Object.keys(PREV).find(k=>hs.includes(k));
 if(pv){const [rid,off]=PREV[pv],r=ROOMS.find(x=>x.id===rid);setFloor(r.f,false);const t=FLOORS[r.f].localToWorld(new THREE.Vector3(tx(r.x+r.w/2),.5,tz(r.y+r.d/2)));camera.position.copy(t.clone().add(new THREE.Vector3(...off)));controls.target.copy(t);}
 if(hs.includes('kerja'))setTimeout(()=>$('btnKerja').click(),300);
