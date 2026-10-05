@@ -1,5 +1,5 @@
 {
-  "updated_at": "2026-10-05T08:46:00+08:00",
+  "updated_at": "2026-10-05T08:55:00+08:00",
   "agents": [
     {
       "id": "hanrin",
@@ -99,20 +99,20 @@
       "role": "Chat WhatsApp",
       "room": "grup-mybini",
       "status": "santai",
-      "task": "Nongkrong di ruangan My Bini",
-      "updated_at": "2026-10-05T08:46:00+08:00",
+      "task": "Nongkrong di Grup My Bini (jam kerja)",
+      "updated_at": "2026-10-05T08:55:00+08:00",
       "schedule": [
         {
           "time": "08:00",
-          "label": "Nongkrong di ruangan My Bini"
+          "label": "Nongkrong di Grup My Bini"
         },
         {
           "time": "17:00",
-          "label": "Studio konten"
+          "label": "Nongkrong di Studio Konten"
         },
         {
           "time": "21:00",
-          "label": "Tidur di kamar"
+          "label": "Tidur di kamar Lantai 3"
         }
       ]
     },

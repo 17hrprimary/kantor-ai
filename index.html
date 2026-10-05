@@ -230,7 +230,7 @@ const STAIR_FOOT={}; // titik kaki tangga per lantai (teleport naik/turun)
 ROOMS.filter(r=>r.stairs).forEach(r=>{STAIR_FOOT[r.f]=[28.6,r.f*DY+7.2];r.foot=STAIR_FOOT[r.f];});
 const SCHOOL={teacher:[4,25.0],students:{lina:[3.2,27.9],sally:[6.7,27.9],sarah:[10.2,27.9],hannah:[4.95,30.0],geby:[8.45,30.0]}};
 const SCHOOL_NAMES={lina:'Lina',sally:'Sally',sarah:'Sarah',hannah:'Hannah',geby:'Geby'};
-const SPOTS={ceo:{hanrin:[4.6,2.35]},ig:{lia:[11.6,2.45],ophelia1:[15.1,2.45]},
+const SPOTS={ceo:{hanrin:[4.6,2.35]},ig:{lia:[11.6,2.45],ophelia1:[15.1,2.45],ornf:[19,1.6]},
  kerja:[[2.6,17.6],[7.1,17.6],[11.6,17.6],[2.6,21.1],[7.1,21.1],[11.6,21.1]]};
 const BEDS=[[16.7,9.2],[20.0,9.2],[23.3,9.2],[26.6,9.2],[16.7,13.3],[20.0,13.3],[23.3,13.3],[26.6,13.3]];
 const BED_ORDER=['ornf','love','lina','sally','sarah','hannah','geby'];
@@ -638,6 +638,7 @@ function effective(){return agentsData.map(a=>{const id=idOf(a),o=overrides[id];
  const rb=routineBase(a,id);
  if(rb&&!ov){if(dayNow())r={...r,room:rb,status:'kerja',task:rb==='school'?(id==='keira'?'🍎 Jam sekolah: ngajar & jaga kelas (08:00-17:00 WITA)':'🎒 Jam sekolah (08:00-17:00 WITA)'):'💬 Standby di Grup My Bini (08:00-17:00 WITA)',auto:true};
   else r={...r,room:LUX[id]?LUX[id].id:'kamar',status:'tidur',task:'😴 Bobo di kamar Lantai 3 (17:00-08:00 WITA)',auto:true};}
+ if(id==='ornf'&&!ov){const m=nowMin();if(m>=480&&m<1020)r={...r,room:'grup-mybini',status:'santai',task:'💬 Nongkrong di Grup My Bini (08:00-17:00 WITA)',auto:true};else if(m>=1020&&m<1260)r={...r,room:'ig',status:'santai',task:'🎬 Nongkrong di Studio Konten (17:00-21:00 WITA)',auto:true};else r={...r,room:'kamar',status:'tidur',task:'😴 Bobo di kamar Lantai 3 (21:00-08:00 WITA)',auto:true};}
  if(BRAIN[id]&&id!=='keira'){const sl=activeSlot(id);if(sl)r={...r,room:WORK_ROOM[id]||'ig',status:'kerja',task:'⏰ '+sl[0].replace('.',':')+' '+sl[1]+' (sesuai jadwal)',auto:true};
   else if(r.status==='kerja')r={...r,room:WORK_ROOM[id]||'ig'};
   else if(nightNow(id))r={...r,room:'kamar',status:'tidur',task:'Bobo malam di kamar 😴 (00:00-07:00 WITA)',auto:true};}
