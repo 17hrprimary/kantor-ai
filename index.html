@@ -213,7 +213,7 @@ const ROOMS=[
 /* ===== Gedung 3 lantai: [lantai, x, y] posisi baru (interior tetap sama, cuma dipindah) ===== */
 const LAYOUT={ceo:[0,0,0],ig:[0,9,0],kerja:[0,0,8],school:[0,16,8],
  'grup-mybini':[1,0,0],'grup-jfm':[1,16,0],lounge:[1,0,8],taman:[1,14,8],
- kamar:[2,0,0],'kamar-lia':[2,4,9],'kamar-hanrin':[2,9,9],'kamar-rin':[2,14,9],'kamar-emely':[2,19,9],'kamar-hr':[2,24,9]}; // + kamar-love (2,29,9) di NEW_ROOMS
+ kamar:[2,0,0],'kamar-lia':[2,4,9],'kamar-hanrin':[2,9,9],'kamar-rin':[2,14,9],'kamar-emely':[2,19,9],'kamar-hr':[2,24,9]}; // + kamar-love (2,29,9) dan kamar-keira-han (2,36,9) di NEW_ROOMS
 const LUXC={c1:'#6b3f2a',c2:'#5e3622',sign:'#8a2236',lux:true};
 const NEW_ROOMS=[
  {id:'tangga-1',name:'🪜 Tangga & Lift',f:0,x:21,y:0,w:11,d:8,c1:'#f3eefa',c2:'#e9e1f5',sign:'#8a7aa8',stairs:true},
@@ -223,6 +223,7 @@ const NEW_ROOMS=[
  {id:'lorong-3b',name:'Lorong',f:2,x:34,y:9,w:2,d:9,c1:'#efe6dc',c2:'#e6dbcf',hall:true},
  {id:'lorong-3',name:'Lorong',f:2,x:4,y:16,w:30,d:2,c1:'#efe6dc',c2:'#e6dbcf',hall:true},
  {id:'kamar-love',name:'❤️ Kamar Love',f:2,x:29,y:9,w:5,d:7,...LUXC,owner:'love'},
+ {id:'kamar-keira-han',name:'🔒❤️ Kamar Keira & Han',f:2,x:36,y:9,w:6,d:7,...LUXC,owner:'keira-han'},
  ...[['keira','🍎 Kamar Keira'],['lina','🎒 Kamar Lina'],['sally','🎒 Kamar Sally'],['sarah','🎒 Kamar Sarah'],['hannah','🎒 Kamar Hannah'],['geby','🎒 Kamar Geby']]
   .map(([o,name],i)=>({id:'kamar-'+o,name,f:2,x:i*6,y:18,w:6,d:7,...LUXC,owner:o}))];
 ROOMS.forEach(r=>{const L=LAYOUT[r.id];r.ox=r.x;r.oy=r.y;r.f=L[0];r.x=L[1];r.y=L[2]+L[0]*DY;r.dx=r.x-r.ox;r.dy=r.y-r.oy;});
@@ -715,7 +716,12 @@ function keiraSchoolToLane(p){
  if(p[1]>29.2){const x=p[0]<10?6.7:12.2;return [[x,Math.min(30.4,p[1])],[x,28.55]];}
  const x=p[0]<5?1.7:p[0]<10?8:12.2;return [[x,28.55]];
 }
-function keiraInside(id,a,b){const r=ROOMS.find(x=>x.id===id);if(!r||r.dx===undefined)return [b];
+function keiraHanInside(a,b){const r=ROOMS.find(x=>x.id==='kamar-keira-han'),laneY=r.y+3,east=r.x+r.w-1.45;
+ const north=p=>p[1]>r.y+4.3,clamp=x=>Math.min(r.x+r.w-1.3,Math.max(r.x+1.3,x)),pts=[];
+ if(north(a))pts.push([east,Math.min(a[1],r.y+5.7)],[east,laneY]);else pts.push([clamp(a[0]),laneY]);
+ if(north(b))pts.push([east,laneY],[east,Math.min(b[1],r.y+5.7)]);else pts.push([clamp(b[0]),laneY]);
+ pts.push(b);return pts;}
+function keiraInside(id,a,b){if(id==='kamar-keira-han')return keiraHanInside(a,b);const r=ROOMS.find(x=>x.id===id);if(!r||r.dx===undefined)return [b];
  return keiraInside0(id,[a[0]-r.dx,a[1]-r.dy],[b[0]-r.dx,b[1]-r.dy]).map(p=>[p[0]+r.dx,p[1]+r.dy]);}
 function keiraInside0(id,a,b){
  if(id==='school'){
@@ -903,8 +909,11 @@ function brainTick(now){
   ac.brain={status:ac.a.status};const finish=(pause)=>{ac.brain=null;ac.nextBrain=performance.now()+(pause||1500);};
   if(kind==='keiraWander'){
    keiraTour(ac,()=>{
-    if(Math.random()<.38)napAt(ac,SOFA_SPOT,'Capek, ke sofa Ruang TV 🛋️',22000+Math.random()*18000,()=>finish(1200));
-    else finish(800);
+    if(Math.random()<.38){
+     const room=ROOMS.find(r=>r.id==='kamar-keira-han');
+     if(Math.random()<.5)napAt(ac,bedSpot(luxBed(room)),'Capek, ke Kamar Keira & Han 🔒❤️',22000+Math.random()*18000,()=>finish(1200));
+     else napAt(ac,SOFA_SPOT,'Capek, ke sofa Ruang TV 🛋️',22000+Math.random()*18000,()=>finish(1200));
+    }else finish(800);
    });
    log('Keira keliling sekolah & kantor 🚶‍♀️');
   }else if(kind==='wander'){
@@ -1115,7 +1124,7 @@ $('loading').remove();
 requestAnimationFrame(loop);
 // opsi URL buat preview: #zoom, #kerja, #pop=lia
 const hs=location.hash;
-const PREV={kamarlove:['kamar-love',[3,8,-7.5]],lux:['kamar-hanrin',[3,8,-7.5]],tvroom:['lounge',[4,6.5,8]],school:['school',[4,8.5,-10.5]],close:['ig',[1.5,2.6,5.5]],zoom:['ig',[7,8.5,10]]};
+const PREV={keirahan:['kamar-keira-han',[5,8,-6]],kamarlove:['kamar-love',[3,8,-7.5]],lux:['kamar-hanrin',[3,8,-7.5]],tvroom:['lounge',[4,6.5,8]],school:['school',[4,8.5,-10.5]],close:['ig',[1.5,2.6,5.5]],zoom:['ig',[7,8.5,10]]};
 const pv=Object.keys(PREV).find(k=>hs.includes(k));
 if(pv){const [rid,off]=PREV[pv],r=ROOMS.find(x=>x.id===rid);setFloor(r.f,false);const t=FLOORS[r.f].localToWorld(new THREE.Vector3(tx(r.x+r.w/2),.5,tz(r.y+r.d/2)));camera.position.copy(t.clone().add(new THREE.Vector3(...off)));controls.target.copy(t);}
 if(hs.includes('kerja'))setTimeout(()=>$('btnKerja').click(),300);
