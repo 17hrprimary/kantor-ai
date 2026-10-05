@@ -225,10 +225,27 @@ const NEW_ROOMS=[
  {id:'kamar-love',name:'❤️ Kamar Love',f:2,x:29,y:9,w:5,d:7,...LUXC,owner:'love'},
  {id:'kamar-keira-han',name:'🔒❤️ Kamar Keira & Han',f:2,x:36,y:9,w:6,d:7,...LUXC,owner:'keira-han'},
  ...[['keira','🍎 Kamar Keira'],['lina','🎒 Kamar Lina'],['sally','🎒 Kamar Sally'],['sarah','🎒 Kamar Sarah'],['hannah','🎒 Kamar Hannah'],['geby','🎒 Kamar Geby']]
-  .map(([o,name],i)=>({id:'kamar-'+o,name,f:2,x:i*6,y:18,w:6,d:7,...LUXC,owner:o}))];
+  .map(([o,name],i)=>({id:'kamar-'+o,name,f:2,x:i*6,y:18,w:6,d:7,...LUXC,owner:o})),
+ // area luar (outdoor) di DEPAN gedung, lantai dasar: taman depan + teras depan School. Karakter di luar gedung cuma boleh di area outdoor ini.
+ {id:'taman-depan',name:'🌳 Taman Depan',f:0,x:0,y:16,w:32,d:8,c1:'#bfe8a6',c2:'#b1e095',sign:'#3e9e52',outdoor:true},
+ {id:'teras-depan',name:'Teras',f:0,x:16,y:15,w:16,d:1,c1:'#efe3d0',c2:'#e6d8c2',hall:true,outdoor:true}];
 ROOMS.forEach(r=>{const L=LAYOUT[r.id];r.ox=r.x;r.oy=r.y;r.f=L[0];r.x=L[1];r.y=L[2]+L[0]*DY;r.dx=r.x-r.ox;r.dy=r.y-r.oy;});
 NEW_ROOMS.forEach(r=>{r.y+=r.f*DY;ROOMS.push(r);});
 const floorOfY=y=>Math.max(0,Math.min(NFLOOR-1,Math.floor(y/DY)));
+/* ===== Batas gerak: posisi karakter wajib selalu di dalam ruangan/lantai gedung atau area outdoor (Taman Depan/Teras) ===== */
+const EDGE=.3; // jarak aman dari tepi area
+const clampN=(v,a,b)=>Math.max(a,Math.min(b,v));
+const OUTDOOR=()=>ROOMS.filter(r=>r.outdoor);
+function snapIn(x,y){ // titik valid terdekat (di lantai yang sama); kalau udah valid, gak diubah
+ const r0=ROOMS.find(r=>x>=r.x&&x<r.x+r.w&&y>=r.y&&y<r.y+r.d);if(r0)return[x,y];
+ const f=floorOfY(y);let best=null,bd=Infinity;
+ ROOMS.forEach(r=>{if(r.f!==f)return;const ex=Math.min(EDGE,r.w/2-.01),ey=Math.min(EDGE,r.d/2-.01);const cx=clampN(x,r.x+ex,r.x+r.w-ex),cy=clampN(y,r.y+ey,r.y+r.d-ey),d=Math.hypot(cx-x,cy-y);if(d<bd){bd=d;best=[cx,cy];}});
+ return best||[x,y];}
+function inOutdoor(x,y){return OUTDOOR().some(r=>x>=r.x&&x<r.x+r.w&&y>=r.y&&y<r.y+r.d);}
+function clampOutdoor(p){ // titik target outdoor dipaksa masuk poligon taman
+ if(inOutdoor(p.x,p.y))return p;let best=null,bd=Infinity;
+ OUTDOOR().forEach(r=>{const ey=Math.min(EDGE*2,r.d/2-.01),cx=clampN(p.x,r.x+EDGE*2,r.x+r.w-EDGE*2),cy=clampN(p.y,r.y+ey,r.y+r.d-ey),d=Math.hypot(cx-p.x,cy-p.y);if(d<bd){bd=d;best=[cx,cy];}});
+ p.x=best[0];p.y=best[1];return p;}
 // titik di denah lama -> posisi baru (ikut ruangannya)
 function oldRoomAt(x,y){return ROOMS.find(r=>r.ox!==undefined&&x>=r.ox&&x<r.ox+r.w&&y>=r.oy&&y<r.oy+r.d);}
 function relP(p){const r=oldRoomAt(p[0],p[1]);if(!r)return p;p[0]+=r.dx;p[1]+=r.dy;return p;}
@@ -256,6 +273,9 @@ relP(SPOTS.ceo.hanrin);Object.values(SPOTS.ig).forEach(relP);SPOTS.kerja.forEach
 [SOFA_SPOT,SOFA2_SPOT].forEach(o=>relO(o,['head','root','wake','throwAt']));
 WANDER.forEach(w=>relO(w));KEIRA_STOPS.forEach(w=>relO(w));
 WANDER.push({t:'Lobi Lantai 3',x:20,y:2*DY+5},{t:'Tangga & Lift',x:24,y:4});
+// titik jalan-jalan outdoor: cuma di dalam Taman Depan (di-push setelah relO biar gak ikut digeser sbg titik denah lama)
+const GARDEN_STOPS=[{t:'Taman Depan',x:5.2,y:20.6},{t:'air mancur Taman Depan',x:16,y:18.9},{t:'bangku Taman Depan',x:11.6,y:21.9},{t:'kebun bunga depan',x:26.5,y:20.4}].map(clampOutdoor);
+WANDER.push(...GARDEN_STOPS);KEIRA_STOPS.push(GARDEN_STOPS[0],GARDEN_STOPS[1]);
 const BRAIN={ophelia1:'wander',lia:'sleepOrWander',hanrin:'wander',keira:'keiraWander'};
 /* ruang kerja wajib pas jam jadwal (per bot) */
 const WORK_ROOM={lia:'ig',ophelia1:'ig',hanrin:'ceo'};
@@ -443,7 +463,7 @@ function lift(r){const o=r.f*DY;box(30.3,.25+o,0,1.6,1.6,2.4,0xcfd8ff);box(30.45
  label('🛗 Lift','seat',31.1,2.2+o,2.7);}
 function buildWorld(){
  ROOMS.forEach(r=>{P=FLOORS[r.f];
-  box(r.x-.05,r.y-.05,-.35,r.w+.1,r.d+.1,.35,0xf3c6dc); // pelat lantai
+  box(r.x-.05,r.y-.05,-.35,r.w+.1,r.d+.1,.35,r.outdoor?0x9ccf7e:0xf3c6dc); // pelat lantai (outdoor: tanah berumput)
   const t=r.lux?planks():checker(r.c1,r.c2);t.repeat.set(r.w/2,r.d/2);
   const m=mesh(new THREE.PlaneGeometry(r.w,r.d),new THREE.MeshStandardMaterial({map:t,roughness:.95}),P,false);
   m.rotation.x=-Math.PI/2;m.position.set(tx(r.x+r.w/2),.002,tz(r.y+r.d/2));m.receiveShadow=true;
@@ -463,14 +483,18 @@ function buildWorld(){
  segs.forEach(s=>{
   if(gaps.has(s.k))return;
   const A=s.o==='h'?roomAt(s.i+.5,s.c-.5):roomAt(s.c-.5,s.i+.5),B=s.o==='h'?roomAt(s.i+.5,s.c+.5):roomAt(s.c+.5,s.i+.5);
-  const outer=!A||!B,luxW=s.o==='h'?!!(A&&A.lux):!!((A&&A.lux)||(B&&B.lux));
+  const oA=!!(A&&A.outdoor),oB=!!(B&&B.outdoor);
+  if(oA&&oB)return; // sesama area outdoor: gak ada dinding
+  if((oA||oB)&&(!A||!B)){P=FLOORS[s.f]; // tepi luar taman: pagar tanaman (hedge) pendek
+   if(s.o==='h')box(s.i,s.c-.2,0,1,.4,.55,0x5fae6a);else box(s.c-.2,s.i,0,.4,1,.55,0x5fae6a);return;}
+  const outer=!A||!B||oA!==oB,luxW=s.o==='h'?!!(A&&A.lux):!!((A&&A.lux)||(B&&B.lux));
   const h=outer?2.4:(luxW?1.7:.95),th=.16;
   P=FLOORS[s.f];const g=new THREE.Group();P.add(g);
   const w=mesh(BOXG,luxW&&!outer?luxWallM:(outer?outM:wallM),g);const cap=mesh(BOXG,luxW||(outer&&((A&&A.lux)||(B&&B.lux)))?luxCapM:capM,g);
   if(s.o==='h'){w.scale.set(1,h,th);cap.scale.set(1,.06,th+.04);g.position.set(tx(s.i+.5),0,tz(s.c));}
   else{w.scale.set(th,h,1);cap.scale.set(th+.04,.06,1);g.position.set(tx(s.c),0,tz(s.i+.5));}
   w.position.y=h/2;cap.position.y=h+.03;
-  if(outer){const n=s.o==='h'?new THREE.Vector3(0,0,A?1:-1):new THREE.Vector3(A?1:-1,0,0);OUTER_WALLS.push({g,w,cap,h,n});}
+  if(outer){const inA=!!A&&!oA,n=s.o==='h'?new THREE.Vector3(0,0,inA?1:-1):new THREE.Vector3(inA?1:-1,0,0);OUTER_WALLS.push({g,w,cap,h,n});}
  });
  // kusen pintu
  doorList.forEach(([o,c,m])=>{P=FLOORS[floorOfY(o==='h'?c-.01:m)];const st=m-1,en=m+1;
@@ -567,7 +591,34 @@ function buildWorld(){
  cyl(19,21.2,0,.6,.38,0xffffff,16);cyl(23.4,21.2,0,.6,.38,0xffffff,16);
  tv(18.4,23.4,3);coffee(28.6,20.6);dispenser(28.9,22);vending(28.5,17.4);
  box(26.5,17.3,0,1.6,.6,.9,0xc98f5a);plant(16.7,23.3,1.1);plant(26.8,23.3,1);
+ buildFrontGarden();
  P=scene;
+}
+function tree(x,y,s=1){cyl(x,y,0,.16*s,1.1*s,0x8a5a3a,8,.2*s);ball(x,y,1.45*s,.75*s,0x5fae6a,1);ball(x+.35*s,y-.2*s,1.85*s,.5*s,0x7fcf9a,1);ball(x-.3*s,y+.25*s,1.75*s,.48*s,0x6bbf7a,1);}
+function bench(x,y,face=-1){ // bangku taman, sandaran di sisi +y kalau face=-1
+ box(x,y,.38,2.2,.6,.08,0xc98f5a);box(x,face<0?y+.5:y,.38,2.2,.1,.6,0xc98f5a);
+ box(x+.1,y+.1,0,.12,.4,.38,0x6c5a7a);box(x+1.98,y+.1,0,.12,.4,.38,0x6c5a7a);}
+function buildFrontGarden(){ // 🌳 Taman Depan (outdoor) di depan gedung, Lantai 1
+ const g=ROOMS.find(r=>r.id==='taman-depan');if(!g)return;P=FLOORS[g.f];const y0=g.y,path=0xeadfca,stone=0xd9cbb2;
+ // jalan setapak: dari pintu Meja Kerja (x=8) & teras School (x=24) ke jalan utama, lalu ke gerbang depan
+ rug(7.25,y0,1.5,g.d,path);rug(23.25,y0-1,1.5,4.2,path);rug(1,y0+3.4,30,1.3,path);
+ for(let i=0;i<7;i++)box(7.45+(i%2)*.55,y0+.5+i*1.1,.02,.5,.5,.03,stone,{shadow:false});
+ // air mancur di tengah
+ cyl(16,y0+5.1,0,2.0,.03,path,24);cyl(16,y0+5.1,0,1.25,.42,0xcfe4ff,20);cyl(16,y0+5.1,.42,1.0,.05,0x9cd4ff,20);
+ cyl(16,y0+5.1,.42,.18,.8,0xffffff,8);cyl(16,y0+5.1,1.2,.45,.08,0xcfe4ff,14);ball(16,y0+5.1,1.42,.18,0x9cd4ff);
+ // pohon & semak
+ [[1.6,y0+1.4,1.1],[13.2,y0+1.5,.9],[19.6,y0+1.4,.85],[30.4,y0+1.5,1.1],[1.8,y0+6.6,1],[30.2,y0+6.6,1],[27.8,y0+6.4,.8]].forEach(([x,y,s])=>tree(x,y,s));
+ [[4.2,y0+1.1],[10.6,y0+1.1],[21.6,y0+1.1],[27.4,y0+1.2]].forEach(([x,y])=>plant(x,y,.9,0x7fcf9a));
+ // bangku menghadap air mancur
+ bench(10.5,y0+5.8);bench(19.3,y0+5.8);bench(12.6,y0+1.9,1);
+ // bedeng bunga
+ for(let i=0;i<10;i++)ball(3.2+i*.7,y0+7.2,.18,.18,[0xff9cc7,0xffd23f,0xc79bff,0xffffff][i%4]);
+ for(let i=0;i<10;i++)ball(21.4+i*.7,y0+7.2,.18,.18,[0xffd23f,0xff9cc7,0xffffff,0xc79bff][i%4]);
+ rug(24.6,y0+2.3,4.2,1.6,0x8a5a3a);for(let i=0;i<6;i++)for(let j=0;j<2;j++)ball(25+i*.68,y0+2.7+j*.8,.2,.17,[0xff7eb6,0xffd23f,0xc79bff][(i+j)%3]);
+ // lampu taman & gerbang depan (tiang)
+ lamp(6.6,y0+3.1);lamp(25.4,y0+5.0);
+ [[6.7,y0+7.55],[9.0,y0+7.55]].forEach(([x,y])=>{box(x,y,0,.3,.3,1.2,0xf2a6c8);ball(x+.15,y+.15,1.32,.14,0xffd23f);});
+ label('🚪 Gerbang','seat',7.85,y0+7.7,1.0);
 }
 
 /* ================= Karakter voxel ================= */
@@ -697,7 +748,7 @@ function doorBetween(a,b){
  return null;
 }
 function route(from,to){
- const A=roomAt(from.x,from.y),B=roomAt(to.x,to.y);if(!A||!B||A===B)return[[to.x,to.y]];
+ const A=roomAt(...snapIn(from.x,from.y)),B=roomAt(...snapIn(to.x,to.y));if(!A||!B||A===B)return[[to.x,to.y]];
  const prev=new Map([[A.id,null]]),q=[A];
  while(q.length){const r=q.shift();if(r===B)break;ROOMS.forEach(n=>{if(!prev.has(n.id)&&doorBetween(r,n)){prev.set(n.id,r);q.push(n);}});}
  if(!prev.has(B.id))return[[to.x,to.y]];
@@ -787,7 +838,7 @@ function keiraInside0(id,a,b){
   const pts=[];toLane(a,pts);pts.push([Math.max(17.4,Math.min(26.2,b[0])),lane],b);return pts;
  }
  if(id==='ig'){const lane=5.15;return [[a[0],lane],[b[0]>17?19.2:b[0],lane],b];}
- {const lx=ROOMS.find(r=>r.id===id&&r.lux);if(lx)return [[lx.x+lx.w/2,lx.y+3.0],b];} // kamar mewah: lewat tengah kamar
+ {const lx=ROOMS.find(r=>r.id===id&&r.lux);if(lx)return [[(lx.ox??lx.x)+lx.w/2,(lx.oy??lx.y)+3.0],b];} // kamar mewah: lewat tengah kamar (koordinat denah lama, sama kayak a/b di sini; dulu kegeser 2x -> Keira melayang di luar gedung)
  return [b];
 }
 function keiraDoor(a,b){
@@ -796,7 +847,7 @@ function keiraDoor(a,b){
  return d;
 }
 function keiraRaw(from,to){
- const A=roomAt(from.x,from.y),B=roomAt(to.x,to.y);
+ const A=roomAt(...snapIn(from.x,from.y)),B=roomAt(...snapIn(to.x,to.y));
  if(!A||!B||A===B)return [[to.x,to.y]];
  const prev=new Map([[A.id,null]]),q=[A];
  while(q.length){const r=q.shift();if(r===B)break;ROOMS.forEach(n=>{if(!prev.has(n.id)&&keiraDoor(r,n)){prev.set(n.id,r);q.push(n);}});}
@@ -835,10 +886,19 @@ function placeActor(ac){ // set pose statis
   c.root.position.set(tx(s.x),.14,tz(s.y));c.root.rotation.y=s.face||0;c.legs.forEach(l=>l.rotation.x=-Math.PI/2);c.arms.forEach(a=>a.rotation.x=-.9);
  }else{c.root.position.set(tx(s.x),0,tz(s.y));c.root.rotation.y=s.face||0;}
 }
+/* rapihin jalur: tiap titik dipaksa ke area valid, pindah lantai wajib lewat kaki tangga/lift (gak boleh melayang antar lantai) */
+const nearFoot=p=>{const f=STAIR_FOOT[floorOfY(p[1])];return !!f&&Math.hypot(p[0]-f[0],p[1]-f[1])<.35;};
+function safePath(from,pts){const out=[];let prev=snapIn(from.x,from.y);
+ (pts||[]).forEach(p=>{const q=snapIn(p[0],p[1]);
+  if(floorOfY(q[1])!==floorOfY(prev[1])&&!(nearFoot(prev)&&nearFoot(q)&&Math.abs(floorOfY(q[1])-floorOfY(prev[1]))===1)){
+   const via=route({x:prev[0],y:prev[1]},{x:q[0],y:q[1]});via.slice(0,-1).forEach(v=>out.push(snapIn(v[0],v[1])));}
+  out.push(q);prev=q;});
+ return out;}
 function startWalk(ac,pts,after){
  if(ac.spot&&ac.spot.pose==='bed'){ac.pos={x:ac.spot.wake[0],y:ac.spot.wake[1]};}
  else if(!ac.pos)ac.pos={x:ac.spot.x,y:ac.spot.y};
- ac.path=pts;ac.after=after||null;ac.walking=true;
+ {const q=snapIn(ac.pos.x,ac.pos.y);ac.pos={x:q[0],y:q[1]};}
+ ac.path=safePath(ac.pos,pts);ac.after=after||null;ac.walking=true;
  placeActor({...ac,spot:{pose:'stand',x:ac.pos.x,y:ac.pos.y,face:0}});
 }
 function syncActors(walk){
@@ -937,6 +997,7 @@ function updateActors(now,dt){
     const dx=x-ac.pos.x,dy=y-ac.pos.y,dist=Math.hypot(dx,dy);
     if(dist<=left){ac.pos={x,y};ac.path.shift();left-=dist;}else{ac.pos.x+=dx/dist*left;ac.pos.y+=dy/dist*left;left=0;
      const target=Math.atan2(dx,dy);let diff=target-c.root.rotation.y;diff=Math.atan2(Math.sin(diff),Math.cos(diff));c.root.rotation.y+=diff*Math.min(1,dt*12);}}
+   {const q=snapIn(ac.pos.x,ac.pos.y);ac.pos.x=q[0];ac.pos.y=q[1];} // jaga2: gak boleh keluar gedung/taman
    const ph=now/1000*9;
    c.legs[0].rotation.x=Math.sin(ph)*.7;c.legs[1].rotation.x=-Math.sin(ph)*.7;c.arms[0].rotation.x=-Math.sin(ph)*.6;c.arms[1].rotation.x=Math.sin(ph)*.6;
    onFloor(ac,ac.pos.y);c.root.position.set(tx(ac.pos.x),Math.abs(Math.sin(ph))*.06,tz(ac.pos.y));
