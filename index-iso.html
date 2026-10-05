@@ -549,7 +549,7 @@ function renderChips(){
  $('chips').innerHTML=effective().map(a=>{const id=idOf(a);return `<div class="chip ${a.status}" data-id="${id}"><img src="${img('f-'+id,faceSVG(lookOf(id))).src}" alt=""><span class="d ${a.status}"></span>${esc(a.name)}</div>`}).join('');
  $('chips').querySelectorAll('.chip').forEach(c=>c.onclick=()=>{focusOn(c.dataset.id);showDetail(c.dataset.id);});
 }
-function roomName(id){const r=ROOMS.find(r=>r.id===id);return r?r.name:id==='kamar-love'?'❤️ Kamar Love':id==='kamar-keira-han'?'🔒❤️ Kamar Keira & Han':id}
+function roomName(id){const r=ROOMS.find(r=>r.id===id);return r?r.name:id==='kamar-love'?'❤️ Kamar Love':id==='pondok-taman'?'🔒🌿 Pondok Taman':id}
 function showDetail(id){
  const a=effective().find(a=>idOf(a)===id);if(!a)return;const d=$('detail');
  d.innerHTML=`<b>${id==='hanrin'?'👑 ':''}${esc(a.name)}</b><br><span style="color:#a37a95">${esc(a.role)}</span><br>📍 ${esc(roomName(a.room))}<br>📌 ${esc(a.task||'-')}<br>Status: <b style="font-size:12px">${label(a.status)}</b>${a.updated_at?'<br><span style="color:#a37a95">update '+fmtFull(new Date(a.updated_at))+'</span>':''}`;
@@ -561,7 +561,7 @@ const FALLBACK=[
  {id:'hanrin',name:'Hanrin',role:'Manager',room:'ceo',status:'kerja',task:'Bagi tugas ke bot lain'},
  {id:'lia',name:'Ophelia 2 (Lia)',role:'Konten Instagram, posting & jaga IG ophelia.lia.real',room:'ig',status:'kerja',task:'Jaga IG ophelia.lia.real'},
  {id:'ophelia1',name:'Ophelia 1',role:'Partner Instagram (lia_1_2000)',room:'ig',status:'kerja',task:'Saling support konten sama Lia'},
- {id:'han',name:'Han',role:'Owner · Kantor AI',room:'kamar-keira-han',status:'santai',task:'Di kamar taman, nunggu Keira 🔒❤️'},
+ {id:'han',name:'Han',role:'Owner · Kantor AI',room:'pondok-taman',status:'santai',task:'Di Pondok Taman 🔒'},
  ...[['rin','Rin','Asisten pribadi'],['ornf','Co Agent 2 Lia','Chat WhatsApp'],['emely','Emely','Teman ngobrol'],['hr','HR','Hanrin, pacar / pendamping'],['keira','Keira','Konsultan pribadi'],['love','Love ❤️','Love ❤️ · Urusan pasangan (date, kado, pengingat)']].map(([id,name,role])=>({id,name,role,room:'kamar',status:'tidur',task:'belum ada tugas',...(id==='love'?{schedule:LOVE_SCHEDULE}:{})}))];
 async function load(manual){
  try{
