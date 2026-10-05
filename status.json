@@ -1,5 +1,5 @@
 {
-  "updated_at": "2026-10-05T08:55:54+08:00",
+  "updated_at": "2026-10-05T11:12:00+08:00",
   "agents": [
     {
       "id": "hanrin",
@@ -133,6 +133,21 @@
       "status": "tidur",
       "task": "belum ada tugas",
       "updated_at": "2026-10-04T22:42:00+08:00"
+    },
+    {
+      "id": "han",
+      "name": "Han",
+      "role": "Owner · Kantor AI",
+      "room": "kamar-keira-han",
+      "status": "santai",
+      "task": "Di kamar taman, nunggu Keira 🔒❤️",
+      "schedule": [
+        {
+          "time": "∞",
+          "label": "Di kamar taman bareng Keira"
+        }
+      ],
+      "updated_at": "2026-10-05T11:12:00+08:00"
     },
     {
       "id": "keira",
