@@ -31,6 +31,9 @@ main{flex:1;display:grid;grid-template-columns:1fr 270px;gap:12px;padding:12px 1
 .ctrl{position:absolute;left:10px;top:10px;display:flex;flex-direction:column;gap:6px;z-index:5}
 .ctrl button{width:36px;height:36px;border-radius:12px;border:2px solid #ffd2e4;background:#fff;color:#d6457f;font-size:17px;font-weight:800;cursor:pointer;box-shadow:0 3px 0 #ffe0ec}
 .floors{position:absolute;left:10px;top:264px;display:flex;flex-direction:column;gap:5px;z-index:5}
+.qrow{display:flex;gap:6px;margin-top:8px}
+.qrow button{flex:1;border:2px solid #ffd2e4;background:#fff;color:#d6457f;font:inherit;font-size:12px;font-weight:800;border-radius:12px;padding:7px 8px;cursor:pointer;box-shadow:0 3px 0 #ffe0ec}
+.qrow button.on{background:linear-gradient(180deg,#6ad39a,#3cae6e);color:#fff;border-color:#fff;box-shadow:0 3px 0 #2a8a55}
 .floors button{min-width:58px;height:30px;border-radius:11px;border:2px solid #ffd2e4;background:#fff;color:#d6457f;font:inherit;font-size:11.5px;font-weight:800;cursor:pointer;box-shadow:0 3px 0 #ffe0ec;padding:0 8px}
 .floors button.on{background:linear-gradient(180deg,#ff7eb6,#f2559a);color:#fff;border-color:#fff}
 .fsign{background:#5a3a52;color:#fff;font-weight:900;font-size:13px;padding:4px 12px;border-radius:10px;border:2px solid #fff;white-space:nowrap;box-shadow:0 3px 8px rgba(0,0,0,.18)}
@@ -173,6 +176,7 @@ body.touch .povhint .kbd{display:none}body.touch .povhint .tch{display:inline}
       <div class="small">Dicek: <b id="lastCheck">-</b> · tiap 60 detik</div>
       <button class="btn ghost" id="btnReload" style="margin-top:6px;width:100%">🔄 Muat ulang status</button>
     </div>
+    <div class="card"><h2>⚡ Kualitas grafis</h2><div class="qrow"><button type="button" id="qRingan" class="on">⚡ Ringan</button><button type="button" id="qNormal">✨ Normal</button></div><div class="small" style="margin-top:6px" id="qHint">Default <b>Ringan</b> biar laptop lemah (i5 gen 3 dll) lebih mulus di POV — resolusi lebih rendah, tanpa bayangan lembut.</div></div>
     <div class="card povcard"><h2>🎮 Mode POV Han</h2><button class="btn" id="btnPov" style="width:100%;white-space:normal">🎮 Mode POV Han</button><div class="small" style="margin-top:6px">Han jalan sendiri: <b>WASD/panah</b> jalan, <b>Q/E</b> atau drag mouse putar, <b>Shift</b> lari, <b>R/F</b> naik/turun di tangga/lift, <b>V</b> 1st/3rd person, <b>Esc</b> keluar. Di HP: stick + tombol di layar.</div></div>
     <div class="card" id="chatCard"></div>
     <div class="card">
@@ -342,12 +346,18 @@ ROOMS.filter(r=>r.group).forEach(r=>{
  for(let i=0;i<n;i++){const a=-Math.PI/2+i*2*Math.PI/n;r.seats.push({x:r.cx+Math.cos(a)*R,y:r.cy+Math.sin(a)*R,name:r.group[i]||null});}
 });
 
-/* ================= Three setup ================= */
+/* ================= Three setup + kualitas grafis ================= */
 const stage=document.getElementById('stage'),glBox=document.getElementById('gl'),labBox=document.getElementById('labels');
-const renderer=new THREE.WebGLRenderer({antialias:true,alpha:true,preserveDrawingBuffer:true});
-renderer.setPixelRatio(Math.min(devicePixelRatio,2));
-renderer.shadowMap.enabled=true;renderer.shadowMap.type=THREE.PCFSoftShadowMap;
+/* Ringan = default buat CPU/GPU lemah (i5 gen 3 dll): DPR rendah, tanpa AA, tanpa shadow map */
+const QPRESETS={
+ ringan:{dpr:.75,scale:.72,shadow:false,shadowSize:512,aa:false,hemi:1.85,sun:2.0,label:'⚡ Ringan'},
+ normal:{dpr:1.5,scale:1,shadow:true,shadowSize:1024,aa:true,hemi:1.6,sun:2.2,label:'✨ Normal'}
+};
+function loadQuality(){try{const q=localStorage.getItem('kantorQuality');if(q==='normal'||q==='ringan')return q;}catch(_){}return 'ringan';}
+let qualityMode=loadQuality(),QUAL=QPRESETS[qualityMode];
+const renderer=new THREE.WebGLRenderer({antialias:!!QUAL.aa,alpha:true,powerPreference:'low-power'});
 renderer.outputColorSpace=THREE.SRGBColorSpace;
+renderer.shadowMap.type=THREE.BasicShadowMap; // lebih murah dari PCFSoft
 glBox.appendChild(renderer.domElement);
 const labelR=new CSS2DRenderer();labelR.domElement.style.position='absolute';labelR.domElement.style.inset='0';labelR.domElement.style.pointerEvents='none';labBox.appendChild(labelR.domElement);
 const scene=new THREE.Scene();
@@ -359,14 +369,39 @@ controls.maxPolarAngle=Math.PI*0.44;controls.minPolarAngle=0.15;
 controls.touches={ONE:THREE.TOUCH.ROTATE,TWO:THREE.TOUCH.DOLLY_PAN};
 controls.screenSpacePanning=false;
 
-scene.add(new THREE.HemisphereLight(0xffffff,0xf3d6ff,1.6));
-const sun=new THREE.DirectionalLight(0xfff4ea,2.2);sun.position.set(14,42,22);
-sun.castShadow=true;sun.shadow.mapSize.set(2048,2048);
+const hemi=new THREE.HemisphereLight(0xffffff,0xf3d6ff,QUAL.hemi);scene.add(hemi);
+const sun=new THREE.DirectionalLight(0xfff4ea,QUAL.sun);sun.position.set(14,42,22);
+sun.shadow.mapSize.set(QUAL.shadowSize,QUAL.shadowSize);
 Object.assign(sun.shadow.camera,{left:-48,right:48,top:48,bottom:-48,near:1,far:120});sun.shadow.bias=-0.0008;sun.shadow.normalBias=.02;
 scene.add(sun);
 let P=scene; // parent bangunan saat ini (grup lantai/ruang)
 const FLOORS=[...Array(NFLOOR)].map((_,f)=>{const g=new THREE.Group();g.userData.f=f;scene.add(g);return g;});
 const fill=new THREE.DirectionalLight(0xffe0f0,.6);fill.position.set(20,12,25);scene.add(fill);
+
+function applyQuality(mode,announce){
+ qualityMode=mode in QPRESETS?mode:'ringan';QUAL=QPRESETS[qualityMode];
+ try{localStorage.setItem('kantorQuality',qualityMode);}catch(_){}
+ const dpr=Math.min(window.devicePixelRatio||1,QUAL.dpr);
+ renderer.setPixelRatio(dpr);
+ renderer.shadowMap.enabled=!!QUAL.shadow;
+ sun.castShadow=!!QUAL.shadow;
+ if(QUAL.shadow)sun.shadow.mapSize.set(QUAL.shadowSize,QUAL.shadowSize);
+ hemi.intensity=QUAL.hemi;sun.intensity=QUAL.sun;
+ const br=document.getElementById('qRingan'),bn=document.getElementById('qNormal'),hint=document.getElementById('qHint');
+ if(br)br.classList.toggle('on',qualityMode==='ringan');
+ if(bn)bn.classList.toggle('on',qualityMode==='normal');
+ if(hint)hint.innerHTML=qualityMode==='ringan'
+  ?'Mode <b>Ringan</b>: resolusi ~72%, tanpa antialias & bayangan — cocok POV di laptop lemah.'
+  :'Mode <b>Normal</b>: lebih tajam + bayangan. Kalau lag di POV, balik ke Ringan.';
+ if(typeof resize==='function')resize();
+ if(announce&&typeof log==='function')log('⚡ Grafis: '+QUAL.label+(QUAL.aa?'':' · AA off')+(QUAL.shadow?'':' · shadow off'));
+}
+function bindQualityUI(){
+ const br=document.getElementById('qRingan'),bn=document.getElementById('qNormal');
+ if(br)br.onclick=()=>{if(qualityMode==='ringan')return;applyQuality('ringan',true);};
+ if(bn)bn.onclick=()=>{if(qualityMode==='normal')return;applyQuality('normal',true);if(typeof log==='function')log('✨ Tip: antialias ikut saat halaman dimuat — refresh kalau mau AA penuh.');};
+}
+applyQuality(qualityMode,false);
 
 /* ================= Helper geometri ================= */
 const MATS={};
@@ -1440,7 +1475,10 @@ renderer.domElement.addEventListener('wheel',e=>{if(!POV.on)return;e.preventDefa
 
 /* ================= Loop ================= */
 function applyShift(){const w=stage.clientWidth,h=stage.clientHeight;if(Math.abs(viewShift)<.5)camera.clearViewOffset();else camera.setViewOffset(w,h,viewShift,0,w,h);camera.updateProjectionMatrix();}
-function resize(){const w=stage.clientWidth,h=stage.clientHeight;renderer.setSize(w,h);labelR.setSize(w,h);camera.aspect=w/h;applyShift();}
+function resize(){const w=stage.clientWidth,h=stage.clientHeight,s=QUAL.scale||1;
+ renderer.setSize(Math.max(1,w*s),Math.max(1,h*s),false);
+ renderer.domElement.style.width=w+'px';renderer.domElement.style.height=h+'px';
+ labelR.setSize(w,h);camera.aspect=w/h;applyShift();}
 window.addEventListener('resize',resize);
 let last=performance.now();const tmpV=new THREE.Vector3();
 function loop(now){
@@ -1469,6 +1507,7 @@ function chatSay(m){const ac=actors[m.from],txt=Array.from(m.text.replace(/\s+/g
  log('💬 '+m.name+': '+(txt.length>60?txt.slice(0,60).join('')+'…':t));}
 try{if(window.KantorChat)KantorChat.init({el:$('chatCard'),nameOf:id=>{const a=agentsData.find(x=>idOf(x)===id);return a&&a.name;},onNew:chatSay});}catch(e){console.warn('chat',e);}
 $('loading').remove();
+bindQualityUI();applyQuality(qualityMode,false);
 requestAnimationFrame(loop);
 // opsi URL buat preview: #zoom, #kerja, #pop=lia
 const hs=location.hash;
