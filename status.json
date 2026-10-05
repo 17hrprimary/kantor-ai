@@ -1,13 +1,13 @@
 {
-  "updated_at": "2026-10-05T00:30:00+08:00",
+  "updated_at": "2026-10-05T08:32:34+08:00",
   "agents": [
     {
       "id": "hanrin",
       "name": "Hanrin",
       "role": "Manager",
       "room": "ceo",
-      "status": "kerja",
-      "task": "Kerja di Ruang CEO",
+      "status": "santai",
+      "task": "Free, jalan-jalan keliling kantor",
       "schedule": [
         {
           "time": "13:01",
@@ -18,7 +18,7 @@
           "label": "Cek WA RI & update website Hawa Bouquet"
         }
       ],
-      "updated_at": "2026-10-04T23:51:29+08:00"
+      "updated_at": "2026-10-05T08:32:34+08:00"
     },
     {
       "id": "lia",
