@@ -837,6 +837,14 @@ const NAMES={lia:'Lia',ophelia1:'Ophelia 1',hanrin:'Hanrin'};
 function nameOf(id){const a=agentsData.find(x=>idOf(x)===id)||(actors[id]&&actors[id].a);return NAMES[id]||(a&&a.name)||id;}
 /* tempat tidur siang pas santai (per bot) */
 function napSpotOf(id){if(id==='ophelia1')return{sp:SOFA2_SPOT,label:'Capek, ke Ruang TV 🛋️'};const lx=LUX[id];if(lx)return{sp:bedSpot(luxBed(lx)),label:'Ngantuk, ke '+lx.name.replace(/^\S+ /,'')+' 😴'};return{sp:SOFA2_SPOT,label:'Capek, ke Ruang TV 🛋️'};}
+/* kursi grup: cocokkan per id (bukan cuma nama), biar nama baru (mis. 'Lia CO') gak numpuk di kursi orang lain (dulu nyasar ke kursi Rin → Rin keliatan double) */
+const SEAT_OWNER={'Rin':'rin','Keira':'keira','Co Agent 2 Lia':'ornf','Lia CO':'ornf','Hanrin':'hanrin','Emely':'emely','HR':'hr','Love':'love'};
+function groupSeat(g,a,id,used){const k='seat:'+g.id,taken=used[k]=used[k]||new Set();
+ const own=s=>s.name&&(SEAT_OWNER[s.name]===id||a.name.startsWith(s.name));
+ const here=new Set((used.eff||[]).filter(x=>x.room===g.id).map(x=>idOf(x)));
+ const free=s=>!taken.has(s);
+ const s=g.seats.find(s=>own(s)&&free(s))||g.seats.find(s=>!s.name&&free(s))||g.seats.find(s=>free(s)&&!here.has(SEAT_OWNER[s.name]))||g.seats.find(free)||g.seats[0];
+ taken.add(s);return s;}
 function spotFor(a,used){
  const id=idOf(a);let room=a.room;
  if(id==='han')return hanSeat();
@@ -853,7 +861,7 @@ function spotFor(a,used){
  if(room==='kamar'){let i=BED_ORDER.indexOf(id);if(i<0)i=(used.bed=(used.bed||6)+1);const b=BEDS[i%BEDS.length];
   return a.status==='tidur'?bedSpot(sharedBed(b)):{x:b[0]+1.9,y:b[1]+1.4,pose:'stand',face:0};}
  const g=ROOMS.find(r=>r.id===room&&r.group);
- if(g){const s=g.seats.find(s=>s.name&&a.name.startsWith(s.name))||g.seats.find(s=>!s.name)||g.seats[0];return{x:s.x,y:s.y,pose:'sit',face:Math.atan2(g.cx-s.x,g.cy-s.y)};}
+ if(g){const s=groupSeat(g,a,id,used);return{x:s.x,y:s.y,pose:'sit',face:Math.atan2(g.cx-s.x,g.cy-s.y)};}
  used.kerja=used.kerja||0;const k=SPOTS.kerja[used.kerja++%SPOTS.kerja.length];return{x:k[0],y:k[1],pose:'sit',face:0};
 }
 const roomAt=(x,y)=>ROOMS.find(r=>x>=r.x&&x<r.x+r.w&&y>=r.y&&y<r.y+r.d);
@@ -1033,7 +1041,7 @@ function startWalk(ac,pts,after){
  placeActor({...ac,spot:{pose:'stand',x:ac.pos.x,y:ac.pos.y,face:0}});
 }
 function syncActors(walk){
- const used={},eff=effective();
+ const eff=effective(),used={eff};
  eff.forEach(a=>{
   const id=idOf(a),s=spotFor(a,used);let ac=actors[id];
   if(ac&&id==='han'&&(ac.pov||ac.together)){ac.a=a;if(ac.pov)ac.home=s;return;} // POV: posisi Han dipegang keyboard

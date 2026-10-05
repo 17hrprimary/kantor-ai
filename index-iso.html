@@ -435,6 +435,14 @@ const LOVE_SCHEDULE=[{time:'08:00',label:'Nongkrong di Grup My Bini 💬',room:'
 function effective(){return agentsData.map(a0=>{const a=applyTimed(a0),o=overrides[idOf(a)];let r=a;if(o&&(!a.updated_at||new Date(a.updated_at)<=o.at))r={...a,...o.patch};
  if(idOf(a)==='han'&&POV.on){const h=actors.han,rm=h?roomAt(h.x,h.y):null;r={...r,room:rm?rm.id:r.room,status:POV.moving?'jalan':'santai',task:POV.moving?'Han lagi jalan (POV) 🎮':'Han lagi kontrol sendiri (POV) 🎮'};} // POV: status lokal menang
  return r;});}
+/* kursi grup: cocokkan per id (bukan cuma nama), biar nama baru (mis. 'Lia CO') gak numpuk di kursi orang lain (dulu nyasar ke kursi Rin → Rin keliatan double) */
+const SEAT_OWNER={'Rin':'rin','Keira':'keira','Co Agent 2 Lia':'ornf','Lia CO':'ornf','Hanrin':'hanrin','Emely':'emely','HR':'hr','Love':'love'};
+function groupSeat(g,a,id,used){const k='seat:'+g.id,taken=used[k]=used[k]||new Set();
+ const own=s=>s.name&&(SEAT_OWNER[s.name]===id||a.name.startsWith(s.name));
+ const here=new Set((used.eff||[]).filter(x=>x.room===g.id).map(x=>idOf(x)));
+ const free=s=>!taken.has(s);
+ const s=g.seats.find(s=>own(s)&&free(s))||g.seats.find(s=>!s.name&&free(s))||g.seats.find(s=>free(s)&&!here.has(SEAT_OWNER[s.name]))||g.seats.find(free)||g.seats[0];
+ taken.add(s);return s;}
 function spotFor(a,used){
  const id=idOf(a);let room=a.room;
  if(id==='han')return{x:8.2,y:26.8,pose:'stand'}; // dekat taman depan; denah iso tidak punya cottage
@@ -443,7 +451,7 @@ function spotFor(a,used){
  if(room==='ceo'||room==='ig'){const s=SPOTS[room][id];if(s)return{x:s[0],y:s[1],pose:'sit'};}
  if(room==='kamar'){let i=BED_ORDER.indexOf(id);if(i<0)i=BED_ORDER.length+Object.keys(used).length;const b=BEDS[i%BEDS.length];return{x:b[0]+.7,y:b[1]+.45,pose:a.status==='tidur'?'bed':'stand',bed:b};}
  const g=ROOMS.find(r=>r.id===room&&r.group);
- if(g){let s=g.seats.find(s=>s.name&&a.name.startsWith(s.name))||g.seats[0];return{x:s.x,y:s.y-.05,pose:'sit'};}
+ if(g){const s=groupSeat(g,a,id,used);return{x:s.x,y:s.y-.05,pose:'sit'};}
  // kerja bersama / lainnya
  used.kerja=used.kerja||0;const k=SPOTS.kerja[used.kerja++%SPOTS.kerja.length];return{x:k[0],y:k[1],pose:'sit'};
 }
@@ -467,8 +475,8 @@ function route(from,to){ // BFS antar ruangan lewat pintu
  pts.push([to.x,to.y]);return pts;
 }
 function syncActors(walk){
- const used={};
- effective().forEach(a=>{
+ const eff=effective(),used={eff};
+ eff.forEach(a=>{
   const id=idOf(a),s=spotFor(a,used);let ac=actors[id];
   if(!ac){actors[id]={x:s.x,y:s.y,path:[],spot:s,home:s,a};return;}
   if(id==='han'&&ac.pov){ac.a=a;ac.home=s;return;} // POV: posisi Han dipegang keyboard
