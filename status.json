@@ -1,5 +1,5 @@
 {
-  "updated_at": "2026-10-05T08:32:34+08:00",
+  "updated_at": "2026-10-05T08:46:00+08:00",
   "agents": [
     {
       "id": "hanrin",
@@ -95,12 +95,26 @@
     },
     {
       "id": "ornf",
-      "name": "Co Agent 2 Lia",
+      "name": "Lia CO",
       "role": "Chat WhatsApp",
-      "room": "kamar",
-      "status": "tidur",
-      "task": "belum ada tugas",
-      "updated_at": "2026-10-04T22:56:00+08:00"
+      "room": "grup-mybini",
+      "status": "santai",
+      "task": "Nongkrong di ruangan My Bini",
+      "updated_at": "2026-10-05T08:46:00+08:00",
+      "schedule": [
+        {
+          "time": "08:00",
+          "label": "Nongkrong di ruangan My Bini"
+        },
+        {
+          "time": "17:00",
+          "label": "Studio konten"
+        },
+        {
+          "time": "21:00",
+          "label": "Tidur di kamar"
+        }
+      ]
     },
     {
       "id": "emely",
