@@ -131,7 +131,7 @@ const LOOKS={
  keira:{hair:'#141217',hl:'#3a3340',style:'bangs',glasses:'roundThick',shirt:'#1f1d24',skin:'#f6dccb',police:true},
  ornf:{hair:'#1b1720',hl:'#3a3340',style:'pony',shirt:'#ffffff',skin:'#f6d8c4',band:'#ff7eb6'},
  love:{hair:'#3b2418',hl:'#5c3a26',style:'bangs',shirt:'#d42a3a',skin:'#fbe4d6',butterfly:'#ff8fc0'}, // rambut panjang coklat tua + poni, jepit kupu-kupu pink, baju merah
- han:{hair:'#3a2418',hl:'#5c4030',style:'short',shirt:'#7eb6e0',skin:'#f3d2bb',pants:'#2c3e6b'}, // Han: rambut pendek, kemeja biru muda, celana navy
+ han:{hair:'#3a2418',hl:'#5c4030',style:'short',shirt:'#7eb6e0',skin:'#f3d2bb',pants:'#2c3e6b',crown:true,robe:true}, // Han/Papa: mahkota emas + jubah ungu royal
 };
 const DEFAULT_LOOK={hair:'#3a2a3a',hl:'#5a4a5a',style:'bob',shirt:'#ff9cc7',skin:'#f6d8c4'};
 
@@ -194,6 +194,7 @@ function hairAcc(L){
  if(L.band)s+=`<path d="M-17 -10 Q0 -24 17 -10" stroke="${L.band}" stroke-width="3" fill="none"/>`;
  if(L.goggles)s+=`<rect x="-15" y="-19" width="30" height="7" rx="3.5" fill="#bdeee0" stroke="#3fb894" stroke-width="1.2"/>`;
  if(L.butterfly)[[-12,-21,-18],[12,-21,18]].forEach(([x,y,r])=>{s+=`<g transform="translate(${x},${y}) rotate(${r})"><path d="M0 0 C-4 -6 -8 -3 -5 1 C-8 4 -3 6 0 1 C3 6 8 4 5 1 C8 -3 4 -6 0 0Z" fill="${L.butterfly}" stroke="#d6457f" stroke-width=".6"/><path d="M0 -2.5 L0 2.5" stroke="#9a2a5a" stroke-width="1.2" stroke-linecap="round"/></g>`;}); // jepit kupu-kupu
+ if(L.crown)s+=`<g transform="translate(0,-30)"><rect x="-10" y="0" width="20" height="5" rx="1" fill="#ffd23f" stroke="#c9a24a" stroke-width=".6"/><path d="M-10 0 L-10 -7 L-5 -2 L0 -8 L5 -2 L10 -7 L10 0Z" fill="#ffd23f" stroke="#c9a24a" stroke-width=".6"/><circle cx="0" cy="-1" r="1.6" fill="#f2559a"/></g>`;
  return s;
 }
 function head(L,sleep){return `${hairBack(L)}${face(L,sleep)}${hairFront(L)}${hairAcc(L)}`}
@@ -212,6 +213,7 @@ function body(L){
  <rect x="-19" y="30" width="9" height="6" rx="1" fill="none" stroke="#3a3842" stroke-width=".7"/>
  <g transform="translate(13,34)"><path d="M0 -5 L4 -2 L4 2 L0 5 L-4 2 L-4 -2Z" fill="#d9dde3" stroke="#8d939c" stroke-width=".7"/><circle r="1.6" fill="#a8aeb7"/></g>`;
  if(L.coat)s+=`<path d="M-24 50 Q-24 24 -10 21 L-3 21 L-1 50Z M24 50 Q24 24 10 21 L3 21 L1 50Z" fill="#f4fbff" stroke="#cfe3ea"/><rect x="11" y="32" width="6" height="5" rx="1" fill="#8fd8c4"/>`;
+ if(L.robe)s+=`<path d="M-28 58 Q-30 28 -12 20 L12 20 Q30 28 28 58 Z" fill="#4a1a6b" stroke="#2e0f45" stroke-width=".8" opacity=".95"/><path d="M-12 20 L-3 21 L-1 58 M12 20 L3 21 L1 58" stroke="#ffd23f" stroke-width="1.4" fill="none"/><path d="M-14 18 Q0 12 14 18" stroke="#ffd23f" stroke-width="2.2" fill="none"/><circle cx="0" cy="30" r="2.2" fill="#ffd23f"/>`; // jubah ungu + trim emas
  return s;
 }
 function lookOf(id){return Object.assign({},DEFAULT_LOOK,LOOKS[id]||{})}

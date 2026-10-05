@@ -213,7 +213,7 @@ const LOOKS={
  hannah:{hair:0x7a1830,style:'wavy',shirt:0x2f6fd6,skin:0xf6d8c4,pants:0xf5f0ff,clip:0xffffff},
  geby:{hair:0x141217,style:'straight',glasses:'roundBlack',shirt:0xff8fc0,skin:0xf8dccb,pants:0x5b6fa8,streak:true},
  love:{hair:0x3b2418,style:'bangs',shirt:0xd42a3a,skin:0xfbe4d6,pants:0x2c2a40,butterfly:0xff8fc0}, // rambut panjang coklat tua + poni, jepit kupu-kupu pink, baju merah
- han:{hair:0x3a2418,style:'short',shirt:0x7eb6e0,skin:0xf3d2bb,pants:0x2c3e6b}, // Han: rambut pendek coklat, kemeja biru muda, celana navy
+ han:{hair:0x3a2418,style:'short',shirt:0x7eb6e0,skin:0xf3d2bb,pants:0x2c3e6b,crown:true,robe:true}, // Han/Papa: mahkota emas + jubah ungu royal
 };
 const DEF_LOOK={hair:0x3a2a3a,style:'bob',shirt:0xff9cc7,skin:0xf6d8c4,pants:0x5b6fa8};
 const lookOf=id=>Object.assign({},DEF_LOOK,LOOKS[id]||{});
@@ -743,6 +743,12 @@ function makeChar(id){
  if(L.police){B(.12,.06,.02,-.07,.33,.125,0x2c2a33,torso);B(.12,.06,.02,.07,.33,.125,0x2c2a33,torso);B(.015,.28,.01,0,.17,.125,0x3a3842,torso);
   B(.07,.08,.02,.1,.22,.13,0xd9dde3,torso,new THREE.MeshStandardMaterial({color:0xdfe3ea,metalness:.8,roughness:.3}));B(.08,.05,.01,-.1,.24,.125,0x3a3842,torso);}
  if(L.coat){B(.4,.37,.26,0,.18,0,0xf4fbff,torso);B(.06,.3,.01,0,.17,.131,L.shirt===0xffffff?0x8fd8c4:L.shirt,torso);B(.07,.05,.01,.11,.2,.132,0x8fd8c4,torso);}
+ if(L.robe){const R=0x4a1a6b,T=0xffd23f; // jubah ungu royal + trim emas (Babe/Papa)
+  B(.5,.08,.32,0,.36,0,R,torso);B(.52,.025,.34,0,.405,0,T,torso); // bahu + kerah emas
+  B(.48,.58,.1,0,.02,-.18,R,torso); // cape belakang
+  B(.1,.55,.3,-.28,.05,-.02,R,torso);B(.1,.55,.3,.28,.05,-.02,R,torso); // drap sisi
+  B(.04,.5,.02,-.21,.06,.13,T,torso);B(.04,.5,.02,.21,.06,.13,T,torso); // trim depan
+  B(.06,.06,.02,0,.28,.132,T,torso);} // medali emas di dada
  // lengan (pivot bahu)
  const arms=[-1,1].map(s=>{const g=new THREE.Group();g.position.set(.25*s,.33,0);torso.add(g);
   B(.11,.14,.13,0,-.06,0,L.coat?0xf4fbff:L.shirt,g);B(.1,.16,.12,0,-.2,0,L.skin,g);return g;});
