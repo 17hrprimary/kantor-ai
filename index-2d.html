@@ -263,7 +263,7 @@ const LOVE_SCHEDULE=[{time:'08:00',label:'Nongkrong di Grup My Bini 💬',room:'
 const FALLBACK={updated_at:null,agents:[
  {id:'hanrin',name:'Hanrin',role:'Manager',room:'desk',status:'kerja',task:'Bagi tugas ke bot lain'},
  {id:'lia',name:'Ophelia (Lia)',role:'Konten Instagram, posting & jaga IG ophelia.lia.real',room:'desk',status:'kerja',task:'Jaga IG ophelia.lia.real'},
- {id:'han',name:'Han',role:'Owner · Kantor AI',room:'kamar-keira-han',status:'santai',task:'Di kamar taman, nunggu Keira 🔒❤️'},
+ {id:'han',name:'Han',role:'Owner · Kantor AI',room:'pondok-taman',status:'santai',task:'Di Pondok Taman 🔒'},
  ...[['rin','Rin','Asisten pribadi'],['ornf','Co Agent 2 Lia','Chat WhatsApp'],['emely','Emely','Teman ngobrol'],['hr','HR','Hanrin, pacar / pendamping'],['keira','Keira','Konsultan pribadi'],['love','Love ❤️','Love ❤️ · Urusan pasangan (date, kado, pengingat)']]
  .map(([id,name,role])=>({id,name,role,room:'kamar',status:'tidur',task:'belum ada tugas',...(id==='love'?{schedule:LOVE_SCHEDULE}:{})}))]};
 let agents=[],overrides={},lastSig='',fileUpdated=null;
