@@ -122,10 +122,12 @@ footer{text-align:center;font-size:11px;color:#b993ab;padding:2px 0 12px}
       <div class="sec">IG Lia x Ophelia 1</div><ul class="sched" id="s2"></ul>
       <div class="sec">Keira</div><ul class="sched" id="s3"></ul>
     </div>
+    <div class="card" id="chatCard"></div>
     <div class="card"><h2>📝 Log kantor</h2><div class="log" id="log"></div></div>
   </aside>
 </main>
 <footer>Kantor AI by Han HQ · HTML, CSS, JS doang · status dari status.json 🌸</footer>
+<script src="chat.js"></script>
 <script>
 /* ===== Tampilan karakter  ===== */
 const LOOKS={
@@ -365,6 +367,11 @@ function tick(){
 tick();setInterval(tick,20000);
 log('Kantor buka, selamat datang Papa 🌸');
 load();setInterval(load,60000);
+/* 💬 Obrolan Ophelia (chat.js): panel + log pas ada pesan baru */
+function chatSay(m){const txt=Array.from(m.text.replace(/\s+/g,' ')),t=txt.slice(0,120).join('')+(txt.length>120?'…':'');
+ log('💬 '+m.name+': '+(txt.length>60?txt.slice(0,60).join('')+'…':t));
+ const b=document.querySelector('#ag-'+CSS.escape(m.from)+' .bubble');if(b){clearTimeout(b._sayT);if(b._orig==null)b._orig=b.innerHTML;b.textContent='💬 '+t;b._sayT=setTimeout(()=>{if(b.isConnected)b.innerHTML=b._orig;b._orig=null;},10000);}}
+try{if(window.KantorChat)KantorChat.init({el:$('chatCard'),nameOf:id=>{const a=agents.find(x=>idOf(x)===id);return a&&a.name;},onNew:chatSay});}catch(e){console.warn('chat',e);}
 if(location.hash==='#kerja')setTimeout(()=>$('btnKerja').click(),600);
 </script>
 </body>
