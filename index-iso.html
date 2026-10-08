@@ -127,7 +127,7 @@ const LOOKS={
  ophelia1:{hair:'#1b1720',hl:'#3a3340',style:'messy',glasses:'square',shirt:'#e23b3b',skin:'#f6d8c4',clip:'#ffd23f'},
  rin:{hair:'#1e1a22',hl:'#3b3540',style:'bun',shirt:'#9a6a4a',skin:'#f3d0b6',clip:'#ff8fbf'},
  emely:{hair:'#4a2e22',hl:'#6e4634',style:'straight',glasses:'round',shirt:'#24222b',skin:'#f3d2bb',earring:true},
- hr:{hair:'#8e1f2c',hl:'#b8364a',style:'wavy',shirt:'#ffa9c4',skin:'#f8dccb'},
+ hr:{hair:'#141217',hl:'#3a3340',style:'messy',glasses:'square',shirt:'#d93636',skin:'#f6d8c4'}, // HR (Hanrin): rambut hitam panjang berantakan, kacamata kotak, kaos merah
  keira:{hair:'#141217',hl:'#3a3340',style:'bangs',glasses:'roundThick',shirt:'#1f1d24',skin:'#f6dccb',police:true},
  ornf:{hair:'#1b1720',hl:'#3a3340',style:'pony',shirt:'#ffffff',skin:'#f6d8c4',band:'#ff7eb6'},
  love:{hair:'#3b2418',hl:'#5c3a26',style:'bangs',shirt:'#d42a3a',skin:'#fbe4d6',butterfly:'#ff8fc0'}, // rambut panjang coklat tua + poni, jepit kupu-kupu pink, baju merah
@@ -246,7 +246,7 @@ const ROOMS=[
 ];
 const SPOTS={ // tempat duduk/berdiri tetap
  ceo:{hanrin:[4.6,2.3]},
- ig:{lia:[11.6,2.5],ophelia1:[15.1,2.5]},
+ ig:{lia:[11.6,2.5],ophelia1:[15.1,2.5],hr:[15.3,6.0]},
  kamar:{},
  lounge:{love:[20.1,18.6]}, // Love nonton TV di sofa
  kerja:[[2.6,17.6],[7.1,17.6],[11.6,17.6],[2.6,21.1],[7.1,21.1],[11.6,21.1]],
@@ -293,6 +293,8 @@ function build(){
  rug(10,1.2,7,5.8,'#ffc4dc');
  desk(10.5,3.0,2.2,1.1,'#ff9cc7','#ffd2e4');chair(11.6,2.5,'#ff7eb6');
  desk(14.0,3.0,2.2,1.1,'#ff9cc7','#ffd2e4');chair(15.1,2.5,'#ffd23f');
+ // meja HR (Hanrin): depan meja Ophelia 1, kanan kursi Babe (kiri kursi Babe dikosongin)
+ desk(14.2,6.5,2.2,1.1,'#ff9cc7','#ffd2e4');chair(15.3,6.0,'#d93636');
  // kursi Babe (Papa)
  box(12.6,6.0,0,1.1,1.0,.45,'#f2559a',{top:'#ff7eb6'});box(12.6,6.0,0,1.1,.25,1.1,'#d6457f');box(12.6,6.0,0,.22,1.0,.75,'#d6457f');box(13.48,6.0,0,.22,1.0,.75,'#d6457f');
  seatTag(13.15,6.5,1.35,'💗 Babe (Papa)','#f2559a');

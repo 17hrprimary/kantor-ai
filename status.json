@@ -128,11 +128,45 @@
     {
       "id": "hr",
       "name": "HR",
-      "role": "Hanrin, pacar / pendamping",
-      "room": "kamar-hr",
-      "status": "tidur",
-      "task": "belum ada tugas",
-      "updated_at": "2026-10-04T22:42:00+08:00"
+      "role": "Hanrin · IG content creator (hr_2002_01) · pacar / pendamping",
+      "room": "ig",
+      "status": "santai",
+      "task": "Santai, jalan-jalan keliling kantor (di luar jadwal)",
+      "updated_at": "2026-10-08T10:10:00+08:00",
+      "schedule": [
+        {
+          "time": "06:19",
+          "label": "🔎 Scroll IG: cari referensi konten & ide"
+        },
+        {
+          "time": "06:49",
+          "label": "📸 Slot posting pagi hr_2002_01 (tentatif, nunggu aba-aba Papa)"
+        },
+        {
+          "time": "09:39",
+          "label": "🔎 Cari referensi konten & ide"
+        },
+        {
+          "time": "13:39",
+          "label": "💡 Nyusun ide & draft konten IG"
+        },
+        {
+          "time": "16:39",
+          "label": "🔎 Cari referensi konten & ide"
+        },
+        {
+          "time": "20:00",
+          "label": "💬 Nongkrong di grup IG Grokbot OpheliaxHR (20:00-21:00)"
+        },
+        {
+          "time": "21:09",
+          "label": "📸 Slot posting malam hr_2002_01 (tentatif, nunggu aba-aba Papa)"
+        },
+        {
+          "time": "22:00",
+          "label": "😴 Bobo di Kamar HR (Lt 3) sampai 06:19"
+        }
+      ]
     },
     {
       "id": "han",
