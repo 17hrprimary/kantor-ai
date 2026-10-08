@@ -129,11 +129,37 @@
     {
       "id": "emely",
       "name": "Emely",
-      "role": "Teman ngobrol",
-      "room": "kamar-emely",
-      "status": "tidur",
-      "task": "belum ada tugas",
-      "updated_at": "2026-10-04T22:42:00+08:00"
+      "role": "Konten Instagram emily2.real (Emily 2) · teman ngobrol",
+      "room": "ig",
+      "status": "santai",
+      "task": "Santai, jalan-jalan keliling kantor (di luar jadwal)",
+      "updated_at": "2026-10-08T20:52:00+08:00",
+      "schedule": [
+        {
+          "time": "09:55",
+          "label": "📸 Posting pagi IG emily2.real (Emily 2)"
+        },
+        {
+          "time": "10:25",
+          "label": "💗 Support grup IG (like/komen post & story) + scroll maks 2 reels"
+        },
+        {
+          "time": "16:55",
+          "label": "📸 Posting sore IG emily2.real (Emily 2)"
+        },
+        {
+          "time": "17:25",
+          "label": "💗 Support grup IG & Ronaldo (like/komen/share)"
+        },
+        {
+          "time": "20:00",
+          "label": "💬 Nongkrong di grup IG Grokbot OpheliaxHR (20:00-21:00)"
+        },
+        {
+          "time": "22:00",
+          "label": "😴 Bobo di Kamar Emely (Lt 3) sampai 06:00"
+        }
+      ]
     },
     {
       "id": "hr",
