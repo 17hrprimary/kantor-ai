@@ -202,7 +202,7 @@ const LOOKS={
  lia:{hair:0x1b1720,style:'messy',glasses:'square',shirt:0xe23b3b,skin:0xf6d8c4,pants:0x3d4f86},
  ophelia1:{hair:0x1b1720,style:'messy',glasses:'square',shirt:0xe23b3b,skin:0xf6d8c4,pants:0x3d4f86,clip:0xffd23f},
  hanrin:{hair:0x141217,style:'neat',glasses:'roundBlack',shirt:0xd93636,skin:0xf3d2bb,skirt:true,crown:true},
- rin:{hair:0x1e1a22,style:'bun',shirt:0x9a6a4a,skin:0xf3d0b6,clip:0xff8fbf,pants:0x4a3a5a},
+ rin:{hair:0x6b4530,style:'braids',shirt:0xf5b6c8,skin:0xf6d8c4,bunny:true,pants:0xe7c9d6}, // rambut coklat dua kepang depan, jepit kelinci pink, hoodie pink pastel
  emely:{hair:0x4a2e22,style:'straight',glasses:'round',shirt:0x24222b,skin:0xf3d2bb,earring:true,pants:0x5b6fa8},
  hr:{hair:0x141217,style:'messy',glasses:'square',shirt:0xd93636,skin:0xf6d8c4,pants:0x2c2a40}, // HR (Hanrin): rambut hitam panjang berantakan, kacamata kotak hitam, kaos merah "HANRIN"
  keira:{hair:0x141217,style:'bangs',glasses:'roundThick',shirt:0x1f1d24,skin:0xf6dccb,police:true,pants:0x1f1d24},
@@ -223,6 +223,7 @@ const SCHEDULE={
  ophelia1:[['07.27','Scroll IG'],['08.27','Story pagi'],['09.27','Scroll IG'],['12.27','Scroll IG'],['12.47','Reel siang'],['13.27','Story siang'],['14.27','Scroll IG'],['19.27','Scroll IG'],['19.47','Reel malam'],['20.27','Story malam'],['21.27','Scroll IG']],
  hanrin:[['13.01','Cek WA RI & update website Hawa Bouquet',undefined,undefined,true],['22.01','Cek WA RI & update website Hawa Bouquet',undefined,undefined,true]],
  hr:[['06.19','🔎 Scroll IG: cari referensi konten & ide'],['06.49','📸 Slot posting pagi hr_2002_01 (tentatif, nunggu aba-aba Papa)'],['09.39','🔎 Cari referensi konten & ide'],['13.39','💡 Nyusun ide & draft konten IG'],['16.39','🔎 Cari referensi konten & ide'],['20.00','💬 Nongkrong di grup IG Grokbot OpheliaxHR (20:00-21:00)'],['21.09','📸 Slot posting malam hr_2002_01 (tentatif, nunggu aba-aba Papa)'],['22.00','😴 Bobo di Kamar HR (Lt 3) sampai 06:19']],
+ rin:[['11.02','Posting konten IG harian'],['20.00','Nongkrong grup IG Grokbot OpheliaxHR (20:00-21:00)']],
 };
 /* Love: jadwal harian (WITA) -> ruangan/status otomatis dihitung di halaman (lihat timedSlot) */
 const LOVE_SCHEDULE=[
@@ -295,7 +296,7 @@ const STAIR_FOOT={}; // titik kaki tangga per lantai (teleport naik/turun)
 ROOMS.filter(r=>r.stairs).forEach(r=>{STAIR_FOOT[r.f]=[28.6,r.f*DY+7.2];r.foot=STAIR_FOOT[r.f];});
 const SCHOOL={teacher:[4,25.0],students:{lina:[3.2,27.9],sally:[6.7,27.9],sarah:[10.2,27.9],hannah:[4.95,30.0],geby:[8.45,30.0]}};
 const SCHOOL_NAMES={lina:'Lina',sally:'Sally',sarah:'Sarah',hannah:'Hannah',geby:'Geby'};
-const SPOTS={ceo:{hanrin:[4.6,2.35]},ig:{lia:[11.6,2.45],ophelia1:[15.1,2.45],ornf:[19,1.6],hr:[15.3,5.95]},
+const SPOTS={ceo:{hanrin:[4.6,2.35]},ig:{lia:[11.6,2.45],ophelia1:[15.1,2.45],ornf:[19,1.6],hr:[15.3,5.95],rin:[11.3,5.95]},
  kerja:[[2.6,17.6],[7.1,17.6],[11.6,17.6],[2.6,21.1],[7.1,21.1],[11.6,21.1]],
  lounge:{love:[20.25,18.95]}}; // Love duduk di sofa hijau, nonton TV
 const BEDS=[[16.7,9.2],[20.0,9.2],[23.3,9.2],[26.6,9.2],[16.7,13.3],[20.0,13.3],[23.3,13.3],[26.6,13.3]];
@@ -319,20 +320,20 @@ WANDER.push({t:'Lobi Lantai 3',x:20,y:2*DY+5},{t:'Tangga & Lift',x:24,y:4});
 // titik jalan-jalan outdoor: cuma di dalam Taman Depan (di-push setelah relO biar gak ikut digeser sbg titik denah lama)
 const GARDEN_STOPS=[{t:'Taman Depan',x:5.2,y:20.6},{t:'air mancur Taman Depan',x:16,y:18.9},{t:'bangku Taman Depan',x:11.6,y:21.9},{t:'kebun bunga depan',x:26.5,y:20.4}].map(clampOutdoor);
 WANDER.push(...GARDEN_STOPS);KEIRA_STOPS.push(GARDEN_STOPS[0],GARDEN_STOPS[1]);
-const BRAIN={ophelia1:'wander',lia:'sleepOrWander',hanrin:'wander',keira:'keiraWander',hr:'wander'}; // hr: di luar jam jadwal boleh jalan-jalan keliling kantor (aturan Papa)
+const BRAIN={ophelia1:'wander',lia:'sleepOrWander',hanrin:'wander',keira:'keiraWander',hr:'wander',rin:'wander'}; // hr: di luar jam jadwal boleh jalan-jalan keliling kantor (aturan Papa). rin: sama, di luar jam kerja
 /* ruang kerja wajib pas jam jadwal (per bot) */
-const WORK_ROOM={lia:'ig',ophelia1:'ig',hanrin:'ceo',hr:'ig'};
+const WORK_ROOM={lia:'ig',ophelia1:'ig',hanrin:'ceo',hr:'ig',rin:'ig'};
 /* jam bobo malam wajib (WITA), kecuali lagi status kerja */
-const NIGHT={hanrin:[0,7*60],hr:[22*60,6*60+19]}; // [mulai,selesai] menit WITA; kalau mulai>selesai berarti lewat tengah malam (HR: 22:00 bobo di Kamar HR Lt 3 sampai slot pertama 06:19)
+const NIGHT={hanrin:[0,7*60],hr:[22*60,6*60+19],rin:[21*60,8*60]}; // [mulai,selesai] menit WITA; kalau mulai>selesai berarti lewat tengah malam (HR: 22:00 bobo di Kamar HR Lt 3 sampai slot pertama 06:19). Rin: 21:00-08:00 Kamar Rin, setelah nongkrong 20:00-21:00
 const hmTxt=m=>String(Math.floor(m/60)).padStart(2,'0')+':'+String(m%60).padStart(2,'0');
 /* jam nongkrong (WITA) per bot: [mulai,selesai,ruangan,task] -> status 'ngobrol', duduk di mejanya */
-const HANGOUT={hr:[20*60,21*60,'ig','💬 Nongkrong di grup IG Grokbot OpheliaxHR (20:00-21:00 WITA)']};
+const HANGOUT={hr:[20*60,21*60,'ig','💬 Nongkrong di grup IG Grokbot OpheliaxHR (20:00-21:00 WITA)'],rin:[20*60,21*60,'ig','💬 Nongkrong grup IG Grokbot OpheliaxHR (20:00-21:00 WITA)']};
 const hangoutNow=id=>{const h=HANGOUT[id];if(!h)return false;const m=nowMin();return m>=h[0]&&m<h[1];};
-/* rutinitas harian (WITA): anak sekolah + Rin/Emely 08:00-17:00 kerja, 17:00-08:00 bobo di kamar masing2 (Lantai 3) */
+/* rutinitas harian (WITA): anak sekolah + Emely 08:00-17:00 di grup/sekolah, 17:00-08:00 bobo. Rin kerja di meja IG 08:00-17:00, bobo Kamar Rin 21:00-08:00 */
 const DAY_WIN=[8*60,17*60];
 const dayNow=()=>{const m=nowMin();return m>=DAY_WIN[0]&&m<DAY_WIN[1];};
 const SCHOOL_BOTS=['keira','lina','sally','sarah','hannah','geby'];
-const MYBINI_BOTS=['rin','emely']; // HR pindah ke Kantor IG (jadwal sendiri, lihat SCHEDULE.hr / status.json)
+const MYBINI_BOTS=['emely']; // Rin pindah ke meja Kantor IG. HR tetap di Kantor IG (jadwal sendiri, lihat SCHEDULE.hr / status.json)
 const routineBase=(a,id)=>MYBINI_BOTS.includes(id)?'grup-mybini':(SCHOOL_BOTS.includes(id)||a.room==='school')?'school':null;
 const nightNow=id=>{const n=NIGHT[id];if(!n)return false;const m=nowMin();return n[0]<=n[1]?(m>=n[0]&&m<n[1]):(m>=n[0]||m<n[1]);};
 const sharedBed=b=>({x:b[0],y:b[1],w:1.4,len:2.4,dir:1});
@@ -606,6 +607,9 @@ function buildWorld(){
  // meja HR (Hanrin): baris depan, persis di depan meja Ophelia 1 & sebelah kanan kursi Babe. Sisi kiri kursi Babe (x≈10.2-12.4) sengaja dikosongin buat meja berikutnya
  desk(14.2,6.5,2.2,1.1,0xff9cc7,0xffd2e4,'ig');chair(15.3,5.95,0xd93636);
  label('❤️ Meja HR','seat pink',15.3,7.35,1.3);
+ // meja Rin: baris depan, kiri kursi Babe (x 10.2-12.4). Kanan Babe tetap meja HR
+ desk(10.2,6.5,2.2,1.1,0xf5b6c8,0xffd6e6,'ig');chair(11.3,5.95,0xffb7d5);
+ label('💗 Meja Rin','seat pink',11.3,7.35,1.3);
  // kursi Babe (Papa)
  box(12.6,6.0,0,1.1,1.0,.45,0xff7eb6);box(12.6,6.75,0,1.1,.25,1.1,0xd6457f);box(12.6,6.0,0,.2,1.0,.75,0xd6457f);box(13.5,6.0,0,.2,1.0,.75,0xd6457f);
  box(12.85,6.2,.45,.6,.4,.22,0xffffff); // bantal
@@ -791,9 +795,10 @@ function makeChar(id){
  else B(.52,.08,.05,0,.2,.21,H,head);
  if(L.style==='wavy')[-1,1].forEach(s=>{for(let i=0;i<4;i++)B(.09,.12,.12,(.3+(i%2)*.03)*s,-.1-i*.14,-.12,H,head);});
  if(L.style==='bun'){const b=mesh(new THREE.IcosahedronGeometry(.13,0),mat(H),head);b.position.set(0,.38,-.12);}
- if(L.style==='braids')[-1,1].forEach(s=>{for(let i=0;i<5;i++)B(.1,.09,.1,.3*s,-.12-i*.1,-.05,H,head);});
+ if(L.style==='braids')[-1,1].forEach(s=>{B(.1,.16,.1,.2*s,.08,.05,H,head);for(let i=0;i<6;i++)B(.085,.1,.085,.15*s,-.02-i*.095,.15,H,head);B(.07,.04,.07,.15*s,-.545,.15,0x2a2428,head);}); // dua kepang di depan/samping
  if(L.style==='pony'){B(.14,.14,.14,0,.22,-.3,H,head);B(.12,.4,.1,0,-.05,-.34,H,head);}
  if(L.clip)B(.12,.04,.04,-.16,.3,.2,L.clip,head);
+ if(L.bunny){const x=.15,y=.3,z=.2;B(.06,.05,.028,x-.05,y,z,0xff8fbf,head);B(.06,.05,.028,x+.05,y,z,0xff8fbf,head);B(.028,.08,.022,x-.02,y+.07,z,0xffb3d1,head);B(.028,.08,.022,x+.02,y+.07,z,0xffb3d1,head);B(.055,.05,.03,x,y,z+.012,0xfff6fb,head);} // jepit kelinci pink + muka putih
  if(L.butterfly)[-1,1].forEach(s=>{const x=.17*s,y=.29,z=.255; // jepit kupu-kupu
   B(.07,.075,.03,x-.042,y+.02,z,L.butterfly,head);B(.07,.075,.03,x+.042,y+.02,z,L.butterfly,head);
   B(.05,.05,.03,x-.036,y-.045,z,0xffc2dc,head);B(.05,.05,.03,x+.036,y-.045,z,0xffc2dc,head);B(.022,.11,.04,x,y,z+.006,0xb03a6a,head);});
@@ -812,7 +817,7 @@ let agentsData=[],overrides={},lastSig='',fileUpdated=null;
 const actors={};
 const idOf=a=>a.id||String(a.name).toLowerCase().replace(/[^a-z0-9]+/g,'-');
 const short=n=>n.replace(/ \(Lia\)/,' · Lia');
-/* Aturan Papa: pas jam jadwal (30 menit dari tiap jam jadwal, WITA), bot di BRAIN otomatis kerja & duduk di mejanya (Lia & Ophelia 1 di Kantor IG, Hanrin di Ruang CEO, HR di Kantor IG); di luar jadwal boleh santai/jalan-jalan */
+/* Aturan Papa: pas jam jadwal (30 menit dari tiap jam jadwal, WITA), bot di BRAIN otomatis kerja & duduk di mejanya (Lia, Ophelia 1, HR & Rin di Kantor IG, Hanrin di Ruang CEO); di luar jadwal boleh santai/jalan-jalan */
 const WORK_WIN=30;
 function activeSlot(id){if(!BRAIN[id]||!agentsData.length)return null;const s=schedOf(id);if(!s)return null;const m=nowMin();
  return s.find(x=>x[2]!==false&&!x[3]&&!/^😴/.test(x[1])&&m>=mins(x[0])&&m<mins(x[0])+WORK_WIN)||null;} // item berlabel 😴 = jam tidur (NIGHT), bukan slot kerja
@@ -825,6 +830,7 @@ function effective(){return chatPair(agentsData.map(a0=>{const a=applyTimed(a0),
  if(rb&&!ov){if(dayNow())r={...r,room:rb,status:'kerja',task:rb==='school'?(id==='keira'?'🍎 Jam sekolah: ngajar & jaga kelas (08:00-17:00 WITA)':'🎒 Jam sekolah (08:00-17:00 WITA)'):'💬 Standby di Grup My Bini (08:00-17:00 WITA)',auto:true};
   else r={...r,room:LUX[id]?LUX[id].id:'kamar',status:'tidur',task:'😴 Bobo di kamar Lantai 3 (17:00-08:00 WITA)',auto:true};}
  if(id==='ornf'&&!ov){const m=nowMin();if(m>=480&&m<1020)r={...r,room:'grup-mybini',status:'santai',task:'💬 Nongkrong di Grup My Bini (08:00-17:00 WITA)',auto:true};else if(m>=1020&&m<1260)r={...r,room:'ig',status:'santai',task:'🎬 Nongkrong di Studio Konten (17:00-21:00 WITA)',auto:true};else r={...r,room:'kamar',status:'tidur',task:'😴 Bobo di kamar Lantai 3 (21:00-08:00 WITA)',auto:true};}
+ if(id==='rin'&&!ov&&dayNow())r={...r,room:'ig',status:'kerja',task:'💻 Kerja di Kantor IG · konten rin_rh_01 (08:00-17:00 WITA)',auto:true};
  if(BRAIN[id]&&id!=='keira'){const sl=activeSlot(id);if(sl)r={...r,room:WORK_ROOM[id]||'ig',status:'kerja',task:'⏰ '+sl[0].replace('.',':')+' '+sl[1]+' (sesuai jadwal)',auto:true};
   else if(r.status==='kerja')r={...r,room:WORK_ROOM[id]||'ig'};
   else if(nightNow(id))r={...r,room:'kamar',status:'tidur',task:'Bobo malam di kamar 😴 ('+hmTxt(NIGHT[id][0])+'-'+hmTxt(NIGHT[id][1])+' WITA)',auto:true};}
@@ -847,7 +853,7 @@ function autoCheck(){const cur={__day:dayNow()?'day':'night',__chat:effective().
  Object.keys(HANGOUT).forEach(id=>{cur['~'+id]=hangoutNow(id)?'on':'';});
  agentsData.forEach(a=>{const t=timedSlot(a);if(t)cur['@'+idOf(a)]=t.time+' '+t.label;});
  const sig=JSON.stringify(cur);if(sig===autoSig)return;const first=!autoSig;autoSig=sig;const prev=autoPrev;autoPrev=cur;if(first)return;
- syncActors(true);Object.keys(cur).forEach(id=>{if(cur[id]===prev[id])return;if(id[0]==='~'){log(nameOf(id.slice(1))+(cur[id]?' nongkrong di grup IG Grokbot OpheliaxHR 💬':' selesai nongkrong di grup IG 🌸'));return;}if(id[0]==='@'){log(nameOf(id.slice(1))+' pindah sesuai jadwal: '+cur[id].slice(6)+' ('+cur[id].slice(0,5)+')');return;}if(id==='__chat'){log(cur[id]?'💬 Ophelia 1 & Ophelia 2 (Lia) ngobrol di sofa Ruang TV':'💬 Ophelia 1 & Ophelia 2 (Lia) udahan ngobrol');return;}if(id==='__day'){log(cur[id]==='day'?'08:00 · Anak sekolah ke kelas, Rin/Emely ke Grup My Bini 🏫':'17:00 · Anak sekolah & Rin/Emely pulang bobo di kamar Lantai 3 😴');return;}const n=nameOf(id);
+ syncActors(true);Object.keys(cur).forEach(id=>{if(cur[id]===prev[id])return;if(id[0]==='~'){log(nameOf(id.slice(1))+(cur[id]?' nongkrong di grup IG Grokbot OpheliaxHR 💬':' selesai nongkrong di grup IG 🌸'));return;}if(id[0]==='@'){log(nameOf(id.slice(1))+' pindah sesuai jadwal: '+cur[id].slice(6)+' ('+cur[id].slice(0,5)+')');return;}if(id==='__chat'){log(cur[id]?'💬 Ophelia 1 & Ophelia 2 (Lia) ngobrol di sofa Ruang TV':'💬 Ophelia 1 & Ophelia 2 (Lia) udahan ngobrol');return;}if(id==='__day'){log(cur[id]==='day'?'08:00 · Anak sekolah ke kelas, Emely ke Grup My Bini, Rin ke Kantor IG 🏫':'17:00 · Anak sekolah & Emely pulang bobo; Rin selesai jam kerja di Kantor IG 😴');return;}const n=nameOf(id);
   log(cur[id]==='night'?n+' waktunya bobo malam, ke kamar 😴':cur[id]?n+' masuk jam kerja ('+cur[id].replace('.',':')+'), duduk di meja '+(WORK_ROOM[id]==='ceo'?'Ruang CEO 👑':'IG 💻'):n+' selesai slot kerja, boleh santai 🌸');});}
 const NAMES={lia:'Lia',ophelia1:'Ophelia 1',hanrin:'Hanrin'};
 function nameOf(id){const a=agentsData.find(x=>idOf(x)===id)||(actors[id]&&actors[id].a);return NAMES[id]||(a&&a.name)||id;}
@@ -1322,7 +1328,7 @@ const FALLBACK=[
  {id:'lia',name:'Ophelia 2 (Lia)',role:'Konten Instagram, posting & jaga IG ophelia.lia.real',room:'ig',status:'kerja',task:'Jaga IG ophelia.lia.real'},
  {id:'ophelia1',name:'Ophelia 1',role:'Partner Instagram (lia_1_2000)',room:'ig',status:'kerja',task:'Saling support konten sama Lia'},
  {id:'han',name:'Han',role:'Owner · Kantor AI',room:'pondok-taman',status:'santai',task:'Di Pondok Taman 🔒'},
- ...[['rin','Rin','Asisten pribadi'],['ornf','Co Agent 2 Lia','Chat WhatsApp'],['emely','Emely','Teman ngobrol'],['hr','HR','Hanrin · IG content creator (hr_2002_01) · pacar / pendamping'],['keira','Keira','Konsultan pribadi'],['love','Love ❤️','Love ❤️ · Urusan pasangan (date, kado, pengingat)']].map(([id,name,role])=>({id,name,role,room:'kamar',status:'tidur',task:'belum ada tugas',...(id==='love'?{schedule:LOVE_SCHEDULE}:{}),...(id==='hr'?{room:'ig',status:'santai',task:'Santai, jalan-jalan keliling kantor (di luar jadwal)'}:{})})),
+ ...[['rin','Rin','Konten Instagram rin_rh_01'],['ornf','Co Agent 2 Lia','Chat WhatsApp'],['emely','Emely','Teman ngobrol'],['hr','HR','Hanrin · IG content creator (hr_2002_01) · pacar / pendamping'],['keira','Keira','Konsultan pribadi'],['love','Love ❤️','Love ❤️ · Urusan pasangan (date, kado, pengingat)']].map(([id,name,role])=>({id,name,role,room:'kamar',status:'tidur',task:'belum ada tugas',...(id==='love'?{schedule:LOVE_SCHEDULE}:{}),...(id==='hr'?{room:'ig',status:'santai',task:'Santai, jalan-jalan keliling kantor (di luar jadwal)'}:{}),...(id==='rin'?{room:'ig',status:'santai',task:'Kerja di Kantor IG · konten rin_rh_01'}:{})})),
  ...Object.entries(SCHOOL_NAMES).map(([id,name])=>({id,name,role:'Murid · Grup School',room:'school',status:'santai',task:'Duduk di kelas, nunggu pelajaran'}))];
 async function load(manual){
  try{

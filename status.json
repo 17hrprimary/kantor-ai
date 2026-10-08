@@ -87,11 +87,21 @@
     {
       "id": "rin",
       "name": "Rin",
-      "role": "Asisten pribadi",
-      "room": "kamar-rin",
-      "status": "tidur",
-      "task": "belum ada tugas",
-      "updated_at": "2026-10-04T22:42:00+08:00"
+      "role": "Konten Instagram rin_rh_01",
+      "room": "ig",
+      "status": "santai",
+      "task": "Kerja di Kantor IG · konten rin_rh_01",
+      "updated_at": "2026-10-08T10:20:00+08:00",
+      "schedule": [
+        {
+          "time": "11:02",
+          "label": "Posting konten IG harian"
+        },
+        {
+          "time": "20:00",
+          "label": "Nongkrong grup IG Grokbot OpheliaxHR (20:00-21:00)"
+        }
+      ]
     },
     {
       "id": "ornf",
