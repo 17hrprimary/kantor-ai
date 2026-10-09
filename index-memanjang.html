@@ -548,7 +548,7 @@ function lift(r){const o=r.f*DY;box(30.3,.25+o,0,1.6,1.6,2.4,0xcfd8ff);box(30.45
  label('🛗 Lift','seat',31.1,2.2+o,2.7);}
 function buildWorld(){
  ROOMS.forEach(r=>{P=FLOORS[r.f];
-  const sl=r.f>0?FH-2.4:.35;box(r.x-.05,r.y-.05,-sl,r.w+.1,r.d+.1,sl,r.outdoor?0x9ccf7e:0xf3c6dc); // pelat lantai (outdoor: tanah berumput; lantai atas lebih tebal = plafon lantai bawahnya)
+  box(r.x-.05,r.y-.05,-.35,r.w+.1,r.d+.1,.35,r.outdoor?0x9ccf7e:0xf3c6dc); // pelat lantai (outdoor: tanah berumput)
   const t=r.lux?planks():checker(r.c1,r.c2);t.repeat.set(r.w/2,r.d/2);
   const m=mesh(new THREE.PlaneGeometry(r.w,r.d),new THREE.MeshStandardMaterial({map:t,roughness:.95}),P,false);
   m.rotation.x=-Math.PI/2;m.position.set(tx(r.x+r.w/2),.002,tz(r.y+r.d/2));m.receiveShadow=true;
@@ -556,10 +556,6 @@ function buildWorld(){
  });
  // papan nama lantai
  for(let f=0;f<NFLOOR;f++){P=FLOORS[f];label(FLOOR_NAMES[f],'fsign',-1.2,f*DY-1.2,.4);}
- // 🏢 gedung bertingkat: plafon/atap datar Lt 2 di bagian yang gak ketutup ruangan + tiang penyangga Lt 3 yang menjorok (atas taman depan & sisi timur)
- {const sl=FH-2.4;P=FLOORS[1];box(28,8+DY,-sl,4,7,sl,0xe9e1f5);box(0,15+DY,-sl,32,1,sl,0xe9e1f5);
-  P=FLOORS[2];const ch=2*FH-sl;[[.2,24.4],[3.4,24.4],[16,24.4],[22,24.4],[28,24.4],[35.4,24.4],[35.4,16.2],[35.4,8.6],[35.4,.2]].forEach(([x,y])=>{
-   box(x,y+2*DY,-2*FH,.4,.4,ch,0xfff5fa);box(x-.08,y-.08+2*DY,-2*FH,.56,.56,.3,0xffc4dc);});}
  // pintu = sambungan antar ruangan (doorBetween), dinding sisanya
  const gaps=new Set(),doorList=[];
  ROOMS.forEach((a,i)=>ROOMS.forEach((b,j)=>{if(j<=i||a.f!==b.f)return;const d=doorBetween(a,b);if(!d)return;
@@ -1039,11 +1035,11 @@ function makeTag(id){
  const d=document.createElement('div');d.className='ntag';d.innerHTML='<div class="say" style="display:none"></div><div class="n"><span class="d"></span><span class="nm"></span><span class="zz2">Zzz</span></div><div class="act" style="display:none"></div>';
  d.addEventListener('pointerdown',e=>e.stopPropagation());
  d.addEventListener('click',e=>{e.stopPropagation();openPop(id);});
- const o=new CSS2DObject(d);o.userData.actorTag=1;FLOORS[0].add(o);
- const z=document.createElement('div');z.innerHTML='<div class="zzz">Z z z</div>';const zo=new CSS2DObject(z);zo.userData.actorTag=1;FLOORS[0].add(zo);
+ const o=new CSS2DObject(d);FLOORS[0].add(o);
+ const z=document.createElement('div');z.innerHTML='<div class="zzz">Z z z</div>';const zo=new CSS2DObject(z);FLOORS[0].add(zo);
  return {o,d,zo};
 }
-function onFloor(ac,y){const f=floorOfY(y),g=FLOORS[f];if(ac.c.root.parent!==g){g.add(ac.c.root);g.add(ac.tag.o);g.add(ac.tag.zo);if(typeof floorLabels==='function'){tagUnder(ac.tag.o,f);tagUnder(ac.tag.zo,f);}}}
+function onFloor(ac,y){const g=FLOORS[floorOfY(y)];if(ac.c.root.parent!==g){g.add(ac.c.root);g.add(ac.tag.o);g.add(ac.tag.zo);}}
 function placeActor(ac){ // set pose statis
  const c=ac.c,s=ac.spot;onFloor(ac,s.pose==='bed'?s.root[1]:s.y);
  c.root.rotation.set(0,0,0,'XYZ');c.body.position.set(0,0,0);c.legs.forEach(l=>l.rotation.x=0);c.arms.forEach(a=>a.rotation.x=0);
@@ -1235,14 +1231,10 @@ function updateActors(now,dt){
 
 /* ================= Kamera ================= */
 let floorMode='all';
-/* Gedung bertingkat: lantai disusun vertikal (Lt 1 bawah, Lt 2 tengah, Lt 3 atas), tinggi per lantai = FH (sama dengan tinggi tangga).
-   Pilih satu lantai: lantai di atasnya disembunyiin biar isinya kelihatan, lantai di bawahnya tetap ada sebagai badan gedung. */
-const topFloor=()=>floorMode==='all'?NFLOOR-1:+floorMode;
-const floorUnder=f=>f<topFloor(); // lantai ketutup lantai di atasnya
-function tagUnder(o,f){const u=floorUnder(f),el=o.element;if(o.userData.actorTag){el.style.opacity=u?'.45':'';}else if(!el.classList.contains('fsign'))el.style.visibility=u?'hidden':'';}
-function floorLabels(){FLOORS.forEach((g,f)=>g.traverse(o=>{if(o.isCSS2DObject)tagUnder(o,f);}));}
-function layoutFloors(){const top=topFloor();FLOORS.forEach((g,f)=>{g.visible=f<=top;g.position.set(0,f*FH,-f*DY);});scene.updateMatrixWorld(true);floorLabels();}
-function viewBox(){const b=new THREE.Box3();FLOORS.forEach((g,f)=>{if(!g.visible||(floorMode!=='all'&&floorUnder(f)))return;ROOMS.filter(r=>r.f===f).forEach(r=>{
+const TERRACE=[[0,0],[4.6,-20],[9.2,-41]]; // mode Semua: lantai atas naik & mundur biar semua kelihatan
+function layoutFloors(){FLOORS.forEach((g,f)=>{const all=floorMode==='all';g.visible=all||+floorMode===f;
+ const t=all?TERRACE[f]:[0,0];g.position.set(0,t[0],t[1]-f*DY);});scene.updateMatrixWorld(true);}
+function viewBox(){const b=new THREE.Box3();FLOORS.forEach((g,f)=>{if(!g.visible)return;ROOMS.filter(r=>r.f===f).forEach(r=>{
  [[r.x,r.y],[r.x+r.w,r.y+r.d]].forEach(([x,y])=>b.expandByPoint(g.localToWorld(new THREE.Vector3(tx(x),0,tz(y)))));});});return b;}
 function fitHome(){
  const asp=stage.clientWidth/stage.clientHeight,b=viewBox(),c=b.getCenter(new THREE.Vector3()),sz=b.getSize(new THREE.Vector3());
@@ -1259,7 +1251,7 @@ document.querySelectorAll('#floors button').forEach(b=>b.onclick=()=>setFloor(b.
 const wp=(o,v=new THREE.Vector3())=>o.getWorldPosition(v);
 let camAnim=null;
 function flyTo(pos,target,ms=900){camAnim={p0:camera.position.clone(),t0:controls.target.clone(),p1:pos,t1:target,start:performance.now(),ms};}
-function focusActor(id,dist=11){const ac=actors[id];if(!ac)return;const fl=floorOfY(ac.pos.y);if(floorMode==='all'?floorUnder(fl):+floorMode!==fl)setFloor(fl,false);const p=wp(ac.c.root);p.y+=.6;
+function focusActor(id,dist=11){const ac=actors[id];if(!ac)return;const fl=floorOfY(ac.pos.y);if(floorMode!=='all'&&+floorMode!==fl)setFloor(fl,false);const p=wp(ac.c.root);p.y+=.6;
  const dir=camera.position.clone().sub(controls.target).normalize();flyTo(p.clone().add(dir.multiplyScalar(dist)),p);}
 function dolly(f){const off=camera.position.clone().sub(controls.target);const len=THREE.MathUtils.clamp(off.length()*f,controls.minDistance,controls.maxDistance);flyTo(controls.target.clone().add(off.setLength(len)),controls.target.clone(),350);}
 function orbit(ang){const off=camera.position.clone().sub(controls.target);off.applyAxisAngle(new THREE.Vector3(0,1,0),ang);flyTo(controls.target.clone().add(off),controls.target.clone(),500);}
@@ -1275,7 +1267,7 @@ renderer.domElement.addEventListener('pointerdown',e=>{downAt={x:e.clientX,y:e.c
 renderer.domElement.addEventListener('pointerup',e=>{
  if(!downAt||Math.hypot(e.clientX-downAt.x,e.clientY-downAt.y)>5){downAt=null;return;}downAt=null;
  const r=renderer.domElement.getBoundingClientRect();mouse.set((e.clientX-r.left)/r.width*2-1,-(e.clientY-r.top)/r.height*2+1);
- ray.setFromCamera(mouse,camera);const hit=ray.intersectObjects(Object.values(actors).filter(a=>a.c.root.parent&&a.c.root.parent.visible&&!floorUnder(a.c.root.parent.userData.f)).map(a=>a.c.root),true)[0];
+ ray.setFromCamera(mouse,camera);const hit=ray.intersectObjects(Object.values(actors).filter(a=>a.c.root.parent&&a.c.root.parent.visible).map(a=>a.c.root),true)[0];
  if(hit){openPop(hit.object.userData.charId);}else closePop();
 });
 
