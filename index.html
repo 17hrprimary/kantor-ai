@@ -31,6 +31,9 @@ main{flex:1;display:grid;grid-template-columns:1fr 270px;gap:12px;padding:12px 1
 .ctrl{position:absolute;left:10px;top:10px;display:flex;flex-direction:column;gap:6px;z-index:5}
 .ctrl button{width:36px;height:36px;border-radius:12px;border:2px solid #ffd2e4;background:#fff;color:#d6457f;font-size:17px;font-weight:800;cursor:pointer;box-shadow:0 3px 0 #ffe0ec}
 .floors{position:absolute;left:10px;top:264px;display:flex;flex-direction:column;gap:5px;z-index:5}
+.shownr{position:absolute;left:10px;top:228px;z-index:5;min-width:58px;height:30px;border-radius:11px;border:2px solid #ffd2e4;background:#fff;color:#d6457f;font:inherit;font-size:11px;font-weight:800;cursor:pointer;box-shadow:0 3px 0 #ffe0ec;padding:0 8px;white-space:nowrap}
+.shownr.on{background:linear-gradient(180deg,#6ad39a,#3cae6e);color:#fff;border-color:#fff;box-shadow:0 3px 0 #2a8a55}
+@media(max-width:900px){.shownr{top:224px;font-size:10px;min-width:52px;height:28px}}
 .qrow{display:flex;gap:6px;margin-top:8px}
 .qrow button{flex:1;border:2px solid #ffd2e4;background:#fff;color:#d6457f;font:inherit;font-size:12px;font-weight:800;border-radius:12px;padding:7px 8px;cursor:pointer;box-shadow:0 3px 0 #ffe0ec}
 .qrow button.on{background:linear-gradient(180deg,#6ad39a,#3cae6e);color:#fff;border-color:#fff;box-shadow:0 3px 0 #2a8a55}
@@ -179,6 +182,7 @@ body.touch .povhint .kbd{display:none}body.touch .povhint .tch{display:inline}
       <button id="home" title="Reset kamera">⌂</button>
       <button id="povMini" title="🎮 Mode POV Han (Han jalan sendiri pakai keyboard / stick)">🎮</button>
     </div>
+    <button type="button" class="shownr" id="btnShowNearMini" title="Show Near: suasana sekitar (hutan dekat + jalan). OFF = Fokus Kantor biar gak lag.">🏢 Fokus</button>
     <div class="floors" id="floors"><button data-f="all" class="on">🏢 Semua</button><button data-f="3">Lt 4 🎬</button><button data-f="2">Lt 3 🛏️</button><button data-f="1">Lt 2 🛋️</button><button data-f="0">Lt 1 💼</button></div>
     <button class="jtoggle" id="jToggle">📅 Jadwal per Karakter</button>
     <div class="jp" id="jPanel"><h3>📅 Jadwal per Karakter</h3><div class="list" id="jList"></div></div>
@@ -215,7 +219,10 @@ body.touch .povhint .kbd{display:none}body.touch .povhint .tch{display:inline}
       <div class="small">Dicek: <b id="lastCheck">-</b> · tiap 60 detik</div>
       <button class="btn ghost" id="btnReload" style="margin-top:6px;width:100%">🔄 Muat ulang status</button>
     </div>
-    <div class="card"><h2>⚡ Kualitas grafis</h2><div class="qrow"><button type="button" id="qRingan" class="on">⚡ Ringan</button><button type="button" id="qNormal">✨ Normal</button></div><div class="small" style="margin-top:6px" id="qHint">Default <b>Ringan</b> biar laptop lemah (i5 gen 3 dll) lebih mulus di POV — resolusi lebih rendah, tanpa bayangan lembut.</div></div>
+    <div class="card"><h2>⚡ Kualitas grafis</h2><div class="qrow"><button type="button" id="qRingan" class="on">⚡ Ringan</button><button type="button" id="qNormal">✨ Normal</button></div><div class="small" style="margin-top:6px" id="qHint">Default <b>Ringan</b> biar laptop lemah (i5 gen 3 dll) lebih mulus di POV — resolusi lebih rendah, tanpa bayangan lembut.</div>
+      <div class="sec" style="margin-top:10px">🌍 Suasana sekitar</div>
+      <div class="qrow"><button type="button" id="btnShowNear">🌲 Show Near</button><button type="button" id="btnFokusKantor" class="on">🏢 Fokus Kantor</button></div>
+      <div class="small" style="margin-top:6px" id="nearHint">Default <b>Fokus Kantor</b> (hutan jauh/dekat &amp; jalan disembunyiin) biar gak lag. Nyalain <b>Show Near</b> buat hutan dekat pagar + jalan/mobil.</div></div>
     <div class="card povcard"><h2>🎮 Mode POV Han</h2><button class="btn" id="btnPov" style="width:100%;white-space:normal">🎮 Mode POV Han</button><div class="small" style="margin-top:6px">Han jalan sendiri: <b>WASD/panah</b> jalan, <b>Q/E</b> atau drag mouse putar, <b>Shift</b> lari, <b>R/F</b> naik/turun di tangga/lift, <b>V</b> 1st/3rd person, <b>Esc</b> keluar. Di HP: stick + tombol di layar.</div></div>
     <div class="card"><h2>🎬 Bioskop Lt 4</h2><button class="btn" id="btnBioskop" style="width:100%;white-space:normal">🎮 Ke Bioskop (Mode POV)</button><div class="small" style="margin-top:6px">Film dari folder <b>theater/</b>, dikunci <b>kode kunci</b>. Di POV: naik tangga/lift ke <b>Lt 4</b> (R), masuk Bioskop, tekan <b>T</b> / 🎬 → kode → pilih film.</div></div>
     <div class="card" id="chatCard"></div>
@@ -1724,8 +1731,7 @@ function thDateStart(id){const ac=actors[id];if(!ac){thActSt('⚠️ '+id+' belu
 function thDateEnd(id){const ac=actors[id];if(!ac||!ac.cinemaDate){thActSt('');return;}ac.cinemaDate=false;ac.demo=null;goHome(ac,null);thActSt('👋 '+nameOf(id)+' balik ke rutinitas');}
 function thHanSit(){const ac=actors.han;if(!POV.on||!ac)return;const st=TH_SEATS.han;ac.pos={x:st[0],y:st[1]};POV.yaw=Math.PI;ac.c.root.rotation.y=POV.yaw;
  POV.fpPref=true;POV.look=-.08;POV.snap=true;povButtons();onFloor(ac,ac.pos.y);ac.c.root.position.set(tx(st[0]),0,tz(st[1]));thClose();}
-thActRender();
-// keyboard
+thActRender();// keyboard
 const POV_KEYS={KeyW:'f',ArrowUp:'f',KeyS:'b',ArrowDown:'b',KeyA:'l',ArrowLeft:'l',KeyD:'r',ArrowRight:'r',KeyQ:'tl',KeyE:'tr',ShiftLeft:'run',ShiftRight:'run'};
 const povTyping=e=>{const t=e.target;return !!t&&(t.tagName==='INPUT'||t.tagName==='TEXTAREA'||t.tagName==='SELECT'||t.isContentEditable);};
 window.addEventListener('keydown',e=>{if(TH.open&&e.code==='Escape'){e.preventDefault();thClose();return;}if(!POV.on||povTyping(e)||e.ctrlKey||e.metaKey||e.altKey)return;const c=e.code;
@@ -1759,8 +1765,31 @@ renderer.domElement.addEventListener('wheel',e=>{if(!POV.on)return;e.preventDefa
   povButtons();}));}
 
 /* ================= 🌍 Lingkungan luar: rumput hijau tenang, hutan (pohon + tanaman liar acak), jalan raya + mobil lalu lalang, langit berawan & suasana pagi/siang/sore/malam (ikut jam WITA) ================= */
-const ENV={g:new THREE.Group(),cars:[],lampMats:[],head:null,tail:null,win:null,stars:null,orb:null,sky:null,skyU:null,clouds:[],cloudMat:null,lastK:null};
+const ENV={g:new THREE.Group(),near:null,far:null,ambience:null,cars:[],lampMats:[],head:null,tail:null,win:null,stars:null,orb:null,sky:null,skyU:null,clouds:[],cloudMat:null,lastK:null,showNear:false,nearBuilt:false,farBuilt:false};
 scene.add(ENV.g);
+function loadShowNear(){try{return localStorage.getItem('kantorShowNear')==='1';}catch(_){return false;}}
+function applyShowNear(on,announce){
+ ENV.showNear=!!on;
+ try{localStorage.setItem('kantorShowNear',ENV.showNear?'1':'0');}catch(_){}
+ if(ENV.showNear){ensureNearForest();/* far sengaja gak dibangun — hemat lag */}
+ if(ENV.near)ENV.near.visible=!!ENV.showNear;
+ if(ENV.far)ENV.far.visible=false; // hutan jauh tetap mati biar gak lag
+ if(ENV.ambience)ENV.ambience.visible=!!ENV.showNear;
+ const bn=document.getElementById('btnShowNear'),bf=document.getElementById('btnFokusKantor'),bm=document.getElementById('btnShowNearMini'),hint=document.getElementById('nearHint');
+ if(bn)bn.classList.toggle('on',ENV.showNear);
+ if(bf)bf.classList.toggle('on',!ENV.showNear);
+ if(bm){bm.classList.toggle('on',ENV.showNear);bm.textContent=ENV.showNear?'🌲 Near':'🏢 Fokus';bm.title=ENV.showNear?'Show Near ON — hutan dekat + jalan. Klik buat Fokus Kantor.':'Fokus Kantor — klik Show Near buat suasana sekitar.';}
+ if(hint)hint.innerHTML=ENV.showNear
+  ?'Mode <b>Show Near</b>: hutan dekat pagar + jalan/mobil. Hutan jauh tetap off biar gak lag.'
+  :'Mode <b>Fokus Kantor</b>: fokus kampus aja (hutan &amp; jalan disembunyiin) — lebih mulus.';
+ if(announce&&typeof log==='function')log(ENV.showNear?'🌲 Show Near: suasana sekitar nyala':'🏢 Fokus Kantor: sekitar disembunyiin biar gak lag');
+}
+function bindShowNearUI(){
+ const bn=document.getElementById('btnShowNear'),bf=document.getElementById('btnFokusKantor'),bm=document.getElementById('btnShowNearMini');
+ if(bn)bn.onclick=()=>{if(ENV.showNear)return;applyShowNear(true,true);};
+ if(bf)bf.onclick=()=>{if(!ENV.showNear)return;applyShowNear(false,true);};
+ if(bm)bm.onclick=()=>applyShowNear(!ENV.showNear,true);
+}
 const ROAD={y0:32,y1:38,x0:-260,x1:320,cx0:-70,cx1:130}; // cx0..cx1 = rentang muter mobil (biar rame di sekitar kantor) // koordinat logika lantai 1 (depan gedung, di bawah Taman Depan / Pondok)
 // keyframe suasana per jam (WITA): langit atas/bawah (sRGB), kekuatan cahaya, warna matahari/bulan
 const AMB=[
@@ -1799,31 +1828,36 @@ function buildCar(color,dir){ // mobil low-poly, hadap +x (dir=1) / -x (dir=-1)
  g.rotation.y=dir>0?0:Math.PI;return g;}
 function buildEnv(){
  const P0=P;P=ENV.g;
- // 🌿 rumput hijau tenang di sekeliling kantor & rumah
+ ENV.ambience=new THREE.Group();ENV.near=new THREE.Group();ENV.far=new THREE.Group();
+ ENV.g.add(ENV.ambience);ENV.g.add(ENV.near);ENV.g.add(ENV.far);
+ ENV.ambience.visible=false;ENV.near.visible=false;ENV.far.visible=false;
+ // 🌿 rumput hijau tenang di sekeliling kantor & rumah (selalu ada)
  const ground=new THREE.Mesh(new THREE.PlaneGeometry(1000,1000),new THREE.MeshStandardMaterial({color:0x8ecf66,map:noiseTex('#8ecf66',['#7ec058','#9ada74','#6fb24a','#a8e484','#85c85c','#95d46e'],128,70),roughness:1,metalness:0}));
  ground.rotation.x=-Math.PI/2;ground.position.y=-.32;ground.receiveShadow=true;ENV.g.add(ground);
- // 🛣️ jalan raya 2 lajur + trotoar + marka
+ // 🛣️ jalan raya + lampu + mobil → grup ambience (toggle Show Near)
+ const AP=ENV.ambience;P=AP;
  const asph=new THREE.MeshStandardMaterial({map:noiseTex('#3a3a40',['#34343a','#444450','#2f2f35'],64,1),roughness:.95});asph.map.repeat.set(140,2);
- envBox(ROAD.x0,ROAD.y0,-.32,ROAD.x1-ROAD.x0,ROAD.y1-ROAD.y0,.04,asph);
+ envBox(ROAD.x0,ROAD.y0,-.32,ROAD.x1-ROAD.x0,ROAD.y1-ROAD.y0,.04,asph,AP);
  const side=mat(0x8f8a86),curb=mat(0xd9d3cc),white=new THREE.MeshBasicMaterial({color:0xf2f2f2}),yel=new THREE.MeshBasicMaterial({color:0xf3c94a});
- envBox(ROAD.x0,ROAD.y0-1.6,-.32,ROAD.x1-ROAD.x0,1.6,.14,side);envBox(ROAD.x0,ROAD.y1,-.32,ROAD.x1-ROAD.x0,1.6,.14,side);
- envBox(ROAD.x0,ROAD.y0-.12,-.32,ROAD.x1-ROAD.x0,.12,.18,curb);envBox(ROAD.x0,ROAD.y1,-.32,ROAD.x1-ROAD.x0,.12,.18,curb);
- envBox(ROAD.x0,ROAD.y0+.3,-.275,ROAD.x1-ROAD.x0,.1,.01,white);envBox(ROAD.x0,ROAD.y1-.4,-.275,ROAD.x1-ROAD.x0,.1,.01,white);
- const midY=(ROAD.y0+ROAD.y1)/2;for(let x=ROAD.x0;x<ROAD.x1;x+=4)envBox(x,midY-.06,-.275,2,.12,.01,yel);
+ envBox(ROAD.x0,ROAD.y0-1.6,-.32,ROAD.x1-ROAD.x0,1.6,.14,side,AP);envBox(ROAD.x0,ROAD.y1,-.32,ROAD.x1-ROAD.x0,1.6,.14,side,AP);
+ envBox(ROAD.x0,ROAD.y0-.12,-.32,ROAD.x1-ROAD.x0,.12,.18,curb,AP);envBox(ROAD.x0,ROAD.y1,-.32,ROAD.x1-ROAD.x0,.12,.18,curb,AP);
+ envBox(ROAD.x0,ROAD.y0+.3,-.275,ROAD.x1-ROAD.x0,.1,.01,white,AP);envBox(ROAD.x0,ROAD.y1-.4,-.275,ROAD.x1-ROAD.x0,.1,.01,white,AP);
+ const midY=(ROAD.y0+ROAD.y1)/2;for(let x=ROAD.x0;x<ROAD.x1;x+=4)envBox(x,midY-.06,-.275,2,.12,.01,yel,AP);
  // zebra cross di depan gedung
- for(let i=0;i<7;i++)envBox(22.4,ROAD.y0+.5+i*.75,-.274,2.6,.42,.01,white);
+ for(let i=0;i<7;i++)envBox(22.4,ROAD.y0+.5+i*.75,-.274,2.6,.42,.01,white,AP);
  // jalan masuk (paving) dari Taman Depan & Taman Halaman ke trotoar
- const pave=mat(0xcfc2ad);envBox(23.25,24,-.32,1.5,ROAD.y0-1.6-24,.3,pave);envBox(35.9,24,-.32,1.3,ROAD.y0-1.6-24,.3,pave);
+ const pave=mat(0xcfc2ad);envBox(23.25,24,-.32,1.5,ROAD.y0-1.6-24,.3,pave,AP);envBox(35.9,24,-.32,1.3,ROAD.y0-1.6-24,.3,pave,AP);
  // 💡 lampu jalan (bohlam nyala pas sore/malam)
  const pole=mat(0x4a4a52);
- for(let x=-60;x<=120;x+=12){const yy=ROAD.y0-1.0;const p=new THREE.Mesh(new THREE.CylinderGeometry(.07,.09,3.6,6),pole);p.position.set(tx(x),-.18+1.8,tz(yy));ENV.g.add(p);
-  envBox(x-.05,yy,3.3,.1,.9,.08,pole);const bm=new THREE.MeshStandardMaterial({color:0xfff2c4,emissive:0xffd27a,emissiveIntensity:0});ENV.lampMats.push(bm);envBox(x-.18,yy+.7,3.1,.36,.36,.18,bm);}
+ for(let x=-60;x<=120;x+=12){const yy=ROAD.y0-1.0;const p=new THREE.Mesh(new THREE.CylinderGeometry(.07,.09,3.6,6),pole);p.position.set(tx(x),-.18+1.8,tz(yy));AP.add(p);
+  envBox(x-.05,yy,3.3,.1,.9,.08,pole,AP);const bm=new THREE.MeshStandardMaterial({color:0xfff2c4,emissive:0xffd27a,emissiveIntensity:0});ENV.lampMats.push(bm);envBox(x-.18,yy+.7,3.1,.36,.36,.18,bm,AP);}
  // 🚗 mobil lalu lalang (2 arah)
  ENV.head=new THREE.MeshStandardMaterial({color:0xfffbe8,emissive:0xfff2b0,emissiveIntensity:.2});
  ENV.tail=new THREE.MeshStandardMaterial({color:0xc4202a,emissive:0xff2030,emissiveIntensity:.2});
  const cols=[0xe8e8ec,0x1f2430,0xd23a3a,0x3c7fd6,0xf2c94c,0x9aa3ad,0x2f8f5b,0xff7eb6,0x6b4fc9,0xf08a3a,0xffffff,0x3a3a44,0x8fd0ff,0xc0392b];
  for(let i=0;i<14;i++){const dir=i%2?-1:1,lane=dir>0?ROAD.y0+1.5:ROAD.y1-1.5,car=buildCar(cols[i],dir);
-  const c={g:car,dir,lane,x:ROAD.cx0+(i>>1)/7*(ROAD.cx1-ROAD.cx0)+Math.random()*8,v:5+Math.random()*6};car.position.set(tx(c.x),-.28,tz(lane));ENV.g.add(car);ENV.cars.push(c);}
+  const c={g:car,dir,lane,x:ROAD.cx0+(i>>1)/7*(ROAD.cx1-ROAD.cx0)+Math.random()*8,v:5+Math.random()*6};car.position.set(tx(c.x),-.28,tz(lane));AP.add(car);ENV.cars.push(c);}
+ P=ENV.g;
  // 🌌 langit (kubah gradasi) + bintang + matahari/bulan, ikut posisi kamera
  ENV.skyU={top:{value:new THREE.Color()},bot:{value:new THREE.Color()}};
  ENV.skyU.cloud={value:0.85};
@@ -1855,8 +1889,8 @@ void main(){float h=clamp(vP.y*3.2+.02,0.,1.);vec3 col=mix(bot,top,pow(h,.55));
  ENV.stars.renderOrder=-9;ENV.stars.frustumCulled=false;scene.add(ENV.stars);
  ENV.orb=new THREE.Mesh(new THREE.SphereGeometry(9,16,10),new THREE.MeshBasicMaterial({color:0xfff6d0,fog:false,depthWrite:false,depthTest:false}));ENV.orb.renderOrder=-8;ENV.orb.frustumCulled=false;scene.add(ENV.orb);
  scene.fog=new THREE.Fog(0x1a2246,180,420); // tanah jauh nyatu sama warna cakrawala (jauh dikit biar hutan keliatan)
- // 🌲 Hutan di sekeliling situs: banyak pohon + tanaman liar acak (natural), tidak nutupin jalan/gedung
- buildForest();
+ // 🌲 Hutan dekat/jauh: dibangun on-demand lewat Show Near (default Fokus Kantor biar gak lag)
+ applyShowNear(loadShowNear(),false);
  P=P0;envTick(performance.now(),0,true);
 }
 function forestRnd(seed){let s=seed>>>0;return()=>{s=(Math.imul(s,1664525)+1013904223)>>>0;return s/4294967296;};}
@@ -1875,10 +1909,8 @@ function bushWild(x,y,s=1){const c=[0x5fae6a,0x6bbf7a,0x4d9a58,0x7fcf9a][(Math.a
 function wildFlower(x,y,s=1){const cols=[0xff9cc7,0xffd23f,0xc79bff,0xffffff,0xff7eb6,0x8fd0ff];
  cyl(x,y,0,.03*s,.28*s,0x5a9a4a,5);ball(x,y,.32*s,.1*s,cols[Math.abs(Math.floor(x*13+y*17))%cols.length],0);}
 function tallGrass(x,y,s=1){const c=0x6fb24a;for(let i=0;i<3;i++){const a=(i-1)*.12,m=mesh(new THREE.ConeGeometry(.04*s,.55*s,4),mat(c));m.position.set(tx(x+a), .28*s,tz(y+(i%2?-.05:.05)*s));m.rotation.z=a*.8;m.castShadow=false;}}
-function buildForest(){ // ditempatkan saat P=ENV.g di dalam buildEnv
- const rnd=forestRnd(20261012),pts={oak:[],pine:[],bush:[],flower:[],grass:[]};
- const place=(key,n,x0,x1,y0,y1,minD,s0=.85,s1=1.55)=>{const goal=pts[key].length+n;let tries=0;while(pts[key].length<goal&&tries<n*140){tries++;const x=x0+rnd()*(x1-x0),y=y0+rnd()*(y1-y0);if(forestBlocked(x,y))continue;let ok=true;const arr=pts[key];for(let k=0;k<arr.length;k++){const dx=arr[k].x-x,dy=arr[k].y-y;if(dx*dx+dy*dy<minD*minD){ok=false;break;}}if(!ok)continue;arr.push({x,y,s:s0+rnd()*(s1-s0)});}}
- // 🌲 SABUK HUTAN TEBAL nempel pagar kampus (biar kelihatan jelas dari sudut Han — bukan cuma cincin tipis)
+function forestPlaceAll(pts,place){
+ // 🌲 SABUK HUTAN TEBAL nempel pagar kampus (Show Near)
  // Barat: 2 lapis (nempel + tebal)
  place('oak',70,-8,-1.25,-2,31,1.35,1.2,2.0);place('oak',55,-22,-8,-8,34,1.55,1.1,1.85);place('pine',35,-9,-1.3,-3,31.5,1.75,1.15,1.85);place('pine',40,-24,-9,-10,36,2.0,1.1,1.7);
  place('bush',90,-9,-1.25,-2,31.5,.6,.95,1.55);place('bush',70,-22,-9,-8,34,.75,.9,1.4);place('flower',60,-9,-1.25,-1.5,31.5,.42,.85,1.35);place('grass',70,-22,-1.25,-1.5,34,.34,.85,1.35);
@@ -1901,21 +1933,41 @@ function buildForest(){ // ditempatkan saat P=ENV.g di dalam buildEnv
  // Seberang jalan: dinding hutan tebal (2 lapis)
  place('oak',90,-22,90,40.3,52,1.35,1.25,2.1);place('oak',45,-30,100,52,70,1.55,1.15,1.9);place('pine',50,-24,92,40.4,54,1.75,1.2,1.95);place('pine',40,-32,102,54,75,2.0,1.1,1.75);
  place('bush',80,-22,90,40.3,54,.5,1.0,1.6);place('bush',50,-30,100,52,75,.7,.9,1.4);place('flower',80,-20,88,40.3,54,.4,.9,1.4);place('grass',90,-20,88,40.3,70,.3,.9,1.4);
- // Hutan lebar jauh (background, lebih hemat mesh)
+}
+function forestPlaceFar(place){
+ // Hutan lebar jauh (background) — cuma kalau ensureFarForest dipanggil; default tetap off
  place('oak',22,-120,-22,-80,80,3.2,.95,1.55);place('oak',22,90,190,-80,80,3.2,.95,1.55);place('oak',16,-22,90,-80,-22,3.1,.95,1.55);place('oak',18,-120,190,70,140,3.4,.95,1.55);
  place('pine',12,-120,-22,-80,80,3.8,.95,1.5);place('pine',12,90,190,-80,80,3.8,.95,1.5);place('pine',8,-22,90,-80,-22,3.6,.95,1.5);place('pine',10,-120,190,72,145,4.0,.95,1.5);
  place('bush',30,-120,190,-80,145,1.4,.8,1.3);place('flower',30,-120,190,-80,145,.9,.75,1.2);place('grass',35,-120,190,-80,145,.7,.75,1.2);
+}
+function forestSpawn(pts){
  pts.oak.forEach(p=>tree(p.x,p.y,p.s));
  pts.pine.forEach(p=>pineTree(p.x,p.y,p.s*.95));
  pts.bush.forEach(p=>bushWild(p.x,p.y,1.05+p.s*.55));
  pts.flower.forEach(p=>wildFlower(p.x,p.y,1.05+p.s*.55));
  pts.grass.forEach(p=>tallGrass(p.x,p.y,1.0+p.s*.6));
 }
+function ensureNearForest(){ // lazy: cuma dibangun pas Show Near pertama kali
+ if(ENV.nearBuilt||!ENV.near)return;
+ const P0=P;P=ENV.near;
+ const rnd=forestRnd(20261012),pts={oak:[],pine:[],bush:[],flower:[],grass:[]};
+ const place=(key,n,x0,x1,y0,y1,minD,s0=.85,s1=1.55)=>{const goal=pts[key].length+n;let tries=0;while(pts[key].length<goal&&tries<n*140){tries++;const x=x0+rnd()*(x1-x0),y=y0+rnd()*(y1-y0);if(forestBlocked(x,y))continue;let ok=true;const arr=pts[key];for(let k=0;k<arr.length;k++){const dx=arr[k].x-x,dy=arr[k].y-y;if(dx*dx+dy*dy<minD*minD){ok=false;break;}}if(!ok)continue;arr.push({x,y,s:s0+rnd()*(s1-s0)});}};
+ forestPlaceAll(pts,place);forestSpawn(pts);
+ P=P0;ENV.nearBuilt=true;
+}
+function ensureFarForest(){ // opsional / WIP — default gak dipanggil (hemat lag)
+ if(ENV.farBuilt||!ENV.far)return;
+ const P0=P;P=ENV.far;
+ const rnd=forestRnd(20261013),pts={oak:[],pine:[],bush:[],flower:[],grass:[]};
+ const place=(key,n,x0,x1,y0,y1,minD,s0=.85,s1=1.55)=>{const goal=pts[key].length+n;let tries=0;while(pts[key].length<goal&&tries<n*140){tries++;const x=x0+rnd()*(x1-x0),y=y0+rnd()*(y1-y0);if(forestBlocked(x,y))continue;let ok=true;const arr=pts[key];for(let k=0;k<arr.length;k++){const dx=arr[k].x-x,dy=arr[k].y-y;if(dx*dx+dy*dy<minD*minD){ok=false;break;}}if(!ok)continue;arr.push({x,y,s:s0+rnd()*(s1-s0)});}};
+ forestPlaceFar(place);forestSpawn(pts);
+ P=P0;ENV.farBuilt=true;
+}
 
 let envLastAmb=0;
 function envTick(now,dt,force){
- // mobil jalan terus, muter balik dari ujung jalan
- ENV.cars.forEach(c=>{c.x+=c.v*c.dir*dt;if(c.dir>0&&c.x>ROAD.cx1)c.x=ROAD.cx0;if(c.dir<0&&c.x<ROAD.cx0)c.x=ROAD.cx1;c.g.position.x=tx(c.x);});
+ // mobil jalan terus (cuma kalau Show Near nyala)
+ if(ENV.showNear)ENV.cars.forEach(c=>{c.x+=c.v*c.dir*dt;if(c.dir>0&&c.x>ROAD.cx1)c.x=ROAD.cx0;if(c.dir<0&&c.x<ROAD.cx0)c.x=ROAD.cx1;c.g.position.x=tx(c.x);});
  // langit, bintang, matahari/bulan nempel kamera; awan pelan drift + hadap kamera
  ENV.sky.position.copy(camera.position);ENV.stars.position.copy(camera.position);
  ENV.clouds.forEach(c=>{const u=c.userData;u.ang+=u.drift*dt*.12;c.position.set(camera.position.x+Math.cos(u.ang)*u.r,camera.position.y+u.baseY*.7+10+Math.sin(now*.00018+u.phase)*2.5,camera.position.z+Math.sin(u.ang)*u.r*.9);});
@@ -1974,7 +2026,7 @@ function chatSay(m){const ac=actors[m.from],txt=Array.from(m.text.replace(/\s+/g
  log('💬 '+m.name+': '+(txt.length>60?txt.slice(0,60).join('')+'…':t));}
 try{if(window.KantorChat)KantorChat.init({el:$('chatCard'),nameOf:id=>{const a=agentsData.find(x=>idOf(x)===id);return a&&a.name;},onNew:chatSay});}catch(e){console.warn('chat',e);}
 $('loading').remove();
-bindQualityUI();applyQuality(qualityMode,false);
+bindQualityUI();applyQuality(qualityMode,false);bindShowNearUI();applyShowNear(ENV.showNear,false);
 requestAnimationFrame(loop);
 // opsi URL buat preview: #zoom, #kerja, #pop=lia
 const hs=location.hash;
