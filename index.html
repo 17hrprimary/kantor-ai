@@ -253,7 +253,7 @@ body.touch .povhint .kbd{display:none}body.touch .povhint .tch{display:inline}
       <div class="therr" id="thErr"></div></div>
      <div id="thMain" hidden>
       <div class="thnow" id="thNow">Pilih film dari daftar 👇</div>
-      <div class="thctl"><button class="thb" id="thPrev" title="Sebelumnya">⏮</button><button class="thb" id="thPlay" title="Putar / jeda (Spasi)">▶️</button><button class="thb" id="thNext" title="Berikutnya">⏭</button><button class="thb" id="thStop" title="Stop">⏹</button><button class="thb" id="thFull" title="Layar penuh">⛶ Layar penuh</button><button class="thb on" id="thAutoNext" title="Auto play next: lanjut film berikutnya otomatis">⏭ Auto ON</button></div>
+      <div class="thctl"><button class="thb" id="thPrev" title="Sebelumnya">⏮</button><button class="thb" id="thPlay" title="Putar / jeda (Spasi)">▶️</button><button class="thb" id="thNext" title="Berikutnya">⏭</button><button class="thb" id="thStop" title="Stop">⏹</button><button class="thb" id="thFull" title="Layar penuh">⛶ Layar penuh</button><button class="thb on" id="thAutoNext" title="Auto play next: lanjut film berikutnya otomatis">⏭ Auto ON</button><button class="thb" id="thScrLock" title="Kunci kamera lurus di tengah layar bioskop (nonton lurus, gak miring)">🎯 Kunci kamera ke layar</button></div>
       <input type="range" id="thSeek" min="0" max="1000" value="0"><div class="small thtime"><span id="thT">0:00 / 0:00</span><span><button class="thb" id="thMute" title="Mute / unmute video">🔊</button> <input type="range" id="thVol" min="0" max="100" value="90"></span></div>
       <div class="sec">🎞️ Folder theater/ <span id="thCount"></span></div><div class="thlist" id="thList"><div class="small">Memuat daftar…</div></div>
       <div class="throw"><label class="thb thpick">📂 Putar dari folder komputer<input type="file" id="thPick" accept="video/*" webkitdirectory multiple hidden></label><button class="thb" id="thLockBtn" title="Kunci lagi">🔒 Kunci</button></div>
@@ -1872,8 +1872,19 @@ async function thTry(){const c=$('thCode').value.trim();if(!c)return;const h=awa
   const enter=!!TH.pendingEnter;TH.pendingEnter=false;if(enter)thDoEnterCinema();else if(thInCinema()){/* sudah di dalam: panel film siap */}}
  else{$('thErr').textContent='❌ Kode salah, coba lagi';$('thCode').select();}}
 $('thGo').onclick=thTry;$('thCode').addEventListener('keydown',e=>{e.stopPropagation();if(e.key==='Enter')thTry();if(e.key==='Escape')thClose();});
-$('thLockBtn').onclick=()=>{TH.unlocked=false;TH.pendingEnter=false;if(typeof thSexSet==='function')thSexSet(false,false);try{sessionStorage.removeItem('thUnlock');}catch(_){}$('thStop').onclick();thSetIdle(['🔒 Masukkan kode kunci di 🔐 Konsol','Mode POV: jalan ke sini, tekan T / tombol 🎬']);thKickFromCinema();thUI();};
+$('thLockBtn').onclick=()=>{if(TH.scrLock)thScrLock(false);TH.unlocked=false;TH.pendingEnter=false;if(typeof thSexSet==='function')thSexSet(false,false);try{sessionStorage.removeItem('thUnlock');}catch(_){}$('thStop').onclick();thSetIdle(['🔒 Masukkan kode kunci di 🔐 Konsol','Mode POV: jalan ke sini, tekan T / tombol 🎬']);thKickFromCinema();thUI();};
 $('thX').onclick=()=>thClose();
+/* 🎯 kunci kamera: lurus di tengah layar bioskop, tegak lurus, seluruh layar 9:16 pas kelihatan (override kamera tiap frame) */
+function thScrLock(on){on=on??!TH.scrLock;if(on&&!TH.unlocked){thGatePrompt();return;}
+ if(on&&!TH.scrLock){TH.scrSave={p:camera.position.clone(),t:controls.target.clone(),fov:camera.fov,fl:floorMode,ce:controls.enabled};if(String(floorMode)!=='3')setFloor(3,false);controls.enabled=false;}
+ else if(!on&&TH.scrLock){const v=TH.scrSave;camera.fov=v?v.fov:55;camera.updateProjectionMatrix();if(v&&!POV.on){camera.position.copy(v.p);controls.target.copy(v.t);controls.enabled=v.ce;camera.lookAt(controls.target);}if(POV.on)POV.snap=true;TH.scrSave=null;}
+ TH.scrLock=on;const b=$('thScrLock');if(b){b.classList.toggle('on',on);b.textContent=on?'🎯 Kamera terkunci ke layar · klik = lepas':'🎯 Kunci kamera ke layar';}}
+const _scW=new THREE.Vector3();
+function thScreenCam(){const sc=TH.screen;if(!sc)return;sc.updateWorldMatrix(true,false);sc.getWorldPosition(_scW);const H=12.8,Wd=7.2,dist=13,m=1.05,asp=camera.aspect||1;
+ const fv=Math.max(2*Math.atan(H/2*m/dist),2*Math.atan(Wd/2*m/(dist*asp)))*180/Math.PI;
+ camera.position.set(_scW.x,_scW.y,_scW.z+dist);camera.up.set(0,1,0);camera.lookAt(_scW);controls.target.copy(_scW);
+ if(Math.abs(camera.fov-fv)>.01||camera.near>.3){camera.fov=fv;camera.near=.3;camera.updateProjectionMatrix();}}
+$('thScrLock').onclick=()=>thScrLock();
 function thOpen(){if(!TH.unlocked&&!thInCinema()){thGatePrompt();return;} // di luar + terkunci → minta kode dulu
  if(!thInCinema()){POV.msg='🎬 Panel bioskop cuma bisa dibuka di dalam Bioskop Lt 4 — tekan tombol 🎬 Bioskop';POV.msgUntil=performance.now()+2500;POV.zoneKey='';return;}
  TH.open=true;$('thPanel').classList.add('on');POV.keys.clear();thUI();POV.zoneKey='';
@@ -1896,7 +1907,7 @@ function thAccess(){ // tombol layar HP: ke bioskop / buka-tutup panel (ganti hu
  if(!thInCinema()){thGoCinema();return;}
  thToggle();}
 try{sessionStorage.removeItem('thUnlock');}catch(_){} // 🔒 kode WAJIB tiap kali masuk Bioskop (gak disimpan antar reload)
-function thRelock(){TH.unlocked=false;TH.pendingEnter=false;if(typeof thSexSet==='function')thSexSet(false,false);try{sessionStorage.removeItem('thUnlock');}catch(_){}
+function thRelock(){if(TH.scrLock)thScrLock(false);TH.unlocked=false;TH.pendingEnter=false;if(typeof thSexSet==='function')thSexSet(false,false);try{sessionStorage.removeItem('thUnlock');}catch(_){}
  if(POV.scene&&typeof thSceneEnd==='function')try{thSceneEnd(true);}catch(_){}try{$('thStop').onclick();}catch(_){}thSetIdle(['🔒 Masukkan kode kunci di 🔐 Konsol','Mode POV: jalan ke sini, tekan T / tombol 🎬']);thUI();}
 /* 🔒 gerbang SEMUA jalur masuk Bioskop (tombol Ke Bioskop, Mode POV Han, jalan kaki, teleport adegan/duduk): keluar = kunci lagi; ada di dalam tanpa kode = ditendang ke tangga + minta kode */
 setInterval(()=>{const inC=thInCinema();
@@ -1983,7 +1994,7 @@ function thSexSet(on,announce){TH.sexMode=!!on;try{sessionStorage.setItem('thSex
  if(announce){thActSt(TH.sexMode?'💞 Mode privat aktif — lampu bioskop diredupin':'🔒 Mode privat OFF');if(typeof log==='function')log(TH.sexMode?'💞 Mode privat Bioskop ON':'🔒 Mode privat Bioskop OFF');}
  if(on&&!thMain()&&actors.ophelia1)thDateStart('ophelia1');
  if(announce){if(on&&thMain()&&!POV.scene)thScene('kiss');else if(!on&&POV.scene)thSceneEnd(true);}thNudeSync();}
-const TH_TXT={kiss:{demo:'💋 Ciuman sambil pelukan',say:'Peluk aku erat sayang… 💋',pov:'💋 Duduk bersila berhadapan, pelukan + ciuman panas'},
+const TH_TXT={bedwatch:{demo:'🍿 Nonton di kasur',say:'Nonton sambil peluk kamu sayang… 💗',pov:'🍿 Selonjoran di kasur nonton; {A} meluk Han, kepala di bahunya, tangan ngelus',trio:true},kiss:{demo:'💋 Ciuman sambil pelukan',say:'Peluk aku erat sayang… 💋',pov:'💋 Duduk bersila berhadapan, pelukan + ciuman panas'},
  bj:{demo:'👄 Oral',say:'Rebahan aja sayang… 💗',pov:'👄 Han rebahan, {A} berlutut di antara kakinya'},
  suck:{demo:'🍼 Hisap tetek',say:'Hisap sayang… 💗',pov:'🍼 {A} rebahan setengah duduk, Han di dadanya'},
  cowgirl:{demo:'🐄 Cowgirl',say:'Aku di atas ya sayang 💞',pov:'🐄 {A} di atas Han, lutut di kasur'},
@@ -2171,7 +2182,7 @@ const TH_BED={x:12.15,y:3*DY+6.6,w:2.6,l:3.2,top:.52},PI2=Math.PI/2;
 const TH_FOOT=1.0-TH_BED.l/2,TH_SIDE=TH_BED.w/2-.65; // geser pose "berdiri di kaki kasur"/"duduk di pinggir" ke tepi kasur besar (pose disetel buat kasur lama 1.3×2.0)
 const TH_BED_Y=.24,TH_BED_LEAN=-.2; // tinggi root pas selonjoran di kasur, condong nyender ke bantal
 const TH_BEDSPOT={han:[TH_BED.x,TH_BED.y+.72],partner:[TH_BED.x-.78,TH_BED.y+.72],partner2:[TH_BED.x+.78,TH_BED.y+.72]};TH.onBed=false;
-const TH_SCENE={suck:{ang:PI2+.35,dist:3.0,w:2.6},kiss:{ang:PI2-.25,dist:2.8,w:2.4},bj:{ang:PI2+.3,dist:3.2,w:3.0},cowgirl:{ang:PI2+.25,dist:3.4,w:3.3},doggy:{ang:PI2+.1,dist:3.3,w:4.0},rear:{ang:PI2+.3,dist:3.3,w:3.6},
+const TH_SCENE={bedwatch:{ang:PI2+.5,dist:2.6,w:1.0},suck:{ang:PI2+.35,dist:3.0,w:2.6},kiss:{ang:PI2-.25,dist:2.8,w:2.4},bj:{ang:PI2+.3,dist:3.2,w:3.0},cowgirl:{ang:PI2+.25,dist:3.4,w:3.3},doggy:{ang:PI2+.1,dist:3.3,w:4.0},rear:{ang:PI2+.3,dist:3.3,w:3.6},
  t_doggy:{ang:PI2+.2,dist:3.6,w:3.8},squat:{ang:PI2+.25,dist:3.4,w:3.0},miss:{ang:PI2+.15,dist:3.3,w:3.4},spoon:{ang:PI2-.6,dist:3.2,w:3.0},stand:{ang:PI2+.2,dist:3.8,w:3.6},
  lap:{ang:PI2-.5,dist:3.4,w:2.8},g_rear:{ang:PI2+.3,dist:3.6,w:2.9},pile:{ang:PI2+.4,dist:3.6,w:2.6},press:{ang:PI2+.25,dist:3.4,w:3.0},prone:{ang:PI2+.3,dist:3.3,w:2.9},dap:{ang:PI2+.25,dist:3.7,w:3.4},dpp:{ang:PI2+.25,dist:3.7,w:3.4},dt_anal:{ang:PI2+.15,dist:3.8,w:3.2},stand_dap:{ang:PI2+.35,dist:3.9,w:2.8},face:{ang:PI2+.3,dist:3.3,w:2.6},n69:{ang:PI2+.3,dist:3.4,w:2.8},t_roast:{ang:PI2+.2,dist:3.8,w:3.6},t_cow:{ang:PI2+.35,dist:3.6,w:3.2},t_oral:{ang:PI2+.1,dist:3.4,w:3.0}};
 const _v1=new THREE.Vector3(),_v2=new THREE.Vector3(),_v3=new THREE.Vector3(),_q1=new THREE.Quaternion(),_z1=new THREE.Vector3(0,0,1);
@@ -2249,7 +2260,26 @@ function thSceneTick(now){const S=POV.scene,han=actors.han;if(!S||!han)return;co
  const kneelUp=(c,lean,k)=>({l:[[-lean,-.08],[-lean,.08]],k:[k??PI2,k??PI2]}); // berlutut: paha tegak (world), betis rebah ke belakang di kasur
  const onAll4=(c,rx)=>({rx,l:[[-rx,-.1],[-rx,.1]],k:[PI2,PI2],a:[[-rx,.08],[-rx,-.08]],e:[0,0]});
  const supine=(c,y)=>({y,ry:0,rx:-PI2+.18,l:[[-.12,-.3],[-.12,.3]],k:[.25,.25],a:[[-.25,.35],[-.25,-.35]],e:[-.6,-.6],h:[.35,0,0]}); // Han telentang, kepala ke arah layar (bantal kecil), kaki ke bantal
- if(S.kind==='kiss'){ // duduk bersila berhadapan, pelukan + ciuman (tangan melekuk meluk punggung via siku IK)
+ if(S.kind==='bedwatch'){ // 🍿 nonton di kasur: Han selonjoran nyender bantal; 1-2 cewek bugil meluk dari samping, kepala di bahu Han, satu tangan meluk dada, satu tangan ngelus (kocok pelan) — semua hadap layar
+  const br=Math.sin(t*1.3),rxH=-.55+.015*br;
+  thPose(hc,{x:0,y:.6,ry:ryS,rx:rxH,l:[[-PI2-rxH-.04,-.14],[-PI2-rxH-.04,.14]],k:[.12,.12],a:[[-.3,.5],[-.3,-.5]],e:[-.8,-.8],h:[.42,.06*Math.sin(t*.2),0]});thGround(hc);
+  hc.torso.updateWorldMatrix(true,false);const HT=hc.torso.matrixWorld,up=new THREE.Vector3(0,1,0).transformDirection(HT),fw=new THREE.Vector3(0,0,1).transformDirection(HT);
+  thW(hc.pen,_v1);thPenAim(hc,_v1.clone().addScaledVector(up,.15).addScaledVector(fw,.06),0);hc.pen.updateWorldMatrix(true,false);
+  const PB=thW(hc.pen,new THREE.Vector3()),PD=new THREE.Vector3(0,0,1).transformDirection(hc.pen.matrixWorld),sp=wave(t*1.7),ws=[oc,bc].filter(Boolean);
+  const sideW=x=>Math.sign(x-PB.x)||1; // +1 = cewek di kanan dunia (+x)
+  ws.forEach((w,j)=>{const sd=ws.length>1?(j?1:-1):1,bx=.36*sd,ry=ryS+.32*sd,lean=-.42+.02*Math.sin(t*1.1+j);
+   const shW=hc.arms.map(a=>thW(a,new THREE.Vector3())).sort((a,b)=>(a.x-b.x)*sd)[1]; // bahu Han di sisi cewek ini
+   const hd=new THREE.Vector3(shW.x,shW.y+.11,shW.z),lat=new THREE.Vector3(1,0,0);
+   const setW=u=>{thPose(w,{x:bx,y:.66,ry,rx:lean,l:[[-PI2-lean-.02,-.06*sd],[-PI2-lean-.02,.06*sd]],k:[.18+.1*j,.3-.1*j],t:[.05,0,-sd*u],h:[.12,.1*sd,-sd*(.3+.04*Math.sin(t*.4+j))]});thGround(w);};
+   S['bw'+j]=thFit(setW,()=>thW(w.head,_v2).sub(hd).dot(lat)*sd,S['bw'+j]??.3,(S['bw'+j]??.3)+.05,0,.75); // miring sampai kepala nyandar di bahu Han
+   {const e=thW(w.head,_v2).sub(hd);w.root.position.x-=e.x*.6;w.root.position.z-=e.z*.5;w.root.updateMatrixWorld(true);} // rapetin badan → kepala pas di bahu
+   w.torso.updateWorldMatrix(true,false);const ai=w.arms.map((a,i)=>[i,thW(a,new THREE.Vector3()).x]).sort((a,b)=>(a[1]-b[1])*sd).map(a=>a[0]),inner=ai[0],outer=ai[1];
+   thHandPole(w,outer,new THREE.Vector3(.03*sd,.3,.13).applyMatrix4(HT),new THREE.Vector3(sd*.4,-.6,.5)); // tangan luar meluk dada Han (nyilang depan badannya)
+   const u=(j?.085:.03)+.05*sp,G=PB.clone().addScaledVector(PD,u).addScaledVector(lat,.026*sd);thHandPole(w,inner,G,new THREE.Vector3(sd,-.4,.2)); // tangan dalam ngelus / kocok pelan
+   const hi=hc.arms.map((a,i)=>[i,thW(a,new THREE.Vector3()).x]).sort((a,b)=>(a[1]-b[1])*sd)[1][0],WP=thW(w.torso,new THREE.Vector3()).addScaledVector(lat,.15*sd);WP.y+=.08; // Han rangkul pinggang luar cewek (lewat belakang punggungnya)
+   thHandPole(hc,hi,WP,new THREE.Vector3(.4*sd,-.5,0).addScaledVector(fw,-1));});
+  S.dripSrc=null;}
+ else if(S.kind==='kiss'){ // duduk bersila berhadapan, pelukan + ciuman (tangan melekuk meluk punggung via siku IK)
   const h1=Math.sin(ph*1.1),h2=Math.sin(ph*.55+.8),ln=.32+.06*p,ln2=.32+.06*q;
   // a/e cuma seed; thHandTo override bahu+siku biar lengan nekuk meluk torso (bukan lurus)
   const sitX=(ln)=>({rx:ln,l:[[-1.45-ln+.15,-.95,.35],[-1.45-ln+.15,.95,-.35]],k:[2.45,2.45],a:[[-.8,.4],[-.8,-.4]],e:[-1.1,-1.1]});
@@ -2525,7 +2555,7 @@ function thSceneTick(now){const S=POV.scene,han=actors.han;if(!S||!han)return;co
  if(S.kind==='t_oral')S.ls=[oc,bc].map(thSnap); // pose terakhir yang beneran ke-render → transisi gantian mulus (gak loncat) // pas transisi gantian tetep napak kasur
  if(peak){const k=1+Math.abs(Math.sin((S.pulse-now)/1200*Math.PI*6))*.03;oc.root.scale.set(k,k,k);}
  thAnRing(cast.map(a=>a.c),[hc,hc2]);
- thReact(S,now,cast,p);
+ if(S.kind!=='bedwatch')thReact(S,now,cast,p);
  [hc,...cast.map(a=>a.c),...(hc2?[hc2]:[])].forEach(c=>thSoft(c,now));thDripTick(S,now);}
 /* 🎯 Fokus bioskop pas Mode sex: lantai/ruangan/luar gedung lain disembunyiin + aktor lain dipause (biar ringan) */
 function thFocus(on){const r=ROOMS.find(x=>x.cinema);if(!r)return;const fi=r.f,g=FLOORS[fi];thKeyLight(on,g);
@@ -2671,7 +2701,12 @@ function thCamClamp(){ // jaga kamera di dalam Bioskop Lt4
  _sm.set(tx(r.x+r.w-.6),3.6,tz(r.y+r.d-.6));g.localToWorld(_sm);
  const x1=Math.min(x0,_sm.x),x2=Math.max(x0,_sm.x),y1=Math.min(y0,_sm.y),y2=Math.max(y0,_sm.y),z1=Math.min(z0,_sm.z),z2=Math.max(z0,_sm.z);
  p.x=clampN(p.x,x1,x2);p.y=clampN(p.y,y1,y2);p.z=clampN(p.z,z1,z2);}
+const _bwH=new THREE.Vector3(),_bwS=new THREE.Vector3();
 function thSceneCam(dt){const S=POV.scene,han=actors.han;if(!S||!han)return false;const cfg=TH_SCENE[S.kind],B=TH_BED;
+ if(S.kind==='bedwatch'&&POV.fpPref&&TH.screen){ // 👁️ 1st person: dari mata Han ke tengah layar (kepala sendiri gak keliatan)
+  thW(han.c.head,_bwH);TH.screen.getWorldPosition(_bwS);_bwS.y=Math.min(_bwS.y,_bwH.y+3.2);const d=_bwS.clone().sub(_bwH).normalize();camera.position.copy(_bwH).addScaledVector(d,.12);camera.position.y+=.04;camera.lookAt(_bwS);
+  if(han.c.head.visible)han.c.head.visible=false;if(Math.abs(camera.fov-55)>.1){camera.fov=55;camera.updateProjectionMatrix();}return true;}
+ if(!han.c.head.visible)han.c.head.visible=true;
  POV.fpNow=false;if(!han.c.root.visible){han.c.root.visible=true;han.tag.o.visible=true;}
  _sm.set(tx(B.x),B.top+.45,tz(B.y));{const g=FLOORS[floorOfY(B.y)];g.updateWorldMatrix(true,false);g.localToWorld(_sm);}
  if(!S.free||POV.snap){ // posisi awal: samping ranjang
@@ -2699,7 +2734,7 @@ function thPulse(ac){if(POV.scene){POV.scene.pulse=performance.now()+1200;return
  (function f(){const e=(performance.now()-t0)/1200;if(e>=1){r.scale.set(1,1,1);return;}const k=1+Math.abs(Math.sin(e*Math.PI*6))*.07*(1-e);r.scale.set(k,k,k);requestAnimationFrame(f);})();}
 function thSceneEnd(quiet){const S=POV.scene;if(!S)return;POV.scene=null;thDripClear();[actors.han,...TH_PARTNERS.map(id=>actors[id])].forEach(a=>a&&(thSoftReset(a.c),thAnRingReset(a.c)));if(TH.han2)thHan2Set(false);thFocus(false);thFreeCam(false);controls.enabled=false;const han=actors.han;thNudeSync();thActRender();
  thSeatAll();
- if(han){thHumanize(han,false);thResetPose(han.c);han.c.root.position.y=0;han.c.root.rotation.set(0,Math.PI,0,'XYZ');
+ if(han){han.c.head.visible=true;thHumanize(han,false);thResetPose(han.c);han.c.root.position.y=0;han.c.root.rotation.set(0,Math.PI,0,'XYZ');
   if(S.prev){POV.fpPref=S.prev.fpPref;POV.yaw=Math.PI;POV.look=thScreenLook(TH_SEATS.han[1]);}}
  camera.near=.3;camera.updateProjectionMatrix();POV.snap=true;POV.zoneKey='';if(typeof povButtons==='function')povButtons();if(!quiet)thActSt('');}
 /* Han (Mode POV) duduk: di kursi Baris C atau selonjoran di kasur besar. POV.sit = pose duduk sampai Han jalan lagi */
@@ -2709,7 +2744,9 @@ function thHanPlace(st,y,lean){const ac=actors.han;if(!POV.on||!ac)return;if(POV
 function thHanSit(){if(!TH.unlocked){thGatePrompt();return;}const was=TH.onBed;TH.onBed=false;if(was)thSeatAll();
  thHanPlace(TH_SEATS.han,.14,0);thActRender();thActSt('💺 Duduk di kursi Baris C — selamat nonton 🍿');thClose();}
 function thBedToggle(){if(!TH.unlocked){thGatePrompt();return;}if(TH.onBed){thHanSit();return;}
- TH.onBed=true;thSeatAll();thHanPlace(TH_BEDSPOT.han,TH_BED_Y,TH_BED_LEAN);thActRender();thActSt('🛏️ Selonjoran di kasur, hadap layar — selamat nonton 🍿');thClose();}
+ TH.onBed=true;if(TH.sexMode&&thMain()){if(!POV.on)povEnter();POV.fpPref=true;thScene('bedwatch');const A=thMain();A.demo=TH_TXT.bedwatch.demo;A.sayText=TH_TXT.bedwatch.say;A.sayUntil=performance.now()+6000;
+  thActRender();thActSt('🍿 Nonton di kasur — '+thP().map(a=>nameOf(a.id)).join(' & ')+' meluk Han, kepala di bahu 💗 (V = 1st/3rd person)');thClose();return;}
+ thSeatAll();thHanPlace(TH_BEDSPOT.han,TH_BED_Y,TH_BED_LEAN);thActRender();thActSt('🛏️ Selonjoran di kasur, hadap layar — selamat nonton 🍿');thClose();}
 thActRender();if(TH.sexMode&&TH.unlocked)thSexSet(true,false);else if(TH.sexMode)thSexSet(false,false);
 setInterval(()=>{const fx=$('thSexFX');if(fx)fx.style.visibility=(TH.unlocked&&thInCinema())?'visible':'hidden';},700); // efek privat cuma di dalam Bioskop
 // keyboard
@@ -3062,7 +3099,7 @@ function loop(now){
  OUTER_WALLS.forEach(w=>{if(!w.g.parent.visible||w.priv)return;tmpV.copy(camera.position).sub(wp(w.g));const facing=tmpV.dot(w.n)>0;const th=facing?.35:w.h;
   const cur=w.w.scale.y+(th-w.w.scale.y)*Math.min(1,dt*8);w.w.scale.y=cur;w.w.position.y=cur/2;w.cap.position.y=cur+.03;});
  const far=camera.position.distanceTo(controls.target)>(stage.clientWidth<700?34:50);labBox.classList.toggle('far',far);
- if(!POV.scene)brainTick(now);updateActors(now,dt);thHumFix();if(POV.scene)thSceneTick(now);thNeonTick(now);if(POV.on)povCamera(dt);placePop();
+ if(!POV.scene)brainTick(now);updateActors(now,dt);thHumFix();if(POV.scene)thSceneTick(now);thNeonTick(now);if(POV.on)povCamera(dt);if(TH.scrLock)thScreenCam();placePop();
  envTick(now,dt);
  renderer.render(scene,camera);labelR.render(scene,camera);
  requestAnimationFrame(loop);
