@@ -1862,7 +1862,7 @@ const TH_TXT={kiss:{demo:'💋 Ciuman sambil pelukan',say:'Peluk aku erat sayang
  suck:{demo:'🍼 Hisap tetek',say:'Hisap sayang… 💗',pov:'🍼 Ophelia rebahan setengah duduk, Han di dadanya'},
  cowgirl:{demo:'🐄 Cowgirl',say:'Aku di atas ya sayang 💞',pov:'🐄 Ophelia di atas Han'},
  doggy:{demo:'🐕 Doggy',say:'Dari belakang sayang… 💗',pov:'🐕 Ophelia merangkak, Han di belakangnya'},
- rear:{demo:'🔙 Dari belakang (rebah)',say:'Pelan-pelan ya sayang 💞',pov:'🔙 Ophelia tengkurap, Han di atasnya dari belakang'}};
+ rear:{demo:'🔙 Dari belakang',say:'Pegang pantatku sayang… 💞',pov:'🔙 Ophelia berlutut nungging membelakangi Han, noleh ke belakang; Han megang pantatnya'}};
 function thIntim(kind){const ac=actors.ophelia1,t=TH_TXT[kind];if(!t)return;
  if(kind!=='kiss'&&!TH.sexMode){thActSt('🔒 Nyalain Mode privat dulu');return;}
  if(!ac||!ac.cinemaDate)thDateStart('ophelia1');if(!actors.ophelia1||!actors.ophelia1.cinemaDate){thActSt('💗 Panggil Ophelia dulu');return;}
@@ -1991,10 +1991,10 @@ function thSceneTick(now){const S=POV.scene,han=actors.han,oph=actors.ophelia1;i
  else if(S.kind==='doggy'){ // Ophelia merangkak hadap bantal, Han berlutut di belakang: hentakan pinggul
   const a=1.45;thPose(oc,{y:-.2+.04*q,z:.33+.01*q,rx:a+.04*q,l:[-a+.15,-a+.15],lz:[-.12,.12],a:[-a-.1-.06*q,-a-.1-.06*q],az:[.06,-.06],hx:-.6+.15*q,hy:.06*Math.sin(ph*.5)});
   thPose(hc,{y:-.44+.1*p,z:.33+.01*p,rx:-.16+.12*p,l:[.35+.1*p,.35+.1*p],lz:[-.18,.18],a:[-.8-.15*p,-.8-.15*p],az:[.3,-.3],hx:.35});}
- else{ // rear: Ophelia tengkurap, Han rebah di atas dari belakang, ditopang lengan
-  const a=PI2-.12;thPose(oc,{y:-.15+.03*q,z:.13,rx:a,l:[.1,.1],lz:[-.22,.22],a:[-2.9,-2.9],az:[.3,-.3],hx:-.45+.12*q,hz:.35});
-  const b=PI2-.38-.06*p;thPose(hc,{y:-.27+.1*p,z:.36+.03*p,rx:b,l:[PI2-b-.12,PI2-b-.12],lz:[-.32,.32],a:[-b,-b],az:[-.3,.3],hx:-.3});}
- if(hc.pen){const PA={kiss:[.9,.8],suck:[.9,.8],bj:[-.35,1.15],cowgirl:[-.6,1.1],doggy:[.1,1.25],rear:[.15,1.2]}[S.kind]||[0,1];
+ else{ // rear 🔙 (ref): Ophelia berlutut di ranjang membelakangi Han & menghadap layar, dada rendah ke kasur, pinggul naik, noleh ke belakang lewat bahu; Han berlutut tegak di belakang, kedua tangan megang pantatnya
+  const a=PI2+.28;thPose(oc,{y:-.16+.035*q,z:.34+.012*q,rx:a+.03*q,ty:.18,l:[-a+.08,-a+.08],lz:[-.16,.16],a:[-2.55-.05*q,-2.35],az:[.28,-.12],hx:-.35+.08*q,hy:1.05,hz:.18});
+  thPose(hc,{y:-.47+.1*p,z:.34+.01*p,rx:-.06+.12*p,l:[.3+.1*p,.3+.1*p],lz:[-.2,.2],a:[-1.05+.08*p,-1.05+.08*p],az:[.42,-.42],tx:.1,hx:.42});}
+ if(hc.pen){const PA={kiss:[.9,.8],suck:[.9,.8],bj:[-.35,1.15],cowgirl:[-.6,1.1],doggy:[.1,1.25],rear:[.12,1.25]}[S.kind]||[0,1];
   hc.pen.rotation.x=PA[0];hc.pen.scale.set(1,1,PA[1]*(S.kind==='kiss'||S.kind==='suck'?1:(1+.06*p)));} // tegang + nyelip masuk (overlap)
  if(peak){const k=1+Math.abs(Math.sin((S.pulse-now)/1200*Math.PI*6))*.05;oc.root.scale.set(k,k,k);}else oc.root.scale.set(1,1,1);}
 const _sm=new THREE.Vector3(),_sc=new THREE.Vector3();
