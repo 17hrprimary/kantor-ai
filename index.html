@@ -171,6 +171,7 @@ body.touch .povhint .kbd{display:none}body.touch .povhint .tch{display:inline}
       <div class="small">Waktu WITA</div>
       <div class="clock" id="clock">--:--</div>
       <div class="small" id="tgl"></div>
+      <div class="small" id="suasana" style="font-weight:800;color:#5a6fd6"></div>
       <div class="small" style="margin-top:6px"><span class="live" id="live"></span><span id="src">Memuat status.json…</span></div>
       <div class="small">Terakhir update: <b id="lastUpd">-</b></div>
       <div class="small">Dicek: <b id="lastCheck">-</b> · tiap 60 detik</div>
@@ -1578,6 +1579,111 @@ renderer.domElement.addEventListener('wheel',e=>{if(!POV.on)return;e.preventDefa
   if(a==='run')POV.run=!POV.run;else if(a==='fp')POV.fpPref=!POV.fpPref;else if(a==='up')povFloor(1);else if(a==='down')povFloor(-1);else if(a==='exit'){povExit();return;}
   povButtons();}));}
 
+/* ================= 🌍 Lingkungan luar: tanah hitam, jalan raya + mobil lalu lalang, langit & suasana pagi/siang/sore/malam (ikut jam WITA) ================= */
+const ENV={g:new THREE.Group(),cars:[],lampMats:[],head:null,tail:null,win:null,stars:null,orb:null,sky:null,skyU:null,lastK:null};
+scene.add(ENV.g);
+const ROAD={y0:32,y1:38,x0:-260,x1:320,cx0:-70,cx1:130}; // cx0..cx1 = rentang muter mobil (biar rame di sekitar kantor) // koordinat logika lantai 1 (depan gedung, di bawah Taman Depan / Pondok)
+// keyframe suasana per jam (WITA): langit atas/bawah (sRGB), kekuatan cahaya, warna matahari/bulan
+const AMB=[
+ {h:0,  top:'#070b24',bot:'#1a2246',hemi:.42,sun:.22,sc:'#9fb4ff',hs:'#8796cc',hg:'#2a2638',star:1},
+ {h:4.6,top:'#0d1434',bot:'#2c2f5c',hemi:.46,sun:.22,sc:'#9fb4ff',hs:'#8796cc',hg:'#2a2638',star:.9},
+ {h:5.6,top:'#2e3f80',bot:'#e89a86',hemi:.62,sun:.45,sc:'#ffb08a',hs:'#c9b6d8',hg:'#3a3040',star:.25},
+ {h:6.6,top:'#5d93dd',bot:'#ffd0a6',hemi:.85,sun:.85,sc:'#ffc690',hs:'#ffe8da',hg:'#e7cfe6',star:0},
+ {h:8.5,top:'#5aa8ff',bot:'#d9eeff',hemi:1,  sun:1,  sc:'#fff3e2',hs:'#ffffff',hg:'#f3d6ff',star:0},
+ {h:12, top:'#3d8ff5',bot:'#cbe6ff',hemi:1.05,sun:1.1,sc:'#ffffff',hs:'#ffffff',hg:'#f3d6ff',star:0},
+ {h:15, top:'#4f9bf0',bot:'#dcedff',hemi:1,  sun:1,  sc:'#fff0d6',hs:'#ffffff',hg:'#f3d6ff',star:0},
+ {h:17.2,top:'#4c66b4',bot:'#ffb37a',hemi:.85,sun:.85,sc:'#ffa860',hs:'#ffe2cc',hg:'#e8c6d8',star:0},
+ {h:18.3,top:'#25306c',bot:'#d26d72',hemi:.62,sun:.45,sc:'#ff8466',hs:'#c7a6c8',hg:'#3c2c40',star:.3},
+ {h:19.3,top:'#0b1130',bot:'#26295a',hemi:.46,sun:.24,sc:'#9fb4ff',hs:'#8796cc',hg:'#2a2638',star:.9},
+ {h:24, top:'#070b24',bot:'#1a2246',hemi:.42,sun:.22,sc:'#9fb4ff',hs:'#8796cc',hg:'#2a2638',star:1}];
+const hexRGB=h=>{const n=parseInt(h.slice(1),16);return[(n>>16&255)/255,(n>>8&255)/255,(n&255)/255];};
+const lerpA=(a,b,t)=>a.map((v,i)=>v+(b[i]-v)*t);
+// jam simulasi buat preview: #jam=21 atau #jam=7.5 (default: jam WITA beneran)
+const JAM_OVR=(()=>{const m=location.hash.match(/jam=([\d.]+)/);return m?(+m[1])%24:null;})();
+const envHour=()=>JAM_OVR!=null?JAM_OVR:nowMin()/60;
+function suasana(h){return h>=4.5&&h<10?['🌅','Pagi']:h>=10&&h<15?['☀️','Siang']:h>=15&&h<18.5?['🌇','Sore']:['🌙','Malam'];}
+function ambAt(h){let i=0;while(i<AMB.length-2&&h>=AMB[i+1].h)i++;const a=AMB[i],b=AMB[i+1],t=(h-a.h)/(b.h-a.h||1);
+ const L=k=>lerpA(hexRGB(a[k]),hexRGB(b[k]),t),N=k=>a[k]+(b[k]-a[k])*t;
+ return{top:L('top'),bot:L('bot'),sc:L('sc'),hs:L('hs'),hg:L('hg'),hemi:N('hemi'),sun:N('sun'),star:N('star')};}
+function noiseTex(base,spots,n=128,rep=60){const cv=document.createElement('canvas');cv.width=cv.height=n;const g=cv.getContext('2d');g.fillStyle=base;g.fillRect(0,0,n,n);
+ for(let i=0;i<n*n/9;i++){g.fillStyle=spots[i%spots.length];const s=1+Math.random()*2.2;g.fillRect(Math.random()*n,Math.random()*n,s,s);}
+ const t=new THREE.CanvasTexture(cv);t.wrapS=t.wrapT=THREE.RepeatWrapping;t.repeat.set(rep,rep);t.colorSpace=THREE.SRGBColorSpace;return t;}
+function envBox(x,y,z,w,d,h,m,parent=ENV.g,shadow=false){const o=new THREE.Mesh(BOXG,m);o.scale.set(w,h,d);o.position.set(tx(x+w/2),z+h/2,tz(y+d/2));o.castShadow=shadow;o.receiveShadow=true;parent.add(o);return o;}
+function buildCar(color,dir){ // mobil low-poly, hadap +x (dir=1) / -x (dir=-1)
+ const g=new THREE.Group(),L=2.7,Wd=1.25,body=mat(color),glass=mat(0x2b3448,{roughness:.3,metalness:.2}),tire=mat(0x161618);
+ const add=(geo,m,x,y,z,sx=1,sy=1,sz=1)=>{const o=new THREE.Mesh(geo,m);o.position.set(x,y,z);o.scale.set(sx,sy,sz);o.castShadow=!!QUAL.shadow;g.add(o);return o;};
+ add(BOXG,body,0,.42,0,L,.5,Wd);add(BOXG,body,-.15,.86,0,1.45,.42,Wd*.92);
+ add(BOXG,glass,-.15,.87,0,1.5,.32,Wd*.94);add(BOXG,glass,-.15,.87,0,1.25,.32,Wd*.97);
+ const wg=new THREE.CylinderGeometry(.26,.26,.2,10);
+ [[.85,.62],[-.85,.62],[.85,-.62],[-.85,-.62]].forEach(([x,z])=>{const w=add(wg,tire,x,.27,z);w.rotation.x=Math.PI/2;});
+ [-.42,.42].forEach(z=>{add(BOXG,ENV.head,L/2+.01,.48,z,.04,.14,.24);add(BOXG,ENV.tail,-L/2-.01,.5,z,.04,.12,.26);});
+ g.rotation.y=dir>0?0:Math.PI;return g;}
+function buildEnv(){
+ const P0=P;P=ENV.g;
+ // 🖤 tanah hitam di sekeliling kantor & rumah
+ const ground=new THREE.Mesh(new THREE.PlaneGeometry(1000,1000),new THREE.MeshStandardMaterial({map:noiseTex('#1b1819',['#242022','#141213','#2a2526','#100e0f'],128,120),roughness:1}));
+ ground.rotation.x=-Math.PI/2;ground.position.y=-.32;ground.receiveShadow=true;ENV.g.add(ground);
+ // 🛣️ jalan raya 2 lajur + trotoar + marka
+ const asph=new THREE.MeshStandardMaterial({map:noiseTex('#3a3a40',['#34343a','#444450','#2f2f35'],64,1),roughness:.95});asph.map.repeat.set(140,2);
+ envBox(ROAD.x0,ROAD.y0,-.32,ROAD.x1-ROAD.x0,ROAD.y1-ROAD.y0,.04,asph);
+ const side=mat(0x8f8a86),curb=mat(0xd9d3cc),white=new THREE.MeshBasicMaterial({color:0xf2f2f2}),yel=new THREE.MeshBasicMaterial({color:0xf3c94a});
+ envBox(ROAD.x0,ROAD.y0-1.6,-.32,ROAD.x1-ROAD.x0,1.6,.14,side);envBox(ROAD.x0,ROAD.y1,-.32,ROAD.x1-ROAD.x0,1.6,.14,side);
+ envBox(ROAD.x0,ROAD.y0-.12,-.32,ROAD.x1-ROAD.x0,.12,.18,curb);envBox(ROAD.x0,ROAD.y1,-.32,ROAD.x1-ROAD.x0,.12,.18,curb);
+ envBox(ROAD.x0,ROAD.y0+.3,-.275,ROAD.x1-ROAD.x0,.1,.01,white);envBox(ROAD.x0,ROAD.y1-.4,-.275,ROAD.x1-ROAD.x0,.1,.01,white);
+ const midY=(ROAD.y0+ROAD.y1)/2;for(let x=ROAD.x0;x<ROAD.x1;x+=4)envBox(x,midY-.06,-.275,2,.12,.01,yel);
+ // zebra cross di depan gedung
+ for(let i=0;i<7;i++)envBox(22.4,ROAD.y0+.5+i*.75,-.274,2.6,.42,.01,white);
+ // jalan masuk (paving) dari Taman Depan & Taman Halaman ke trotoar
+ const pave=mat(0xcfc2ad);envBox(23.25,24,-.32,1.5,ROAD.y0-1.6-24,.3,pave);envBox(35.9,24,-.32,1.3,ROAD.y0-1.6-24,.3,pave);
+ // 💡 lampu jalan (bohlam nyala pas sore/malam)
+ const pole=mat(0x4a4a52);
+ for(let x=-60;x<=120;x+=12){const yy=ROAD.y0-1.0;const p=new THREE.Mesh(new THREE.CylinderGeometry(.07,.09,3.6,6),pole);p.position.set(tx(x),-.18+1.8,tz(yy));ENV.g.add(p);
+  envBox(x-.05,yy,3.3,.1,.9,.08,pole);const bm=new THREE.MeshStandardMaterial({color:0xfff2c4,emissive:0xffd27a,emissiveIntensity:0});ENV.lampMats.push(bm);envBox(x-.18,yy+.7,3.1,.36,.36,.18,bm);}
+ // 🚗 mobil lalu lalang (2 arah)
+ ENV.head=new THREE.MeshStandardMaterial({color:0xfffbe8,emissive:0xfff2b0,emissiveIntensity:.2});
+ ENV.tail=new THREE.MeshStandardMaterial({color:0xc4202a,emissive:0xff2030,emissiveIntensity:.2});
+ const cols=[0xe8e8ec,0x1f2430,0xd23a3a,0x3c7fd6,0xf2c94c,0x9aa3ad,0x2f8f5b,0xff7eb6,0x6b4fc9,0xf08a3a,0xffffff,0x3a3a44,0x8fd0ff,0xc0392b];
+ for(let i=0;i<14;i++){const dir=i%2?-1:1,lane=dir>0?ROAD.y0+1.5:ROAD.y1-1.5,car=buildCar(cols[i],dir);
+  const c={g:car,dir,lane,x:ROAD.cx0+(i>>1)/7*(ROAD.cx1-ROAD.cx0)+Math.random()*8,v:5+Math.random()*6};car.position.set(tx(c.x),-.28,tz(lane));ENV.g.add(car);ENV.cars.push(c);}
+ // 🌌 langit (kubah gradasi) + bintang + matahari/bulan, ikut posisi kamera
+ ENV.skyU={top:{value:new THREE.Color()},bot:{value:new THREE.Color()}};
+ ENV.sky=new THREE.Mesh(new THREE.SphereGeometry(330,24,14),new THREE.ShaderMaterial({uniforms:ENV.skyU,side:THREE.BackSide,depthWrite:false,depthTest:false,
+  vertexShader:'varying vec3 vP;void main(){vP=normalize(position);gl_Position=projectionMatrix*modelViewMatrix*vec4(position,1.);}',
+  fragmentShader:'uniform vec3 top;uniform vec3 bot;varying vec3 vP;void main(){float h=clamp(vP.y*3.2+.02,0.,1.);gl_FragColor=vec4(mix(bot,top,pow(h,.55)),1.);}'}));
+ ENV.sky.renderOrder=-10;ENV.sky.frustumCulled=false;scene.add(ENV.sky);
+ const sp=[];for(let i=0;i<500;i++){const a=Math.random()*Math.PI*2,e=.08+Math.random()*1.4;sp.push(Math.cos(a)*Math.cos(e)*320,Math.sin(e)*320,Math.sin(a)*Math.cos(e)*320);}
+ const sg=new THREE.BufferGeometry();sg.setAttribute('position',new THREE.Float32BufferAttribute(sp,3));
+ ENV.stars=new THREE.Points(sg,new THREE.PointsMaterial({color:0xffffff,size:1.8,sizeAttenuation:false,transparent:true,opacity:0,depthWrite:false,depthTest:false,fog:false}));
+ ENV.stars.renderOrder=-9;ENV.stars.frustumCulled=false;scene.add(ENV.stars);
+ ENV.orb=new THREE.Mesh(new THREE.SphereGeometry(9,16,10),new THREE.MeshBasicMaterial({color:0xfff6d0,fog:false,depthWrite:false,depthTest:false}));ENV.orb.renderOrder=-8;ENV.orb.frustumCulled=false;scene.add(ENV.orb);
+ scene.fog=new THREE.Fog(0x1a2246,150,340); // tanah jauh nyatu sama warna cakrawala
+ P=P0;envTick(performance.now(),0,true);
+}
+let envLastAmb=0;
+function envTick(now,dt,force){
+ // mobil jalan terus, muter balik dari ujung jalan
+ ENV.cars.forEach(c=>{c.x+=c.v*c.dir*dt;if(c.dir>0&&c.x>ROAD.cx1)c.x=ROAD.cx0;if(c.dir<0&&c.x<ROAD.cx0)c.x=ROAD.cx1;c.g.position.x=tx(c.x);});
+ // langit, bintang, matahari/bulan nempel kamera
+ ENV.sky.position.copy(camera.position);ENV.stars.position.copy(camera.position);
+ if(!force&&now-envLastAmb<1000){ENV.orb.position.copy(camera.position).add(ENV.orbDir);return;}
+ envLastAmb=now;const h=envHour(),k=ambAt(h);
+ ENV.skyU.top.value.setRGB(...k.top);ENV.skyU.bot.value.setRGB(...k.bot);
+ scene.fog.color.setRGB(...k.bot,THREE.SRGBColorSpace);
+ hemi.intensity=QUAL.hemi*k.hemi;sun.intensity=QUAL.sun*k.sun;fill.intensity=.6*k.hemi;
+ sun.color.setRGB(...k.sc,THREE.SRGBColorSpace);hemi.color.setRGB(...k.hs,THREE.SRGBColorSpace);hemi.groundColor.setRGB(...k.hg,THREE.SRGBColorSpace);
+ // posisi matahari (06-18) / bulan (18-06): timur (+x) -> selatan (depan gedung, +z) -> barat
+ const day=h>=6&&h<18,ph=day?(h-6)/12:((h+6)%24)/12,az=Math.PI*ph,el=Math.max(.28,Math.sin(Math.PI*ph))*1.05;
+ const dir=new THREE.Vector3(Math.cos(az),el,.75+.35*Math.sin(az)).normalize();
+ sun.position.copy(dir).multiplyScalar(52);
+ ENV.orbDir=new THREE.Vector3(Math.cos(az),Math.max(.12,Math.sin(Math.PI*ph))*.8,.75+.35*Math.sin(az)).normalize().multiplyScalar(300);
+ ENV.orb.material.color.set(day?(h<7.5||h>16.5?0xffb070:0xfff4c8):0xe8eeff);ENV.orb.scale.setScalar(day?1:.7);
+ ENV.orb.position.copy(camera.position).add(ENV.orbDir);
+ ENV.stars.material.opacity=k.star;
+ const dark=clampN((1.05-k.hemi)/.6,0,1); // 0 siang, 1 malam
+ ENV.lampMats.forEach(m=>m.emissiveIntensity=dark*2.2);ENV.head.emissiveIntensity=.2+dark*2.4;ENV.tail.emissiveIntensity=.2+dark*1.6;
+ const [ic,nm]=suasana(h),el2=document.getElementById('suasana');if(el2)el2.textContent=ic+' Suasana '+nm+(JAM_OVR!=null?' (preview jam '+hmTxt(Math.round(h*60))+')':'');
+}
+
 /* ================= Loop ================= */
 function applyShift(){const w=stage.clientWidth,h=stage.clientHeight;if(Math.abs(viewShift)<.5)camera.clearViewOffset();else camera.setViewOffset(w,h,viewShift,0,w,h);camera.updateProjectionMatrix();}
 function resize(){const w=stage.clientWidth,h=stage.clientHeight,s=QUAL.scale||1;
@@ -1598,10 +1704,11 @@ function loop(now){
   const cur=w.w.scale.y+(th-w.w.scale.y)*Math.min(1,dt*8);w.w.scale.y=cur;w.w.position.y=cur/2;w.cap.position.y=cur+.03;});
  const far=camera.position.distanceTo(controls.target)>(stage.clientWidth<700?34:50);labBox.classList.toggle('far',far);
  brainTick(now);updateActors(now,dt);if(POV.on)povCamera(dt);placePop();
+ envTick(now,dt);
  renderer.render(scene,camera);labelR.render(scene,camera);
  requestAnimationFrame(loop);
 }
-buildWorld();resize();
+buildWorld();buildEnv();resize();
 const hf=location.hash.match(/lt([123])/);setFloor(hf?+hf[1]-1:'all',false);
 tick();setInterval(tick,20000);
 log('Kantor 3D buka, selamat datang Papa 🌸');
@@ -1616,9 +1723,9 @@ bindQualityUI();applyQuality(qualityMode,false);
 requestAnimationFrame(loop);
 // opsi URL buat preview: #zoom, #kerja, #pop=lia
 const hs=location.hash;
-const PREV={pondok:['pondok-taman',[0.8,4.2,-4]],kamarlove:['kamar-love',[3,8,-7.5]],lux:['kamar-hanrin',[3,8,-7.5]],tvroom:['lounge',[4,6.5,8]],school:['school',[4,8.5,-10.5]],close:['ig',[1.5,2.6,5.5]],zoom:['ig',[7,8.5,10]]};
+const PREV={langit:['taman-depan',[26,2.5,34]],pondok:['pondok-taman',[0.8,4.2,-4]],kamarlove:['kamar-love',[3,8,-7.5]],lux:['kamar-hanrin',[3,8,-7.5]],tvroom:['lounge',[4,6.5,8]],school:['school',[4,8.5,-10.5]],close:['ig',[1.5,2.6,5.5]],zoom:['ig',[7,8.5,10]]};
 const pv=Object.keys(PREV).find(k=>hs.includes(k));
-if(pv){const [rid,off]=PREV[pv],r=ROOMS.find(x=>x.id===rid);setFloor(r.f,false);const t=FLOORS[r.f].localToWorld(new THREE.Vector3(tx(r.x+r.w/2),.5,tz(r.y+r.d/2)));camera.position.copy(t.clone().add(new THREE.Vector3(...off)));controls.target.copy(t);}
+if(pv){const [rid,off]=PREV[pv],r=ROOMS.find(x=>x.id===rid);setFloor(r.f,false);const t=FLOORS[r.f].localToWorld(new THREE.Vector3(tx(r.x+r.w/2),.5,tz(r.y+r.d/2)));camera.position.copy(t.clone().add(new THREE.Vector3(...off)));controls.target.copy(t);if(pv==='langit')controls.target.y+=5;}
 if(hs.includes('povpad'))document.body.classList.add('touch');
 if(hs.includes('pov'))setTimeout(()=>{if(hs.includes('povfp'))POV.fpPref=true;povEnter();},500);
 if(hs.includes('kerja'))setTimeout(()=>$('btnKerja').click(),300);
