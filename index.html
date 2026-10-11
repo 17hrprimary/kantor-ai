@@ -1855,8 +1855,8 @@ function thSexSet(on,announce){TH.sexMode=!!on;try{sessionStorage.setItem('thSex
  $('thPanel').classList.toggle('priv',TH.sexMode);thActRender();
  if(announce){thActSt(TH.sexMode?'💞 Mode privat aktif — lampu bioskop diredupin':'🔒 Mode privat OFF');if(typeof log==='function')log(TH.sexMode?'💞 Mode privat Bioskop ON':'🔒 Mode privat Bioskop OFF');}
  if(on&&actors.ophelia1&&!actors.ophelia1.cinemaDate)thDateStart('ophelia1');
- if(announce){if(on&&actors.ophelia1&&actors.ophelia1.cinemaDate&&!POV.scene)thScene('kiss');else if(!on&&POV.scene)thSceneEnd(true);}}
-const TH_TXT={kiss:{demo:'💋 Ciuman di ranjang',say:'Sini sayang, cium aku… 💋',pov:'💋 Ophelia ciuman sama Han di ranjang'},
+ if(announce){if(on&&actors.ophelia1&&actors.ophelia1.cinemaDate&&!POV.scene)thScene('kiss');else if(!on&&POV.scene)thSceneEnd(true);}thNudeSync();}
+const TH_TXT={kiss:{demo:'💋 Ciuman sambil pelukan',say:'Peluk aku erat sayang… 💋',pov:'💋 Duduk bersila berhadapan, pelukan + ciuman panas'},
  bj:{demo:'👄 Oral',say:'Rebahan aja sayang… 💗',pov:'👄 Han rebahan, Ophelia di antara kakinya'},
  cowgirl:{demo:'🐄 Cowgirl',say:'Aku di atas ya sayang 💞',pov:'🐄 Ophelia di atas Han'},
  doggy:{demo:'🐕 Doggy',say:'Dari belakang sayang… 💗',pov:'🐕 Ophelia merangkak, Han di belakangnya'},
@@ -1875,11 +1875,11 @@ function thPeakFX(){if(!TH.sexMode){thActSt('🔒 Nyalain Mode privat dulu');ret
 const thActSt=t=>{$('thActSt').textContent=t||'';};
 /* 🧍 Humanoid halus (bukan kotak) — KHUSUS Bioskop sex/date. Nempel di rig yang sama (legs/arms/torso/head) jadi pose/animasi tetap jalan; lantai lain tetap boxy. Ophelia = cewek, Han = cowok dewasa sederhana (tanpa kacamata). */
 function thHumanBuild(c,id){const L=lookOf(id||'ophelia1'),male=id==='han',sm=(col,o)=>new THREE.MeshStandardMaterial({color:col,roughness:.55,metalness:0,...(o||{})}),SK=sm(L.skin),HR=sm(L.hair,{roughness:.45,side:THREE.DoubleSide}),SH=sm(L.shirt),PN=sm(L.pants,{roughness:.8}),PL=sm(0xeeeef2,{roughness:.35,metalness:.1}),BK=sm(0x111111,{roughness:.3,metalness:.3}),GD=sm(0xffd23f,{metalness:.6,roughness:.35,emissive:0x553300,emissiveIntensity:.25});
- const parts=[],G=parent=>{const g=new THREE.Group();g.userData.hum=1;parent.add(g);parts.push(g);return g;};
+ const SHO=sm(male?0x22262e:0xf4f4f4),parts=[],G=parent=>{const g=new THREE.Group();g.userData.hum=1;parent.add(g);parts.push(g);return g;};
  const M=(geo,m,g,x,y,z,sx,sy,sz)=>{const o=mesh(geo,m,g);o.position.set(x,y,z);if(sx)o.scale.set(sx,sy??sx,sz??sx);return o;};
  const cap=(r,l)=>new THREE.CapsuleGeometry(r,l,6,14),sph=(r)=>new THREE.SphereGeometry(r,20,14);
  // kaki: Han sedikit lebih tebal
- c.legs.forEach(l=>{const g=G(l);M(cap(male?.065:.058,.2),PN,g,0,-.14,0);M(sph(male?.055:.05),SK,g,0,-.29,.0,1,.7,1);M(sph(.06),sm(male?0x22262e:0xf4f4f4),g,0,-.33,.04,1,.55,1.5);});
+ c.legs.forEach(l=>{const g=G(l);M(cap(male?.065:.058,.2),PN,g,0,-.14,0);M(sph(male?.055:.05),SK,g,0,-.29,.0,1,.7,1);M(sph(.06),SHO,g,0,-.33,.04,1,.55,1.5);});
  {const g=G(c.torso);
   if(male){ // badan cowok: bahu lebih lebar, dada rata, kaos pendek
    M(new THREE.CylinderGeometry(.18,.145,.34,22),SH,g,0,.18,0,1,1,.74);M(sph(.135),PN,g,0,.015,0,1.12,.5,.85);
@@ -1909,10 +1909,16 @@ function thHumanBuild(c,id){const L=lookOf(id||'ophelia1'),male=id==='han',sm=(c
    M(cap(.016,.42),PL,g,-.13,-.2,.1);M(sph(.035),PL,g,-.095,.08,.135,1,.8,.5);
    M(new THREE.BoxGeometry(.07,.022,.022),sm(L.clip||0xffd23f),g,.11,.12,.12);}
  }
+ // 👕 tandai mesh baju (kaos/celana/sepatu/medali) biar bisa dilepas pas Mode privat (ganti ke kulit, polos tanpa detail)
+ c.humSkin=SK;parts.forEach(g=>g.traverse(o=>{if(o.isMesh&&(o.material===SH||o.material===PN||o.material===SHO||o.material===GD))o.userData.cloth=o.material;}));
  return parts;}
+/* 🫦 telanjang cuma di adegan Mode privat; selain itu (nonton biasa / privat OFF / Selesai) baju balik */
+function thNude(ac,on){const c=ac&&ac.c;if(!c||!c.hum)return;on=!!on;if(c.nude===on)return;c.nude=on;
+ c.hum.forEach(g=>g.traverse(o=>{const m=o.userData.cloth;if(!m)return;if(m.color&&m.metalness>.5){o.visible=!on;return;}o.material=on?c.humSkin:m;}));}
+function thNudeSync(){const on=!!(TH.sexMode&&POV.scene);[actors.han,actors.ophelia1].forEach(a=>a&&thNude(a,on));}
 function thHumanize(ac,on){if(!ac||!ac.c)return;const c=ac.c;
  if(on&&!c.hum){c.hum=thHumanBuild(c,ac.id);c.boxy=[];[c.body,c.torso,c.head,...c.legs,...c.arms].forEach(g=>g.children.forEach(o=>{if(o===c.eyes||o===c.closed)c.boxy.push(...o.children);else if(!o.userData.hum&&!c.legs.includes(o)&&!c.arms.includes(o)&&o!==c.torso&&o!==c.head)c.boxy.push(o);}));}
- if(!c.hum)return;c.hum.forEach(g=>g.visible=!!on);c.boxy.forEach(o=>o.visible=!on);c.humOn=!!on;}
+ if(!c.hum)return;c.hum.forEach(g=>g.visible=!!on);c.boxy.forEach(o=>o.visible=!on);c.humOn=!!on;if(!on)thNude(ac,false);}
 function thDateStart(id){const ac=actors[id];if(!ac){thActSt('⚠️ '+id+' belum ada di denah');return;}
  if(ac.cinemaDate){thActSt('🍿 '+nameOf(id)+' udah di bioskop');return;}
  Object.assign(ac,{cinemaDate:true,brain:null,napUntil:0,afterNap:null,waitUntil:0,afterWait:null,demo:'Diajak Han nonton 🎬'});
@@ -1921,7 +1927,7 @@ function thDateStart(id){const ac=actors[id];if(!ac){thActSt('⚠️ '+id+' belu
  ac.path=null;ac.spot=seat;ac.pos={x:seat.x,y:seat.y};placeActor(ac);ac.demo='🍿 Nonton bareng Han';ac.sayText='Nonton bareng yuk sayang 🍿';ac.sayUntil=performance.now()+6000;
  if(id==='ophelia1'){thHumanize(ac,true);if(thInCinema()&&actors.han)thHumanize(actors.han,true);} // date: Ophelia + Han (kalau Han udah di bioskop) humanoid
  thActSt('🍿 '+nameOf(id)+' udah duduk, Baris C');log('🎬 Han ngajak '+nameOf(id)+' nonton bareng');}
-function thDateEnd(id){const ac=actors[id];if(POV.scene)thSceneEnd(true);if(!ac||!ac.cinemaDate){thActSt('');return;}ac.cinemaDate=false;ac.demo=null;thHumanize(ac,false);if(actors.han)thHumanize(actors.han,false);goHome(ac,null);thActSt('👋 '+nameOf(id)+' balik ke rutinitas');}
+function thDateEnd(id){const ac=actors[id];if(POV.scene)thSceneEnd(true);if(!ac||!ac.cinemaDate){thActSt('');return;}ac.cinemaDate=false;ac.demo=null;thNude(ac,false);if(actors.han)thNude(actors.han,false);thHumanize(ac,false);if(actors.han)thHumanize(actors.han,false);goHome(ac,null);thActSt('👋 '+nameOf(id)+' balik ke rutinitas');}
 /* 💞 Adegan bioskop: pose 3D beneran + kamera SAMPING (side view) — non-eksplisit (duduk mepet / peluk dari belakang, goyang pelan) */
 const TH_SCREEN={y:.25,h:12.8};
 function thScreenLook(seatY){const d=Math.max(2,seatY-TH_SCREEN.y),cy=.7+TH_SCREEN.h/2-1.16;return clampN(-Math.atan2(cy,d),-.8,.9);}
@@ -1930,7 +1936,7 @@ const thResetPose=c=>{c.body.rotation.set(0,0,0);c.body.position.set(0,0,0);c.to
 /* 🛏️ Ranjang tengah bioskop (logika lantai 4). Pose dipivot di PINGGUL: body digeser -.34 biar root = titik pinggul, lalu root di-yaw/pitch (YXZ).
    rx>0 = condong ke depan (PI/2 = tengkurap), rx<0 = rebah telentang. Kaki/lengan: rotation.x<0 = ke depan, >0 = ke belakang. */
 const TH_BED={x:12.5,y:3*DY+6.4,top:.5},PI2=Math.PI/2;
-const TH_SCENE={kiss:{ang:.2,dist:2.3,w:1.3},bj:{ang:PI2+.3,dist:2.7,w:3.0},cowgirl:{ang:PI2+.25,dist:2.8,w:3.3},doggy:{ang:PI2+.1,dist:2.7,w:4.0},rear:{ang:PI2+.3,dist:2.8,w:3.6}};
+const TH_SCENE={kiss:{ang:PI2-.25,dist:2.2,w:2.4},bj:{ang:PI2+.3,dist:2.7,w:3.0},cowgirl:{ang:PI2+.25,dist:2.8,w:3.3},doggy:{ang:PI2+.1,dist:2.7,w:4.0},rear:{ang:PI2+.3,dist:2.8,w:3.6}};
 function thPose(c,o){const B=TH_BED;c.body.position.set(0,-.34,0);c.body.rotation.set(0,0,0);
  c.root.position.set(tx(B.x+(o.x||0)),B.top+o.z,tz(B.y+(o.y||0)));c.root.rotation.set(o.rx||0,o.ry||0,o.rz||0,'YXZ');
  const L=o.l||[0,0],LZ=o.lz||[0,0],A=o.a||[0,0],AZ=o.az||[0,0];
@@ -1943,7 +1949,7 @@ function thScene(kind){const han=actors.han,oph=actors.ophelia1,cfg=TH_SCENE[kin
  const B=TH_BED;han.pos={x:B.x,y:B.y};han.spot={pose:'stand',x:B.x,y:B.y,face:0};placeActor(han);thResetPose(han.c);
  Object.assign(oph,{walking:false,path:[],after:null,waitUntil:0,afterWait:null});
  oph.pos={x:B.x+.3,y:B.y};oph.spot={pose:'stand',x:B.x+.3,y:B.y,face:0};placeActor(oph);thResetPose(oph.c);
- thHumanize(han,true);thHumanize(oph,true);
+ thHumanize(han,true);thHumanize(oph,true);thNudeSync();
  setFloor(floorOfY(B.y),false);han.c.root.visible=true;han.tag.o.visible=true;camera.near=.1;camera.updateProjectionMatrix();POV.snap=true;POV.zoneKey='';thClose&&thClose();}
 /* loop ritmis per posisi: p = dorongan 0..1 (cepat masuk, pelan balik), q = reaksi pasangan (sedikit telat) */
 function thSceneTick(now){const S=POV.scene,han=actors.han,oph=actors.ophelia1;if(!S||!han||!oph)return;
@@ -1952,9 +1958,13 @@ function thSceneTick(now){const S=POV.scene,han=actors.han,oph=actors.ophelia1;i
  S.ph=(S.ph||0)+(S.lt?Math.min(.1,(now-S.lt)/1000):0)*cfg.w*(peak?1.6:1);S.lt=now;const ph=S.ph;
  const wave=x=>{const u=(1-Math.cos(x))/2;return Math.pow(u,.7);}; // ritme: dorong tajam, balik halus
  const p=wave(ph),q=wave(ph-.7),s=Math.sin(ph),hc=han.c,oc=oph.c;
- if(S.kind==='kiss'){const sw=Math.sin(t*1.3),hs=Math.sin(ph);
-  thPose(hc,{x:-.25,y:0,z:.15,ry:PI2,rx:.34+.04*sw,l:[1.1,1.1],lz:[-.15,.15],a:[-1.25,-1.1],az:[.55,-.55],hx:-.1,hy:.2*hs,hz:-.3});
-  thPose(oc,{x:.25,y:0,z:.15,ry:-PI2,rx:.34+.04*sw,l:[1.1,1.1],lz:[-.15,.15],a:[-1.3,-1.2],az:[.6,-.6],hx:-.1,hy:-.2*hs,hz:.3});}
+ if(S.kind==='kiss'){ // 💋 duduk BERSILA berhadapan di ranjang, pelukan erat + ciuman brutal (condong keras, kepala miring gantian, lengan melingkar)
+  const sw=Math.sin(t*.9),h1=Math.sin(ph*1.15),h2=Math.sin(ph*.55+.8),lean=.2+.16*p,lean2=.2+.16*q,sit=.06;
+  const cross=r=>-PI2+.12-r; // paha datar ke depan relatif pinggul yang condong
+  thPose(hc,{x:-.27+.04*p,y:.02*sw,z:sit,ry:PI2,rx:lean,l:[cross(lean)+.05,cross(lean)-.05],lz:[-.85,.85],
+   a:[-2.0-.18*h2,-1.15+.12*h1],az:[.95+.08*h1,-.75],tx:.06*p,ty:.1*h2,hx:.12+.08*p,hy:.28*h1,hz:-.38-.12*h2});
+  thPose(oc,{x:.27-.04*q,y:.02*sw,z:sit,ry:-PI2,rx:lean2,l:[cross(lean2)+.05,cross(lean2)-.05],lz:[-.85,.85],
+   a:[-2.15+.15*h1,-2.05-.12*h2],az:[.85,-.85-.08*h1],tx:.06*q,ty:-.1*h2,hx:.14+.08*q,hy:-.28*h1,hz:.38+.12*h2});}
  else if(S.kind==='bj'){ // Han telentang di bantal, Ophelia rebah di antara kakinya, kepala naik-turun
   thPose(hc,{y:.1,z:.12+.015*q,ry:Math.PI,rx:-(PI2-.12),l:[-.12,-.12],lz:[-.42,.42],a:[-.55-.1*q,.1],az:[.2,-.15],hx:.45+.05*q});
   const a=1.22+.12*s;thPose(oc,{y:-.62+.09*p,z:.14+.03*p,rx:a,l:[PI2-a,PI2-a],lz:[-.12,.12],a:[-a-.6,-a-.6],az:[.15,-.15],hx:-.5+.18*p});}
@@ -1979,7 +1989,7 @@ function thSceneCam(dt){const S=POV.scene,han=actors.han,oph=actors.ophelia1;if(
  if(Math.abs(camera.fov-55)>.1){camera.fov+=(55-camera.fov)*Math.min(1,dt*6);camera.updateProjectionMatrix();}return true;}
 function thPulse(ac){if(POV.scene){POV.scene.pulse=performance.now()+1200;return;}if(!ac||!ac.c)return;const r=ac.c.root,t0=performance.now();
  (function f(){const e=(performance.now()-t0)/1200;if(e>=1){r.scale.set(1,1,1);return;}const k=1+Math.abs(Math.sin(e*Math.PI*6))*.07*(1-e);r.scale.set(k,k,k);requestAnimationFrame(f);})();}
-function thSceneEnd(quiet){const S=POV.scene;if(!S)return;POV.scene=null;const han=actors.han,oph=actors.ophelia1;
+function thSceneEnd(quiet){const S=POV.scene;if(!S)return;POV.scene=null;const han=actors.han,oph=actors.ophelia1;thNudeSync();
  if(oph){thResetPose(oph.c);if(oph.cinemaDate){const st=TH_SEATS.partner;oph.pos={x:st[0],y:st[1]};oph.spot={x:st[0],y:st[1],pose:'sit',face:Math.PI};placeActor(oph);}}
  if(han){thHumanize(han,false);thResetPose(han.c);han.c.legs.forEach(l=>l.rotation.x=0);han.c.arms.forEach(a=>a.rotation.x=0);han.c.root.position.y=0;han.c.root.rotation.set(0,Math.PI,0,'XYZ');
   if(S.prev){POV.fpPref=S.prev.fpPref;POV.yaw=Math.PI;POV.look=thScreenLook(TH_SEATS.han[1]);}}
