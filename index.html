@@ -1930,7 +1930,8 @@ const TH_ACTS=[
  {id:'t_cow',label:'👯 3some: Cowgirl + ciuman',gated:true,trio:true,run:()=>thIntim('t_cow')},
  {id:'t_roast',label:'👯 3some: Spit-roast',gated:true,trio:true,run:()=>thIntim('t_roast')},
  {id:'t_oral',label:'👯 3some: Oral berdua (double oral)',gated:true,trio:true,run:()=>thIntim('t_oral')},
- {id:'cam',label:'🎥 Reset kamera',run:()=>{if(POV.scene){POV.snap=true;thActSt('🎥 Kamera balik ke samping — drag muter, scroll/cubit zoom, 2 jari/klik kanan geser');}}},
+ {id:'camlock',label:'🔒 Kunci ke pasangan',toggle:true,run:()=>thCamLockSet(!TH.camLock,true)},
+ {id:'cam',label:'🎥 Reset kamera',run:()=>{if(POV.scene){POV.snap=true;thActSt(TH.camLock?'🎥 Kamera balik ke samping (orbit)':'🎥 Kamera reset samping — WASD jalan, drag lihat, Q/E naik/turun');}}},
  {id:'puncak',label:'✨ Climax FX / Efek puncak',gated:true,run:()=>thPeakFX()},
  {id:'selesai',label:'🚶 Selesai',run:()=>thDateEnd()},
 ];
@@ -1941,10 +1942,14 @@ function thActRender(){const el=$('thAct');el.innerHTML='';const n=thP().length;
  if((a.id==='bareng'&&actors.ophelia1&&actors.ophelia1.cinemaDate)||(a.id==='keira'&&actors.keira&&actors.keira.cinemaDate))b.classList.add('on');
  if(a.id==='privat'&&TH.sexMode){b.classList.add('on');b.textContent='🔓 Mode privat ON';}
  if(a.id==='brutal'&&TH.brutal){b.classList.add('on');b.textContent='⚡ Mode brutal ON';}
+ if(a.id==='camlock'){b.hidden=!POV.scene;if(TH.camLock){b.classList.add('on');b.textContent='🔒 Kunci ON · klik = bebas';}else{b.textContent='🚶 Bebas jalan ON · klik = kunci';b.classList.add('on');}}
+ if(a.id==='cam')b.hidden=!POV.scene;
  b.onclick=()=>a.run();el.appendChild(b);});const ps=$('thPrivSt');if(ps)ps.hidden=!TH.sexMode;}
 /* 💞 Mode privat (sexMode) */
 TH.sexMode=false;try{TH.sexMode=sessionStorage.getItem('thSexMode')==='1';}catch(_){}
 TH.brutal=false;try{TH.brutal=localStorage.getItem('kantorThBrutal')==='1';}catch(_){}
+TH.camLock=false;try{TH.camLock=sessionStorage.getItem('thCamLock')==='1';}catch(_){}
+TH.camYaw=0;TH.camPitch=0;
 function thBrutalSet(on,announce){TH.brutal=!!on;try{localStorage.setItem('kantorThBrutal',TH.brutal?'1':'0');}catch(_){}
  thActRender();if(announce){thActSt(TH.brutal?'⚡ Mode brutal ON — animasi ~2.3×':'⚡ Mode brutal OFF');if(typeof log==='function')log(TH.brutal?'⚡ Mode brutal Bioskop ON':'⚡ Mode brutal Bioskop OFF');}}
 const thFX=()=>$('thSexFX');let thFXT=0;
@@ -1978,7 +1983,7 @@ function thIntim(kind){const t=TH_TXT[kind];if(!t)return;
  if(t.trio&&!thSecond()){thActSt('👯 Panggil partner kedua dulu (Ophelia + Keira)');return;}
  thScene(kind);ac.demo=t.demo;ac.sayText=t.say;ac.sayUntil=performance.now()+7000;POV.msg=thFill(t.pov);POV.msgUntil=performance.now()+4000;POV.zoneKey='';
  const fx=thFX();if(fx){fx.classList.add('soft');clearTimeout(thFXT);if(!TH.sexMode)thFXT=setTimeout(()=>fx.classList.remove('soft'),6000);}
- thActSt(t.demo+' — 🎥 kamera bebas: drag muter, scroll/cubit zoom, 2 jari/klik kanan geser');}
+ thActSt(t.demo+' — 🎥 '+(TH.camLock?'orbit pasangan (🔒)':'WASD jalan · drag lihat · Q/E naik/turun · 🔒 kunci ke pasangan'));}
 function thPeakFX(){if(!TH.sexMode){thActSt('🔒 Nyalain Mode privat dulu');return;}const fx=thFX();if(!fx)return;
  fx.classList.add('soft');fx.classList.remove('peak');void fx.offsetWidth;fx.classList.add('peak');
  for(let i=0;i<26;i++){const h=document.createElement('span');h.className='ht';h.textContent=['💗','💖','💕','✨','💞'][i%5];h.style.left=(Math.random()*96)+'%';h.style.animationDelay=(Math.random()*1.2)+'s';fx.appendChild(h);}
@@ -2142,7 +2147,7 @@ function thScene(kind){const han=actors.han,A=thMain(),cfg=TH_SCENE[kind];if(!ha
  cast.forEach((id,i)=>{const o=actors[id];Object.assign(o,{walking:false,path:[],after:null,waitUntil:0,afterWait:null});o.pos={x:B.x+.3*(i+1),y:B.y};o.spot={pose:'stand',x:B.x+.3*(i+1),y:B.y,face:0};placeActor(o);thHumanize(o,true);});
  thHumanize(han,true);[han,...cast.map(id=>actors[id])].forEach(a=>{if(!prev)thResetPose(a.c);a.c.snap=prev?thSnap(a.c):null;});
  thSeatAll();thNudeSync();
- setFloor(floorOfY(B.y),false);han.c.root.visible=true;han.tag.o.visible=true;camera.near=.1;camera.updateProjectionMatrix();if(!prev)POV.snap=true;POV.zoneKey='';thClose&&thClose();}
+ setFloor(floorOfY(B.y),false);han.c.root.visible=true;han.tag.o.visible=true;camera.near=.1;camera.updateProjectionMatrix();if(!prev)POV.snap=true;POV.zoneKey='';thClose&&thClose();thActRender();}
 /* transisi halus antar posisi (0.6 dtk): simpan pose lama, slerp ke pose baru */
 function thNodes(c){return [c.root,c.body,c.torso,c.head,...c.legs,...c.arms,...c.knees,...c.elbows,...(c.ankles||[]),...(c.pen?[c.pen]:[])];}
 function thSnap(c){return thNodes(c).map(n=>({p:n.position.clone(),q:n.quaternion.clone(),s:n.scale.clone()}));}
@@ -2296,23 +2301,52 @@ function thHandTo(c,i,T){const arm=c.arms[i],el=c.elbows[i],D=c.dim;arm.updateWo
  const cosS=clampN((L1*L1+dd*dd-L2*L2)/(2*L1*dd),-1,1),off=Math.acos(cosS);
  _v1.divideScalar(d);_q1.setFromUnitVectors(_v2.set(0,-1,0),_v1);arm.quaternion.copy(_q1);
  arm.rotateX(off);el.rotation.set(-bend,0,0);arm.updateMatrixWorld(true);}
-const _sm=new THREE.Vector3(),_sc=new THREE.Vector3();
-/* 🎥 kamera BEBAS pas adegan: drag = muter (orbit), 2 jari / klik kanan = geser (pan), scroll / cubit = zoom. Awal = samping ranjang */
+const _sm=new THREE.Vector3(),_sc=new THREE.Vector3(),_look=new THREE.Vector3();
+/* 🎥 kamera adegan: default BEBAS JALAN (WASD + drag look + Q/E naik/turun). Toggle 🔒 kunci = orbit pasangan. */
 let TH_CAM0=null;
 function thFreeCam(on){if(on){if(!TH_CAM0)TH_CAM0={min:controls.minDistance,max:controls.maxDistance,maxP:controls.maxPolarAngle,minP:controls.minPolarAngle,ssp:controls.screenSpacePanning,en:controls.enabled,pan:controls.enablePan};
-  controls.minDistance=.5;controls.maxDistance=9;controls.maxPolarAngle=Math.PI*.97;controls.minPolarAngle=.02;controls.screenSpacePanning=true;controls.enablePan=true;controls.enabled=true;}
- else if(TH_CAM0){const c=TH_CAM0;controls.minDistance=c.min;controls.maxDistance=c.max;controls.maxPolarAngle=c.maxP;controls.minPolarAngle=c.minP;controls.screenSpacePanning=c.ssp;controls.enablePan=c.pan;controls.enabled=c.en;TH_CAM0=null;}}
+  controls.minDistance=.5;controls.maxDistance=14;controls.maxPolarAngle=Math.PI*.97;controls.minPolarAngle=.02;controls.screenSpacePanning=true;controls.enablePan=true;controls.enabled=true;}
+ else if(TH_CAM0){const c=TH_CAM0;controls.minDistance=c.min;controls.maxDistance=c.max;controls.maxPolarAngle=c.maxP;controls.minPolarAngle=c.minP;controls.screenSpacePanning=c.ssp;controls.enablePan=c.pan;controls.enabled=false;TH_CAM0=null;}
+ else controls.enabled=false;}
+function thCamLockSet(on,announce){TH.camLock=!!on;try{sessionStorage.setItem('thCamLock',TH.camLock?'1':'0');}catch(_){}
+ if(POV.scene){if(TH.camLock){POV.snap=true;thFreeCam(true);}else{thFreeCam(false);controls.enabled=false;
+  // ambil yaw/pitch dari arah kamera sekarang biar gak loncat
+  camera.getWorldDirection(_look);TH.camYaw=Math.atan2(_look.x,_look.z);TH.camPitch=clampN(Math.asin(clampN(_look.y,-1,1)),-1.25,1.25);}
+  thActRender();}
+ if(announce){thActSt(TH.camLock?'🔒 Kamera dikunci ke pasangan — drag orbit, scroll zoom, pan geser':'🚶 Kamera bebas — WASD jalan, drag lihat sekeliling, Q/E naik/turun (gak terkunci di karakter)');if(typeof log==='function')log(TH.camLock?'🔒 Bioskop: kamera kunci pasangan':'🚶 Bioskop: kamera bebas jalan');}}
+function thCamClamp(){ // jaga kamera di dalam Bioskop Lt4
+ const r=ROOMS.find(x=>x.cinema);if(!r)return;const g=FLOORS[r.f];g.updateWorldMatrix(true,false);
+ const p=camera.position;_sm.set(tx(r.x+.6),0.35,tz(r.y+.6));g.localToWorld(_sm);const x0=_sm.x,y0=_sm.y,z0=_sm.z;
+ _sm.set(tx(r.x+r.w-.6),3.6,tz(r.y+r.d-.6));g.localToWorld(_sm);
+ const x1=Math.min(x0,_sm.x),x2=Math.max(x0,_sm.x),y1=Math.min(y0,_sm.y),y2=Math.max(y0,_sm.y),z1=Math.min(z0,_sm.z),z2=Math.max(z0,_sm.z);
+ p.x=clampN(p.x,x1,x2);p.y=clampN(p.y,y1,y2);p.z=clampN(p.z,z1,z2);}
 function thSceneCam(dt){const S=POV.scene,han=actors.han;if(!S||!han)return false;const cfg=TH_SCENE[S.kind],B=TH_BED;
  POV.fpNow=false;if(!han.c.root.visible){han.c.root.visible=true;han.tag.o.visible=true;}
- if(!S.free||POV.snap){ // posisi awal: samping ranjang (0 = dari arah layar, PI/2 = samping)
-  _sm.set(tx(B.x),B.top+.45,tz(B.y));{const g=FLOORS[floorOfY(B.y)];g.updateWorldMatrix(true,false);g.localToWorld(_sm);}
+ _sm.set(tx(B.x),B.top+.45,tz(B.y));{const g=FLOORS[floorOfY(B.y)];g.updateWorldMatrix(true,false);g.localToWorld(_sm);}
+ if(!S.free||POV.snap){ // posisi awal: samping ranjang
   const a=cfg.ang,d=cfg.dist;_sc.set(_sm.x+Math.sin(a)*d,_sm.y+.9,_sm.z-Math.cos(a)*d);
-  if(!S.free||POV.snap){camera.position.copy(_sc);controls.target.copy(_sm);}S.free=true;POV.snap=false;thFreeCam(true);}
- controls.update();
+  camera.position.copy(_sc);controls.target.copy(_sm);
+  _look.subVectors(_sm,_sc).normalize();TH.camYaw=Math.atan2(_look.x,_look.z);TH.camPitch=clampN(Math.asin(clampN(_look.y,-1,1)),-1.25,1.25);
+  S.free=true;POV.snap=false;if(TH.camLock)thFreeCam(true);else{thFreeCam(false);controls.enabled=false;}thActRender();}
+ if(TH.camLock){if(!controls.enabled)thFreeCam(true);controls.update();}
+ else{ // 🚶 free walk + free look (bukan orbit)
+  controls.enabled=false;
+  const K=POV.keys,st=POV.stick;let fwd=(K.has('f')?1:0)-(K.has('b')?1:0),str=(K.has('r')?1:0)-(K.has('l')?1:0);
+  if(st.x||st.y){fwd=-st.y;str=st.x;}
+  const up=(K.has('tl')?1:0)-(K.has('tr')?1:0); // Q naik, E turun
+  const run=K.has('run')||POV.run||Math.hypot(st.x,st.y)>.95;const sp=3.2*(run?1.7:1)*dt;
+  const hx=Math.sin(TH.camYaw),hz=Math.cos(TH.camYaw),rx=-hz,rz=hx;
+  const mag=Math.hypot(fwd,str);if(mag>.01){fwd/=mag;str/=mag;camera.position.x+=(hx*fwd+rx*str)*sp;camera.position.z+=(hz*fwd+rz*str)*sp;}
+  if(up)camera.position.y+=up*sp;
+  thCamClamp();
+  const cp=Math.cos(TH.camPitch),spn=Math.sin(TH.camPitch);
+  _look.set(Math.sin(TH.camYaw)*cp,spn,Math.cos(TH.camYaw)*cp);
+  controls.target.copy(camera.position).addScaledVector(_look,3);
+  camera.lookAt(controls.target);}
  if(Math.abs(camera.fov-55)>.1){camera.fov+=(55-camera.fov)*Math.min(1,dt*6);camera.updateProjectionMatrix();}return true;}
 function thPulse(ac){if(POV.scene){POV.scene.pulse=performance.now()+1200;return;}if(!ac||!ac.c)return;const r=ac.c.root,t0=performance.now();
  (function f(){const e=(performance.now()-t0)/1200;if(e>=1){r.scale.set(1,1,1);return;}const k=1+Math.abs(Math.sin(e*Math.PI*6))*.07*(1-e);r.scale.set(k,k,k);requestAnimationFrame(f);})();}
-function thSceneEnd(quiet){const S=POV.scene;if(!S)return;POV.scene=null;thFreeCam(false);const han=actors.han;thNudeSync();
+function thSceneEnd(quiet){const S=POV.scene;if(!S)return;POV.scene=null;thFreeCam(false);controls.enabled=false;const han=actors.han;thNudeSync();thActRender();
  thSeatAll();
  if(han){thHumanize(han,false);thResetPose(han.c);han.c.root.position.y=0;han.c.root.rotation.set(0,Math.PI,0,'XYZ');
   if(S.prev){POV.fpPref=S.prev.fpPref;POV.yaw=Math.PI;POV.look=thScreenLook(TH_SEATS.han[1]);}}
@@ -2338,9 +2372,15 @@ window.addEventListener('blur',()=>POV.keys.clear());
 // mouse / sentuh di kanvas: drag = putar (kiri/kanan) & miring (atas/bawah); scroll = jarak kamera
 renderer.domElement.addEventListener('pointerdown',e=>{if(POV.on)POV.drag={id:e.pointerId,x:e.clientX,y:e.clientY};});
 window.addEventListener('pointermove',e=>{const d=POV.drag;if(!POV.on||!d||e.pointerId!==d.id)return;const dx=e.clientX-d.x,dy=e.clientY-d.y;d.x=e.clientX;d.y=e.clientY;
+ if(POV.scene){if(!TH.camLock){TH.camYaw-=dx*.006;TH.camPitch=clampN(TH.camPitch-dy*.004,-1.25,1.25);}return;} // free-look di adegan; orbit pakai OrbitControls
  POV.yaw-=dx*.006;if(POV.fpNow)POV.look=clampN(POV.look+dy*.004,-.8,.9);else POV.pitch=clampN(POV.pitch+dy*.004,.12,1.3);});
 ['pointerup','pointercancel'].forEach(n=>window.addEventListener(n,e=>{if(POV.drag&&e.pointerId===POV.drag.id)POV.drag=null;}));
-renderer.domElement.addEventListener('wheel',e=>{if(!POV.on)return;e.preventDefault();POV.dist=clampN(POV.dist*(e.deltaY>0?1.12:1/1.12),2.2,10);},{passive:false});
+renderer.domElement.addEventListener('wheel',e=>{if(!POV.on)return;
+ if(POV.scene){if(TH.camLock)return; // orbit zoom biar OrbitControls yang urus
+  e.preventDefault(); // free-walk: scroll = maju/mundur
+  const sp=(e.deltaY>0?-1:1)*.55,cp=Math.cos(TH.camPitch),hx=Math.sin(TH.camYaw)*cp,hz=Math.cos(TH.camYaw)*cp,hy=Math.sin(TH.camPitch);
+  camera.position.x+=hx*sp;camera.position.y+=hy*sp;camera.position.z+=hz*sp;if(typeof thCamClamp==='function')thCamClamp();return;}
+ e.preventDefault();POV.dist=clampN(POV.dist*(e.deltaY>0?1.12:1/1.12),2.2,10);},{passive:false});
 // HP: stick virtual + tombol tahan
 {const stickEl=$('povStick'),knobEl=$('povKnob');
  const at=e=>{const r=stickEl.getBoundingClientRect(),R=r.width/2;let x=(e.clientX-r.left-R)/R,y=(e.clientY-r.top-R)/R;const m=Math.hypot(x,y);if(m>1){x/=m;y/=m;}if(m<.12){x=0;y=0;}
