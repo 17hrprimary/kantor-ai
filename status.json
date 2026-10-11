@@ -1,5 +1,5 @@
 {
-  "updated_at": "2026-10-11T09:51:24+08:00",
+  "updated_at": "2026-10-11T09:53:20+08:00",
   "agents": [
     {
       "id": "hanrin",
@@ -189,6 +189,37 @@
       ]
     },
     {
+      "id": "emily1",
+      "name": "Emily 1",
+      "role": "Konten Instagram 01emily_17 (Emily)",
+      "room": "ig",
+      "status": "santai",
+      "task": "Santai, jalan-jalan keliling kantor (di luar jadwal)",
+      "updated_at": "2026-10-11T09:53:20+08:00",
+      "schedule": [
+        {
+          "time": "08:00",
+          "label": "💻 On Kantor IG"
+        },
+        {
+          "time": "13:05",
+          "label": "📸 Reel 1"
+        },
+        {
+          "time": "20:05",
+          "label": "📸 Reel 2"
+        },
+        {
+          "time": "20:00",
+          "label": "💬 Nongkrong grup IG (jendela on)"
+        },
+        {
+          "time": "21:00",
+          "label": "😴 Off / tidur sampai 08:00"
+        }
+      ]
+    },
+    {
       "id": "hr",
       "name": "HR",
       "role": "Hanrin · IG content creator (hr_2002_01) · pacar / pendamping",
@@ -228,6 +259,41 @@
         {
           "time": "22:00",
           "label": "😴 Bobo di Kamar HR (Lt 3) sampai 06:19"
+        }
+      ]
+    },
+    {
+      "id": "hr1",
+      "name": "HR 1",
+      "role": "Konten Instagram hr_2002_01 (HR)",
+      "room": "ig",
+      "status": "santai",
+      "task": "Santai, jalan-jalan keliling kantor (di luar jadwal)",
+      "updated_at": "2026-10-11T09:53:20+08:00",
+      "schedule": [
+        {
+          "time": "09:00",
+          "label": "💻 On Kantor IG"
+        },
+        {
+          "time": "09:47",
+          "label": "📸 Post soft 1"
+        },
+        {
+          "time": "12:00",
+          "label": "💗 Scroll + support grup & CR7"
+        },
+        {
+          "time": "19:47",
+          "label": "📸 Post/Reel 2"
+        },
+        {
+          "time": "20:03",
+          "label": "💬 Nongkrong grup OpheliaxHR + support"
+        },
+        {
+          "time": "22:00",
+          "label": "😴 Bobo Kamar HR 1 sampai 08:00"
         }
       ]
     },
