@@ -31,10 +31,17 @@ main{flex:1;display:grid;grid-template-columns:1fr 270px;gap:12px;padding:12px 1
 #labels{position:absolute;inset:0;pointer-events:none;z-index:2;overflow:hidden}
 .ctrl{position:absolute;left:10px;top:10px;display:flex;flex-direction:column;gap:6px;z-index:5}
 .ctrl button{width:36px;height:36px;border-radius:12px;border:2px solid #ffd2e4;background:#fff;color:#d6457f;font-size:17px;font-weight:800;cursor:pointer;box-shadow:0 3px 0 #ffe0ec}
-.floors{position:absolute;left:10px;top:264px;display:flex;flex-direction:column;gap:5px;z-index:5}
+.floors{position:absolute;left:10px;top:300px;display:flex;flex-direction:column;gap:5px;z-index:5}
 .shownr{position:absolute;left:10px;top:228px;z-index:5;min-width:58px;height:30px;border-radius:11px;border:2px solid #ffd2e4;background:#fff;color:#d6457f;font:inherit;font-size:11px;font-weight:800;cursor:pointer;box-shadow:0 3px 0 #ffe0ec;padding:0 8px;white-space:nowrap}
 .shownr.on{background:linear-gradient(180deg,#6ad39a,#3cae6e);color:#fff;border-color:#fff;box-shadow:0 3px 0 #2a8a55}
-@media(max-width:900px){.shownr{top:224px;font-size:10px;min-width:52px;height:28px}.portmini{top:188px}}
+@media(max-width:900px){.shownr{top:224px;font-size:10px;min-width:52px;height:28px}.portmini{top:188px}.gedmini{top:254px;font-size:10px;min-width:52px;height:28px}.floors{top:292px}}
+/* 🏙️ Gedung luar (eksterior) */
+.gedmini{position:absolute;left:10px;top:264px;z-index:5;min-width:58px;height:30px;border-radius:11px;border:2px solid #ffd2e4;background:#fff;color:#d6457f;font:inherit;font-size:11px;font-weight:800;cursor:pointer;box-shadow:0 3px 0 #ffe0ec;padding:0 8px;white-space:nowrap}
+.gedmini.on{background:linear-gradient(180deg,#5d6b86,#2f3a52);color:#fff;border-color:#fff;box-shadow:0 3px 0 #1d2536}
+#labels.inshell>div>div{visibility:hidden}
+.gcredit{display:none;position:absolute;left:12px;bottom:38px;z-index:5;font-size:10px;color:#5a4a66;background:rgba(255,255,255,.85);padding:3px 9px;border-radius:999px}
+.gcredit a{color:#d6457f}
+.gcredit.show{display:block}
 .portmini{position:absolute;left:10px;top:192px;z-index:5;min-width:58px;height:30px;border-radius:11px;border:2px solid #ffd2e4;background:#fff;color:#d6457f;font:inherit;font-size:11px;font-weight:800;cursor:pointer;box-shadow:0 3px 0 #ffe0ec;padding:0 8px;white-space:nowrap}
 .portmini.on{background:linear-gradient(180deg,#7eb6ff,#4a7fd6);color:#fff;border-color:#fff;box-shadow:0 3px 0 #2a5fa8}
 body.portrait .stage{height:min(82vh,780px);min-height:520px}
@@ -130,7 +137,7 @@ body.fs .infofloat{top:14px}
  .chips{order:3;flex-basis:100%}
  .btn{margin-left:auto}
  .jp{width:min(250px,80%)}
- .floors{top:260px}.floors button{min-width:52px;height:28px;font-size:10.5px;padding:0 6px}.fsign{font-size:11px;padding:3px 9px}
+ .floors{top:292px}.floors button{min-width:52px;height:28px;font-size:10.5px;padding:0 6px}.fsign{font-size:11px;padding:3px 9px}
  .ntag .n{font-size:10px;padding:1px 7px}.rsign{font-size:10px}.hint{font-size:9.5px}
  .jtoggle.open{right:calc(min(250px,80%) + 18px)}
 }
@@ -233,12 +240,14 @@ body.touch .povhint .kbd{display:none}body.touch .povhint .tch{display:inline}
       <button id="povMini" title="🎮 Mode POV Han (Han jalan sendiri pakai keyboard / stick)">🎮</button>
     </div>
     <button type="button" class="portmini" id="btnPortraitMini" title="Mode Portrait: framing HP fokus kampus/kantor, ambience jauh di-crop. Show Near tetap ada.">📱 Port</button>
+    <button type="button" class="gedmini on" id="btnGedung" title="Gedung luar: zoom jauh kelihatan gedungnya, zoom masuk kelihatan isinya.">🏙️ Gedung</button>
+    <div class="gcredit" id="gCredit">🏙️ Gedung: <a href="https://poly.pizza/m/KRT3e3kgEb" target="_blank" rel="noopener">“Office” by SoyMaria</a> · Poly Pizza · <a href="https://creativecommons.org/licenses/by/3.0/" target="_blank" rel="noopener">CC-BY 3.0</a> · zoom masuk buat lihat isinya</div>
     <button type="button" class="shownr" id="btnShowNearMini" title="Show Near: suasana sekitar (hutan dekat + jalan). OFF = Fokus Kantor biar gak lag.">🏢 Fokus</button>
     <div class="floors" id="floors"><button data-f="all" class="on">🏢 Semua</button><button data-f="3">Lt 4 🎬</button><button data-f="2">Lt 3 🛏️</button><button data-f="1">Lt 2 🛋️</button><button data-f="0">Lt 1 💼</button></div>
     <button class="jtoggle" id="jToggle">📅 Jadwal per Karakter</button>
     <div class="jp" id="jPanel"><h3>📅 Jadwal per Karakter</h3><div class="list" id="jList"></div></div>
     <div class="pop" id="pop"></div>
-    <div class="hint">Drag: putar · klik kanan/2 jari: geser · scroll/pinch: zoom · klik karakter buat detail · <a href="index-iso.html">isometrik</a> · <a href="index-2d.html">2D</a></div>
+    <div class="hint">Drag: putar · klik kanan/2 jari: geser · scroll/pinch: zoom · klik karakter buat detail · <a href="index-iso.html">isometrik</a> · <a href="index-2d.html">2D</a> · gedung: <a href="https://poly.pizza/m/KRT3e3kgEb" target="_blank" rel="noopener">“Office” by SoyMaria</a> (<a href="https://creativecommons.org/licenses/by/3.0/" target="_blank" rel="noopener">CC-BY 3.0</a>)</div>
     <div class="povhint" id="povHint"><b>🎮 Mode POV Han</b> <span class="kbd">· <span class="kb">W</span><span class="kb">A</span><span class="kb">S</span><span class="kb">D</span> / <span class="kb">↑↓←→</span> jalan · <span class="kb">Q</span><span class="kb">E</span> / drag mouse: putar · <span class="kb">Shift</span> lari · <span class="kb">V</span> 1st/3rd person · scroll: jarak kamera · <span class="kb">Esc</span> keluar</span><span class="tch">· stick kiri: jalan · tombol kanan: Naik/Turun/Bioskop/POV · bar tengah: Akses cepat</span><div class="povst" id="povStair"></div></div>
 
     <div class="thpanel" id="thPanel">
@@ -3218,6 +3227,43 @@ function resize(){const w=stage.clientWidth,h=stage.clientHeight,s=QUAL.scale||1
  renderer.domElement.style.width=w+'px';renderer.domElement.style.height=h+'px';
  labelR.setSize(w,h);camera.aspect=w/h;applyShift();}
 window.addEventListener('resize',resize);
+/* ================= 🏙️ Gedung luar (eksterior) =================
+   Model: "Office" by SoyMaria — Poly Pizza https://poly.pizza/m/KRT3e3kgEb — CC-BY 3.0 (https://creativecommons.org/licenses/by/3.0/)
+   Dimodif: tiang kanopi dibuang, kanopi dipendekin, lampu bawaan dibuang, material disetel, mesh digabung + dikuantisasi (models/gedung-kantor.glb).
+   Semua ruangan kantor ada "di dalam" gedung ini. Kelihatan pas kamera di luar (zoom jauh, mode 🏢 Semua);
+   zoom masuk / pilih lantai / POV / Bioskop -> gedung memudar & disembunyiin biar isinya kelihatan. */
+const SHELL={g:new THREE.Group(),model:null,mats:[],op:0,on:true,box:new THREE.Box3(),homeD:0,homeAt:0,loading:false};
+// badan gedung (koordinat dunia): nutup semua lantai (Lt 3 paling lebar x -18..18, z -12.6..12.6) + Bioskop Lt 4 (puncak ±24 m)
+const SHELL_DIM={cx:0,cz:-.2,w:37.8,d:25.9,h:25.6};
+SHELL.g.visible=false;scene.add(SHELL.g);
+function loadShellOn(){try{return localStorage.getItem('kantorGedung')!=='0';}catch(_){return true;}}
+function shellBtn(){const b=document.getElementById('btnGedung');if(!b)return;b.classList.toggle('on',SHELL.on);
+ b.title=SHELL.on?'Gedung luar ON — zoom jauh kelihatan gedungnya, zoom masuk kelihatan isinya. Klik buat matiin.':'Gedung luar OFF — klik buat nyalain lagi.';}
+function applyShell(on,announce){SHELL.on=!!on;try{localStorage.setItem('kantorGedung',SHELL.on?'1':'0');}catch(_){}
+ shellBtn();if(SHELL.on)ensureShell();
+ if(announce&&typeof log==='function')log(SHELL.on?'🏙️ Gedung luar nyala — zoom jauh buat lihat gedungnya':'🏙️ Gedung luar mati');}
+function bindShellUI(){const b=document.getElementById('btnGedung');if(b)b.onclick=()=>applyShell(!SHELL.on,true);applyShell(loadShellOn(),false);}
+async function ensureShell(){if(SHELL.model||SHELL.loading)return;SHELL.loading=true;
+ try{const {GLTFLoader}=await import('./vendor/GLTFLoader.js');
+  const gl=await new GLTFLoader().loadAsync('./models/gedung-kantor.glb');const m=gl.scene;
+  // model: badan 4.04 × 9.59 × 4.04 (dasar y=0, pusat x/z=0), pintu + kanopi ngadep +z (= depan / Taman Depan)
+  m.scale.set(SHELL_DIM.w/4.04,SHELL_DIM.h/9.59,SHELL_DIM.d/4.04);m.position.set(SHELL_DIM.cx,0,SHELL_DIM.cz);
+  m.traverse(o=>{if(!o.isMesh)return;o.castShadow=true;o.receiveShadow=false;const mt=o.material;if(!SHELL.mats.includes(mt))SHELL.mats.push(mt);
+   if(mt.name==='Material.002'){mt.emissive=new THREE.Color(0x9a7438);mt.emissiveIntensity=0;ENV.lampMats.push(mt);}}); // kaca jendela nyala dikit pas malam
+  SHELL.g.add(m);SHELL.model=m;m.updateMatrixWorld(true);SHELL.box.setFromObject(m);
+ }catch(e){console.warn('gedung luar',e);}
+ SHELL.loading=false;}
+function shellTick(dt){if(!SHELL.model)return;
+ const now=performance.now();if(now-SHELL.homeAt>800&&floorMode==='all'){SHELL.homeAt=now;const h=fitHome();SHELL.homeD=h.pos.distanceTo(h.target);}
+ let want=0;
+ if(SHELL.on&&floorMode==='all'&&!POV.on&&!POV.scene&&!TH.open&&!TH.scrLock&&SHELL.homeD>0&&!SHELL.box.containsPoint(camera.position)){
+  const d=camera.position.distanceTo(controls.target);want=THREE.MathUtils.smoothstep(d,SHELL.homeD*.7,SHELL.homeD*.9);}
+ SHELL.op+=(want-SHELL.op)*Math.min(1,dt*8);if(Math.abs(want-SHELL.op)<.02)SHELL.op=want;
+ const op=SHELL.op,vis=op>.01;SHELL.g.visible=vis;
+ if(vis)SHELL.mats.forEach(mt=>{const tr=op<.99;if(mt.transparent!==tr){mt.transparent=tr;mt.depthWrite=!tr;mt.needsUpdate=true;}mt.opacity=op;});
+ labBox.classList.toggle('inshell',op>.6);
+ const gc=document.getElementById('gCredit');if(gc)gc.classList.toggle('show',op>.6);
+}
 let last=performance.now();const tmpV=new THREE.Vector3();
 function loop(now){
  const dt=Math.min(.05,(now-last)/1000);last=now;
@@ -3231,7 +3277,7 @@ function loop(now){
   const cur=w.w.scale.y+(th-w.w.scale.y)*Math.min(1,dt*8);w.w.scale.y=cur;w.w.position.y=cur/2;w.cap.position.y=cur+.03;});
  const far=camera.position.distanceTo(controls.target)>(stage.clientWidth<700?34:50);labBox.classList.toggle('far',far);
  if(!POV.scene)brainTick(now);updateActors(now,dt);thHumFix();if(POV.scene)thSceneTick(now);thNeonTick(now);if(POV.on)povCamera(dt);if(TH.scrLock)thScreenCam();placePop();
- envTick(now,dt);
+ envTick(now,dt);shellTick(dt);
  renderer.render(scene,camera);labelR.render(scene,camera);
  requestAnimationFrame(loop);
 }
@@ -3246,7 +3292,7 @@ function chatSay(m){const ac=actors[m.from],txt=Array.from(m.text.replace(/\s+/g
  log('💬 '+m.name+': '+(txt.length>60?txt.slice(0,60).join('')+'…':t));}
 try{if(window.KantorChat)KantorChat.init({el:$('chatCard'),nameOf:id=>{const a=agentsData.find(x=>idOf(x)===id);return a&&a.name;},onNew:chatSay});}catch(e){console.warn('chat',e);}
 $('loading').remove();
-bindQualityUI();applyQuality(qualityMode,false);bindShowNearUI();bindPortraitUI();ENV.portrait=loadPortrait();applyPortrait(ENV.portrait,false);
+bindQualityUI();applyQuality(qualityMode,false);bindShowNearUI();bindPortraitUI();ENV.portrait=loadPortrait();applyPortrait(ENV.portrait,false);bindShellUI();
 requestAnimationFrame(loop);
 // opsi URL buat preview: #zoom, #kerja, #pop=lia
 const hs=location.hash;
