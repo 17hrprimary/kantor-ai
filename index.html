@@ -2160,13 +2160,19 @@ function thSceneTick(now){const S=POV.scene,han=actors.han;if(!S||!han)return;co
  const kneelUp=(c,lean,k)=>({l:[[-lean,-.08],[-lean,.08]],k:[k??PI2,k??PI2]}); // berlutut: paha tegak (world), betis rebah ke belakang di kasur
  const onAll4=(c,rx)=>({rx,l:[[-rx,-.1],[-rx,.1]],k:[PI2,PI2],a:[[-rx,.08],[-rx,-.08]],e:[0,0]});
  const supine=(c,y)=>({y,ry:0,rx:-PI2+.18,l:[[-.12,-.3],[-.12,.3]],k:[.25,.25],a:[[-.25,.35],[-.25,-.35]],e:[-.6,-.6],h:[.35,0,0]}); // Han telentang, kepala ke arah layar (bantal kecil), kaki ke bantal
- if(S.kind==='kiss'){ // duduk bersila berhadapan, pelukan + ciuman
+ if(S.kind==='kiss'){ // duduk bersila berhadapan, pelukan + ciuman (tangan melekuk meluk punggung via siku IK)
   const h1=Math.sin(ph*1.1),h2=Math.sin(ph*.55+.8),ln=.32+.06*p,ln2=.32+.06*q;
-  const sitX=(ln,f)=>({rx:ln,l:[[-1.45-ln+.15,-.95,.35],[-1.45-ln+.15,.95,-.35]],k:[2.45,2.45],a:[[-1.25,.55*f],[-1.05,-.35*f]],e:[-1.35,-1.5]});
-  thPose(hc,{x:-.26,y:0,ry:PI2,...sitX(ln,1),t:[0,.08*h2,0],h:[.05,.22*h1,-.3]});thGround(hc);
-  thPose(oc,{x:.26,y:0,ry:-PI2,...sitX(ln2,1),t:[0,-.08*h2,0],h:[.08,-.22*h1,.3]});thGround(oc);
+  // a/e cuma seed; thHandTo override bahu+siku biar lengan nekuk meluk torso (bukan lurus)
+  const sitX=(ln)=>({rx:ln,l:[[-1.45-ln+.15,-.95,.35],[-1.45-ln+.15,.95,-.35]],k:[2.45,2.45],a:[[-.8,.4],[-.8,-.4]],e:[-1.1,-1.1]});
+  thPose(hc,{x:-.26,y:0,ry:PI2,...sitX(ln),t:[0,.08*h2,0],h:[.05,.22*h1,-.3]});thGround(hc);
+  thPose(oc,{x:.26,y:0,ry:-PI2,...sitX(ln2),t:[0,-.08*h2,0],h:[.08,-.22*h1,.3]});thGround(oc);
   // rapetin biar bibir ketemu (cuma geser horizontal)
-  thW(hc.anc.mouth,_v2);const hm=_v2.clone();thW(oc.anc.mouth,_v2);const d=(_v2.x-hm.x)-.03;hc.root.position.x+=d/2;oc.root.position.x-=d/2;}
+  thW(hc.anc.mouth,_v2);const hm=_v2.clone();thW(oc.anc.mouth,_v2);const d=(_v2.x-hm.x)-.03;hc.root.position.x+=d/2;oc.root.position.x-=d/2;
+  hc.root.updateMatrixWorld(true);oc.root.updateMatrixWorld(true);
+  // titik punggung pasangan (torso lokal: +X kanan mereka, -Z belakang) → tangan melingkar meluk
+  const hugBack=(c,sx,sy)=>{c.torso.updateWorldMatrix(true,false);return new THREE.Vector3(sx,sy,-.13).applyMatrix4(c.torso.matrixWorld);};
+  thHandTo(hc,0,hugBack(oc, .10,.26));thHandTo(hc,1,hugBack(oc,-.10,.18)); // Han meluk punggung Ophelia
+  thHandTo(oc,0,hugBack(hc, .10,.26));thHandTo(oc,1,hugBack(hc,-.10,.18));} // Ophelia meluk punggung Han
  else if(S.kind==='suck'){ // cewek rebah setengah duduk ke bantal hadap layar, kaki terbuka; Han berlutut di antara kakinya, mulut di puting
   const r=-1.0+.03*q;thPose(oc,{y:.42,ry:ryS,rx:r,l:[[-PI2-r-.3,-.45],[-PI2-r-.3,.45]],k:[.75,.75],a:[[-2.7,.35],[-.5,-.3]],e:[-1.7,-1.1],h:[.45,.15*Math.sin(ph*.5),0]});thGround(oc);thKeepOnBed(oc);
   thW(oc.anc.nipR,T);const N=T.clone(),top=thTopW(oc),b=1.0-.06*p; // Han BERLUTUT di antara kakinya: lutut napak kasur, badan condong ke dada, mulut di puting
