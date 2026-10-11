@@ -3,3 +3,4 @@
 theater/*
 !theater/README.md
 !theater/videos.json
+!theater/idle-ophelia.png
