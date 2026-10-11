@@ -1862,29 +1862,45 @@ function thPeakFX(){if(!TH.sexMode){thActSt('🔒 Nyalain Mode privat dulu');ret
  const ac=actors.ophelia1;if(ac&&ac.cinemaDate){ac.sayText='💖✨';ac.sayUntil=performance.now()+4000;}
  thPulse(ac);thActSt('✨ Efek puncak 💖');setTimeout(()=>{fx.classList.remove('peak');fx.querySelectorAll('.ht').forEach(e=>e.remove());},4200);}
 const thActSt=t=>{$('thActSt').textContent=t||'';};
-/* 🧍‍♀️ Ophelia versi humanoid (halus, bukan kotak) — KHUSUS Bioskop. Nempel di rig yang sama (legs/arms/torso/head) jadi semua pose/animasi tetap jalan; lantai lain tetap boxy */
-function thHumanBuild(c){const L=lookOf('ophelia1'),sm=(col,o)=>new THREE.MeshStandardMaterial({color:col,roughness:.55,metalness:0,...(o||{})}),SK=sm(L.skin),HR=sm(L.hair,{roughness:.45,side:THREE.DoubleSide}),SH=sm(L.shirt),PN=sm(L.pants,{roughness:.8}),PL=sm(0xeeeef2,{roughness:.35,metalness:.1}),BK=sm(0x111111,{roughness:.3,metalness:.3});
+/* 🧍 Humanoid halus (bukan kotak) — KHUSUS Bioskop sex/date. Nempel di rig yang sama (legs/arms/torso/head) jadi pose/animasi tetap jalan; lantai lain tetap boxy. Ophelia = cewek, Han = cowok dewasa sederhana (tanpa kacamata). */
+function thHumanBuild(c,id){const L=lookOf(id||'ophelia1'),male=id==='han',sm=(col,o)=>new THREE.MeshStandardMaterial({color:col,roughness:.55,metalness:0,...(o||{})}),SK=sm(L.skin),HR=sm(L.hair,{roughness:.45,side:THREE.DoubleSide}),SH=sm(L.shirt),PN=sm(L.pants,{roughness:.8}),PL=sm(0xeeeef2,{roughness:.35,metalness:.1}),BK=sm(0x111111,{roughness:.3,metalness:.3}),GD=sm(0xffd23f,{metalness:.6,roughness:.35,emissive:0x553300,emissiveIntensity:.25});
  const parts=[],G=parent=>{const g=new THREE.Group();g.userData.hum=1;parent.add(g);parts.push(g);return g;};
  const M=(geo,m,g,x,y,z,sx,sy,sz)=>{const o=mesh(geo,m,g);o.position.set(x,y,z);if(sx)o.scale.set(sx,sy??sx,sz??sx);return o;};
  const cap=(r,l)=>new THREE.CapsuleGeometry(r,l,6,14),sph=(r)=>new THREE.SphereGeometry(r,20,14);
- c.legs.forEach(l=>{const g=G(l);M(cap(.058,.2),PN,g,0,-.14,0);M(sph(.05),SK,g,0,-.29,.0,1,.7,1);M(sph(.06),sm(0xf4f4f4),g,0,-.33,.04,1,.55,1.5);});
- {const g=G(c.torso);M(new THREE.CylinderGeometry(.155,.12,.3,22),SH,g,0,.17,0,1,1,.68);M(sph(.14),PN,g,0,.02,0,1.05,.55,.8); // badan + pinggul
-  [-1,1].forEach(s=>{M(sph(.06),SH,g,.065*s,.22,.07,1,.9,.8);M(sph(.07),SH,g,.15*s,.3,0,1,.75,.9);}); // dada (sopan) + bahu
-  M(new THREE.CylinderGeometry(.042,.048,.12,12),SK,g,0,.4,0);}
- c.arms.forEach((a,i)=>{const s=i?1:-1,g=G(a);g.position.x=-.08*s;M(cap(.045,.1),SH,g,0,-.07,0);M(cap(.036,.12),SK,g,0,-.21,0);M(sph(.038),SK,g,0,-.3,0,1,1.1,.8);});
- {const g=G(c.head);M(sph(.15),SK,g,0,-.01,0,1,1.13,1.02); // wajah
-  [-1,1].forEach(s=>{M(sph(.024),sm(0x2a1f2a),g,.055*s,.0,.135,1,1.15,.6);M(sph(.008),sm(0xffffff),g,.06*s,.01,.15);M(sph(.02),sm(0xffa3c0,{transparent:true,opacity:.55}),g,.09*s,-.06,.12,1.3,.6,.4);
-   const fr=M(new THREE.TorusGeometry(.04,.006,6,4),BK,g,.055*s,.0,.158);fr.rotation.z=Math.PI/4;fr.scale.set(1.25,1,1);}); // kacamata kotak
-  M(new THREE.BoxGeometry(.03,.006,.006),BK,g,0,.005,.16);[-1,1].forEach(s=>{const t=M(new THREE.BoxGeometry(.006,.006,.13),BK,g,.105*s,.005,.095);});
-  M(sph(.02),sm(0xc0587e),g,0,-.085,.142,1.4,.55,.5);M(sph(.013),SK,g,0,-.035,.155); // bibir + hidung
-  M(new THREE.SphereGeometry(.165,24,16,0,Math.PI*2,0,Math.PI*.46),HR,g,0,.0,-.008,1.04,1.1,1.06); // atap rambut
-  M(new THREE.CylinderGeometry(.165,.2,.6,24,1,true,.62,Math.PI*2-1.24),HR,g,0,-.25,-.01,1,1,.95); // rambut panjang sampai punggung, depan kebuka buat muka
-  [[-.1,.09],[-.04,.1],[.03,.1],[.1,.085]].forEach(([x,y],i)=>M(sph(.045),HR,g,x,y,.12,1,.7+(i%2)*.25,.5)); // poni messy
-  M(cap(.016,.42),PL,g,-.13,-.2,.1);M(sph(.035),PL,g,-.095,.08,.135,1,.8,.5); // streak platinum
-  M(new THREE.BoxGeometry(.07,.022,.022),sm(L.clip||0xffd23f),g,.11,.12,.12);}
+ // kaki: Han sedikit lebih tebal
+ c.legs.forEach(l=>{const g=G(l);M(cap(male?.065:.058,.2),PN,g,0,-.14,0);M(sph(male?.055:.05),SK,g,0,-.29,.0,1,.7,1);M(sph(.06),sm(male?0x22262e:0xf4f4f4),g,0,-.33,.04,1,.55,1.5);});
+ {const g=G(c.torso);
+  if(male){ // badan cowok: bahu lebih lebar, dada rata, kaos pendek
+   M(new THREE.CylinderGeometry(.18,.145,.34,22),SH,g,0,.18,0,1,1,.74);M(sph(.135),PN,g,0,.015,0,1.12,.5,.85);
+   [-1,1].forEach(s=>M(sph(.085),SH,g,.17*s,.32,0,1,.8,1)); // bahu
+   M(new THREE.CylinderGeometry(.05,.055,.11,12),SK,g,0,.43,0);
+   if(L.robe){M(new THREE.BoxGeometry(.06,.05,.02),GD,g,0,.28,.12);} // medali emas kecil (tanpa jubah penuh biar pose intim bersih)
+  }else{ // Ophelia / cewek
+   M(new THREE.CylinderGeometry(.155,.12,.3,22),SH,g,0,.17,0,1,1,.68);M(sph(.14),PN,g,0,.02,0,1.05,.55,.8);
+   [-1,1].forEach(s=>{M(sph(.06),SH,g,.065*s,.22,.07,1,.9,.8);M(sph(.07),SH,g,.15*s,.3,0,1,.75,.9);});
+   M(new THREE.CylinderGeometry(.042,.048,.12,12),SK,g,0,.4,0);}
+ }
+ c.arms.forEach((a,i)=>{const s=i?1:-1,g=G(a);g.position.x=-(male?.06:.08)*s;M(cap(male?.05:.045,.1),SH,g,0,-.07,0);M(cap(male?.04:.036,.12),SK,g,0,-.21,0);M(sph(male?.042:.038),SK,g,0,-.3,0,1,1.1,.8);});
+ {const g=G(c.head);M(sph(male?.155:.15),SK,g,0,-.01,0,1,male?1.08:1.13,male?1.05:1.02); // wajah
+  [-1,1].forEach(s=>{M(sph(.024),sm(0x2a1f2a),g,.055*s,.0,.135,1,1.15,.6);M(sph(.008),sm(0xffffff),g,.06*s,.01,.15);M(sph(.02),sm(0xffa3c0,{transparent:true,opacity:male?.35:.55}),g,.09*s,-.06,.12,1.3,.6,.4);
+   if(!male&&L.glasses==='square'){const fr=M(new THREE.TorusGeometry(.04,.006,6,4),BK,g,.055*s,.0,.158);fr.rotation.z=Math.PI/4;fr.scale.set(1.25,1,1);}}); // kacamata cuma kalau look punya
+  if(!male&&L.glasses==='square'){M(new THREE.BoxGeometry(.03,.006,.006),BK,g,0,.005,.16);[-1,1].forEach(s=>{M(new THREE.BoxGeometry(.006,.006,.13),BK,g,.105*s,.005,.095);});}
+  M(sph(.02),sm(male?0xb06070:0xc0587e),g,0,-.085,.142,male?1.2:1.4,.55,.5);M(sph(male?.016:.013),SK,g,0,-.035,.155); // bibir + hidung
+  if(male){ // rambut pendek + mahkota kecil (ciri Han)
+   M(new THREE.SphereGeometry(.17,22,14,0,Math.PI*2,0,Math.PI*.55),HR,g,0,.02,-.01,1.02,1.0,1.04);
+   M(new THREE.CylinderGeometry(.155,.16,.12,20,1,true),HR,g,0,-.02,-.02,1,1,.95); // samping/belakang pendek
+   [[-.08,.1],[.0,.12],[.08,.1]].forEach(([x,y])=>M(sph(.04),HR,g,x,y,.12,1,.55,.45)); // poni pendek
+   if(L.crown){const cg=G(g);cg.position.set(0,.16,0);M(new THREE.CylinderGeometry(.09,.1,.035,10),GD,cg,0,0,0);[[-.07,0],[.07,0],[0,-.06],[0,.06],[-.05,.05]].forEach(([x,z])=>M(new THREE.ConeGeometry(.018,.05,5),GD,cg,x,.035,z));M(sph(.012),sm(0xf2559a),cg,0,.01,.1);}
+  }else{ // rambut panjang messy Ophelia + streak + clip
+   M(new THREE.SphereGeometry(.165,24,16,0,Math.PI*2,0,Math.PI*.46),HR,g,0,.0,-.008,1.04,1.1,1.06);
+   M(new THREE.CylinderGeometry(.165,.2,.6,24,1,true,.62,Math.PI*2-1.24),HR,g,0,-.25,-.01,1,1,.95);
+   [[-.1,.09],[-.04,.1],[.03,.1],[.1,.085]].forEach(([x,y],i)=>M(sph(.045),HR,g,x,y,.12,1,.7+(i%2)*.25,.5));
+   M(cap(.016,.42),PL,g,-.13,-.2,.1);M(sph(.035),PL,g,-.095,.08,.135,1,.8,.5);
+   M(new THREE.BoxGeometry(.07,.022,.022),sm(L.clip||0xffd23f),g,.11,.12,.12);}
+ }
  return parts;}
 function thHumanize(ac,on){if(!ac||!ac.c)return;const c=ac.c;
- if(on&&!c.hum){c.hum=thHumanBuild(c);c.boxy=[];[c.body,c.torso,c.head,...c.legs,...c.arms].forEach(g=>g.children.forEach(o=>{if(o===c.eyes||o===c.closed)c.boxy.push(...o.children);else if(!o.userData.hum&&!c.legs.includes(o)&&!c.arms.includes(o)&&o!==c.torso&&o!==c.head)c.boxy.push(o);}));}
+ if(on&&!c.hum){c.hum=thHumanBuild(c,ac.id);c.boxy=[];[c.body,c.torso,c.head,...c.legs,...c.arms].forEach(g=>g.children.forEach(o=>{if(o===c.eyes||o===c.closed)c.boxy.push(...o.children);else if(!o.userData.hum&&!c.legs.includes(o)&&!c.arms.includes(o)&&o!==c.torso&&o!==c.head)c.boxy.push(o);}));}
  if(!c.hum)return;c.hum.forEach(g=>g.visible=!!on);c.boxy.forEach(o=>o.visible=!on);c.humOn=!!on;}
 function thDateStart(id){const ac=actors[id];if(!ac){thActSt('⚠️ '+id+' belum ada di denah');return;}
  if(ac.cinemaDate){thActSt('🍿 '+nameOf(id)+' udah di bioskop');return;}
@@ -1892,8 +1908,9 @@ function thDateStart(id){const ac=actors[id];if(!ac){thActSt('⚠️ '+id+' belu
  const st=TH_SEATS.partner,seat={x:st[0],y:st[1],pose:'sit',face:Math.PI};
  if(ac.spot&&ac.spot.pose==='bed')wakeUp&&wakeUp(ac);
  ac.path=null;ac.spot=seat;ac.pos={x:seat.x,y:seat.y};placeActor(ac);ac.demo='🍿 Nonton bareng Han';ac.sayText='Nonton bareng yuk sayang 🍿';ac.sayUntil=performance.now()+6000;
- if(id==='ophelia1')thHumanize(ac,true); thActSt('🍿 '+nameOf(id)+' udah duduk, Baris C');log('🎬 Han ngajak '+nameOf(id)+' nonton bareng');}
-function thDateEnd(id){const ac=actors[id];if(POV.scene)thSceneEnd(true);if(!ac||!ac.cinemaDate){thActSt('');return;}ac.cinemaDate=false;ac.demo=null;thHumanize(ac,false);goHome(ac,null);thActSt('👋 '+nameOf(id)+' balik ke rutinitas');}
+ if(id==='ophelia1'){thHumanize(ac,true);if(thInCinema()&&actors.han)thHumanize(actors.han,true);} // date: Ophelia + Han (kalau Han udah di bioskop) humanoid
+ thActSt('🍿 '+nameOf(id)+' udah duduk, Baris C');log('🎬 Han ngajak '+nameOf(id)+' nonton bareng');}
+function thDateEnd(id){const ac=actors[id];if(POV.scene)thSceneEnd(true);if(!ac||!ac.cinemaDate){thActSt('');return;}ac.cinemaDate=false;ac.demo=null;thHumanize(ac,false);if(actors.han)thHumanize(actors.han,false);goHome(ac,null);thActSt('👋 '+nameOf(id)+' balik ke rutinitas');}
 /* 💞 Adegan bioskop: pose 3D beneran + kamera SAMPING (side view) — non-eksplisit (duduk mepet / peluk dari belakang, goyang pelan) */
 const TH_SCREEN={y:.25,h:12.8};
 function thScreenLook(seatY){const d=Math.max(2,seatY-TH_SCREEN.y),cy=.7+TH_SCREEN.h/2-1.16;return clampN(-Math.atan2(cy,d),-.8,.9);}
@@ -1909,6 +1926,7 @@ function thScene(kind){const han=actors.han,oph=actors.ophelia1,cfg=TH_SCENE[kin
  // Ophelia: teleport ke posisi adegan (dekat = mepet di samping, belakang = sedikit di belakang kursi Han, hadap sama)
  Object.assign(oph,{walking:false,path:[],after:null,waitUntil:0,afterWait:null});
  const op=thOphAt(kind);oph.pos={x:op[0],y:op[1]};oph.spot={pose:'sit',x:op[0],y:op[1],face:Math.PI};placeActor(oph);thResetPose(oph.c);
+ thHumanize(han,true);thHumanize(oph,true); // Han + Ophelia humanoid khusus adegan bioskop
  setFloor(floorOfY(hs[1]),false);han.c.root.visible=true;han.tag.o.visible=true;camera.near=.1;camera.updateProjectionMatrix();POV.snap=true;POV.zoneKey='';thClose&&thClose();}
 function thSceneTick(now){const S=POV.scene,han=actors.han,oph=actors.ophelia1;if(!S||!han||!oph)return;
  if(!oph.cinemaDate){thSceneEnd(true);return;}
@@ -1937,11 +1955,13 @@ function thPulse(ac){if(POV.scene){POV.scene.pulse=performance.now()+1200;return
  (function f(){const e=(performance.now()-t0)/1200;if(e>=1){r.scale.set(1,1,1);return;}const k=1+Math.abs(Math.sin(e*Math.PI*6))*.07*(1-e);r.scale.set(k,k,k);requestAnimationFrame(f);})();}
 function thSceneEnd(quiet){const S=POV.scene;if(!S)return;POV.scene=null;const han=actors.han,oph=actors.ophelia1;
  if(oph){thResetPose(oph.c);if(oph.cinemaDate){const st=TH_SEATS.partner;oph.pos={x:st[0],y:st[1]};oph.spot={x:st[0],y:st[1],pose:'sit',face:Math.PI};placeActor(oph);}}
- if(han){thResetPose(han.c);han.c.legs.forEach(l=>l.rotation.x=0);han.c.arms.forEach(a=>a.rotation.x=0);han.c.root.position.y=0;han.c.root.rotation.set(0,Math.PI,0);
+ if(han){thHumanize(han,false);thResetPose(han.c);han.c.legs.forEach(l=>l.rotation.x=0);han.c.arms.forEach(a=>a.rotation.x=0);han.c.root.position.y=0;han.c.root.rotation.set(0,Math.PI,0);
   if(S.prev){POV.fpPref=S.prev.fpPref;POV.yaw=Math.PI;POV.look=thScreenLook(TH_SEATS.han[1]);}}
  camera.near=.3;camera.updateProjectionMatrix();POV.snap=true;POV.zoneKey='';if(typeof povButtons==='function')povButtons();if(!quiet)thActSt('');}
 function thHanSit(){const ac=actors.han;if(!POV.on||!ac)return;const st=TH_SEATS.han;ac.pos={x:st[0],y:st[1]};POV.yaw=Math.PI;ac.c.root.rotation.y=POV.yaw;
- POV.fpPref=true;POV.look=thScreenLook(st[1]);POV.snap=true;povButtons();onFloor(ac,ac.pos.y);ac.c.root.position.set(tx(st[0]),0,tz(st[1]));thClose();}
+ POV.fpPref=true;POV.look=thScreenLook(st[1]);POV.snap=true;povButtons();onFloor(ac,ac.pos.y);ac.c.root.position.set(tx(st[0]),0,tz(st[1]));
+ if(actors.ophelia1&&actors.ophelia1.cinemaDate)thHumanize(ac,true); // duduk bareng date → Han humanoid juga
+ thClose();}
 thActRender();if(TH.sexMode&&TH.unlocked)thSexSet(true,false);else if(TH.sexMode)thSexSet(false,false);
 setInterval(()=>{const fx=$('thSexFX');if(fx)fx.style.visibility=(TH.unlocked&&thInCinema())?'visible':'hidden';},700); // efek privat cuma di dalam Bioskop
 // keyboard
