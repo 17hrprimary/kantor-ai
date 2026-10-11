@@ -1697,23 +1697,39 @@ function wildFlower(x,y,s=1){const cols=[0xff9cc7,0xffd23f,0xc79bff,0xffffff,0xf
 function tallGrass(x,y,s=1){const c=0x6fb24a;for(let i=0;i<3;i++){const a=(i-1)*.12,m=mesh(new THREE.ConeGeometry(.04*s,.55*s,4),mat(c));m.position.set(tx(x+a), .28*s,tz(y+(i%2?-.05:.05)*s));m.rotation.z=a*.8;m.castShadow=false;}}
 function buildForest(){ // ditempatkan saat P=ENV.g di dalam buildEnv
  const rnd=forestRnd(20261011),pts={oak:[],pine:[],bush:[],flower:[],grass:[]};
- const place=(key,n,x0,x1,y0,y1,minD)=>{const goal=pts[key].length+n;let tries=0;while(pts[key].length<goal&&tries<n*80){tries++;const x=x0+rnd()*(x1-x0),y=y0+rnd()*(y1-y0);if(forestBlocked(x,y))continue;let ok=true;const arr=pts[key];for(let k=0;k<arr.length;k++){const dx=arr[k].x-x,dy=arr[k].y-y;if(dx*dx+dy*dy<minD*minD){ok=false;break;}}if(!ok)continue;arr.push({x,y,s:.7+rnd()*1.1});}}
- // cincin dekat kampus (kelihatan dari kamera default) — tetap di luar gedung/jalan
- place('oak',28,-28,-4,-8,26,2.4);place('oak',28,64,95,-8,26,2.4);place('oak',32,-4,64,-28,-4,2.3);
- place('pine',16,-30,-5,-10,26,3.0);place('pine',16,65,100,-10,26,3.0);place('pine',18,-5,64,-32,-5,2.8);
- place('bush',40,-30,100,-32,30,1.0);place('flower',50,-30,100,-32,30,.65);place('grass',60,-30,100,-32,30,.5);
- // hutan lebar di sekeliling
- place('oak',55,-110,-28,-70,70,2.6);place('oak',55,95,180,-70,70,2.6);place('oak',40,-28,95,-70,-28,2.5);place('oak',50,-110,180,42,130,2.8);
- place('pine',35,-110,-28,-70,70,3.2);place('pine',35,95,180,-70,70,3.2);place('pine',22,-28,95,-70,-28,3.0);place('pine',28,-110,180,45,135,3.4);
- place('bush',90,-110,180,-70,135,1.05);place('flower',110,-110,180,-70,135,.65);place('grass',130,-110,180,-70,135,.5);
- // fringe semak di strip antara taman depan & trotoar (hindari jalan masuk)
- place('bush',22,-2,21,26.2,29.6,1.2);place('bush',16,27,33.5,26.2,29.6,1.2);place('bush',22,39,63,26.2,29.6,1.2);
- place('oak',10,-2,20,27.2,29.4,2.2);place('oak',10,40,62,27.2,29.4,2.2);
- place('pine',6,-2,18,27.4,29.4,2.6);place('pine',6,42,62,27.4,29.4,2.6);
- place('flower',20,-2,21,26.2,29.8,.7);place('flower',14,27,33.5,26.2,29.8,.7);place('flower',20,39,63,26.2,29.8,.7);
- place('grass',24,-2,63,26.2,29.8,.45);
- // selatan jalan (hutan di seberang jalan raya)
- place('oak',40,-110,180,42,90,2.6);place('pine',24,-110,180,44,95,3.2);place('bush',50,-110,180,42,95,1.0);
+ const place=(key,n,x0,x1,y0,y1,minD)=>{const goal=pts[key].length+n;let tries=0;while(pts[key].length<goal&&tries<n*100){tries++;const x=x0+rnd()*(x1-x0),y=y0+rnd()*(y1-y0);if(forestBlocked(x,y))continue;let ok=true;const arr=pts[key];for(let k=0;k<arr.length;k++){const dx=arr[k].x-x,dy=arr[k].y-y;if(dx*dx+dy*dy<minD*minD){ok=false;break;}}if(!ok)continue;arr.push({x,y,s:.7+rnd()*1.1});}}
+ // 🌲 CINCIN RAPAT di perimeter kampus (kelihatan dari kamera Han / langit / zoom) — nempel pagar, tetap di luar gedung/jalan
+ // barat kantor (x≈-12..-3.1, sepanjang sisi + ke trotoar)
+ place('oak',42,-12.5,-3.15,-5,30.5,1.85);place('pine',22,-13.5,-3.2,-6,30.8,2.3);place('bush',55,-13,-3.1,-5,30.5,.85);
+ place('flower',40,-12.5,-3.1,-4,30.5,.55);place('grass',48,-12.5,-3.1,-4,30.5,.42);
+ // timur rumah (x≈64..78, sepanjang sisi + ke trotoar)
+ place('oak',42,64.1,78,-5,30.5,1.85);place('pine',22,64.2,80,-6,30.8,2.3);place('bush',55,64.1,78,-5,30.5,.85);
+ place('flower',40,64.1,78,-4,30.5,.55);place('grass',48,64.1,78,-4,30.5,.42);
+ // utara kampus (belakang kantor/rumah)
+ place('oak',48,-5,65,-14,-3.15,1.8);place('pine',24,-6,66,-15,-3.2,2.25);place('bush',60,-5,65,-13,-3.1,.8);
+ place('flower',45,-5,65,-12,-3.1,.55);place('grass',55,-5,65,-12,-3.1,.4);
+ // sudut NW / NE biar gak bolong
+ place('oak',18,-14,-3.2,-14,-3.2,1.7);place('oak',18,64.1,80,-14,-3.2,1.7);
+ place('pine',10,-15,-3.3,-15,-3.3,2.2);place('pine',10,64.2,82,-15,-3.3,2.2);
+ place('bush',24,-14,-3.1,-14,-3.1,.75);place('bush',24,64.1,80,-14,-3.1,.75);
+ // fringe Taman Depan → trotoar (strip y 27..29.6, hindari jalan masuk paving)
+ place('bush',36,-3,21,26.5,29.7,.95);place('bush',22,27,33.5,26.5,29.7,.95);place('bush',36,39,64,26.5,29.7,.95);
+ place('oak',16,-3,20,27.0,29.55,1.75);place('oak',16,39.5,63.5,27.0,29.55,1.75);
+ place('pine',8,-2.5,19,27.1,29.5,2.15);place('pine',8,40.5,63,27.1,29.5,2.15);
+ place('flower',28,-3,21,26.4,29.85,.55);place('flower',18,27,33.5,26.4,29.85,.55);place('flower',28,39,64,26.4,29.85,.55);
+ place('grass',40,-3,64,26.4,29.85,.38);
+ // seberang jalan (tepi utara hutan selatan, nempel ROAD.y1+2.4 ≈ 40.4) — kelihatan dari sudut Han
+ place('oak',55,-20,90,40.5,56,1.9);place('pine',30,-22,92,40.6,58,2.35);place('bush',70,-20,90,40.5,58,.8);
+ place('flower',50,-18,88,40.5,56,.55);place('grass',60,-18,88,40.5,56,.4);
+ // cincin medium (sedikit lebih jauh, isi kekosongan)
+ place('oak',36,-28,-12.5,-20,32,2.2);place('oak',36,78,105,-20,32,2.2);place('oak',30,-12,78,-28,-14,2.15);
+ place('pine',20,-30,-13,-22,34,2.7);place('pine',20,80,110,-22,34,2.7);place('pine',16,-14,80,-32,-14,2.6);
+ place('bush',50,-30,110,-28,34,.95);place('flower',55,-30,110,-28,34,.6);place('grass',65,-30,110,-28,34,.48);
+ // hutan lebar di sekeliling (background jauh)
+ place('oak',50,-110,-28,-70,70,2.6);place('oak',50,105,180,-70,70,2.6);place('oak',36,-28,105,-70,-28,2.5);place('oak',45,-110,180,56,130,2.8);
+ place('pine',30,-110,-28,-70,70,3.2);place('pine',30,105,180,-70,70,3.2);place('pine',18,-28,105,-70,-28,3.0);place('pine',24,-110,180,58,135,3.4);
+ place('bush',80,-110,180,-70,135,1.05);place('flower',90,-110,180,-70,135,.65);place('grass',110,-110,180,-70,135,.5);
+ place('oak',35,-110,180,56,95,2.5);place('pine',20,-110,180,58,100,3.1);place('bush',40,-110,180,56,100,1.0);
  pts.oak.forEach(p=>tree(p.x,p.y,p.s));
  pts.pine.forEach(p=>pineTree(p.x,p.y,p.s*.95));
  pts.bush.forEach(p=>bushWild(p.x,p.y,.8+p.s*.4));
