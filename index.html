@@ -154,7 +154,7 @@ body.noinfo aside{display:none}
 .thlist button{text-align:left;border:1.5px solid #5a3a5e;background:#2a1a30;color:#fff;font:inherit;font-size:12px;border-radius:9px;padding:5px 8px;cursor:pointer;word-break:break-word}
 .thlist button.on{border-color:#ffe28a;background:#5a2a52}
 #thVideo{position:fixed;left:0;bottom:0;width:2px;height:2px;opacity:.01;pointer-events:none;z-index:-1;background:#000}
-#thVideo.full{width:100vw;height:100vh;opacity:1;pointer-events:auto;z-index:99}
+#thVideo.full{left:50%;top:50%;transform:translate(-50%,-50%);width:min(100vw,calc(100vh*9/16));height:min(100vh,calc(100vw*16/9));object-fit:contain;background:#000;opacity:1;pointer-events:auto;z-index:99}
 .povbtns button.st.dis[data-a="th"]{opacity:.35}
 /* 🎮 Mode POV Han */
 .btn.povon{background:linear-gradient(180deg,#6aa8f5,#3c7fd6);box-shadow:0 5px 0 #2a5fa8,0 8px 18px rgba(60,127,214,.35)}
@@ -1826,7 +1826,7 @@ $('btnBioskop').onclick=()=>thGoCinema();
 /* ===== 💞 Interaksi Ophelia 1 di Bioskop (daftar bisa ditambah: push objek baru ke TH_ACTS) ===== */
 const TH_SEATS={partner:[9.9,3*DY+8.4],han:[8.75,3*DY+8.4]}; // Baris C, dekat lorong tengah, hadap layar
 const TH_ACTS=[
- {id:'bareng',label:'🍿 Nonton bareng',run:()=>thDateStart('ophelia1')},
+ {id:'bareng',label:'💗 Panggil Ophelia',run:()=>thDateStart('ophelia1')},
  {id:'duduk',label:'💺 Han duduk di sebelah',run:()=>thHanSit()},
  {id:'privat',label:'🔒 Mode privat',toggle:true,run:()=>thSexSet(!TH.sexMode,true)},
  {id:'dekat',label:'💞 Close-up soft / Intim dekat',run:()=>thIntim('dekat')},
@@ -1843,7 +1843,8 @@ const thFX=()=>$('thSexFX');let thFXT=0;
 function thSexSet(on,announce){TH.sexMode=!!on;try{sessionStorage.setItem('thSexMode',TH.sexMode?'1':'0');}catch(_){}
  const fx=thFX();if(fx){if(TH.sexMode)fx.classList.add('soft');else{fx.classList.remove('soft','peak');fx.innerHTML='';}}
  $('thPanel').classList.toggle('priv',TH.sexMode);thActRender();
- if(announce){thActSt(TH.sexMode?'💞 Mode privat aktif — lampu bioskop diredupin':'🔒 Mode privat OFF');if(typeof log==='function')log(TH.sexMode?'💞 Mode privat Bioskop ON':'🔒 Mode privat Bioskop OFF');}}
+ if(announce){thActSt(TH.sexMode?'💞 Mode privat aktif — lampu bioskop diredupin':'🔒 Mode privat OFF');if(typeof log==='function')log(TH.sexMode?'💞 Mode privat Bioskop ON':'🔒 Mode privat Bioskop OFF');}
+ if(on&&actors.ophelia1&&!actors.ophelia1.cinemaDate)thDateStart('ophelia1');}
 function thIntim(kind){const ac=actors.ophelia1;
  if(!ac||!ac.cinemaDate){thActSt('🍿 Ajak Ophelia dulu (🍿 Nonton bareng)');return;}
  const t=kind==='dekat'?{demo:'💞 Intim dekat sama Han',say:'Sini sayang, deketan… 💞',pov:'💞 Ophelia nyender deket banget, kepala di bahu Han'}
@@ -1862,8 +1863,8 @@ function thDateStart(id){const ac=actors[id];if(!ac){thActSt('⚠️ '+id+' belu
  Object.assign(ac,{cinemaDate:true,brain:null,napUntil:0,afterNap:null,waitUntil:0,afterWait:null,demo:'Diajak Han nonton 🎬'});
  const st=TH_SEATS.partner,seat={x:st[0],y:st[1],pose:'sit',face:Math.PI};
  if(ac.spot&&ac.spot.pose==='bed')wakeUp&&wakeUp(ac);
- startWalk(ac,route({x:ac.pos.x,y:ac.pos.y},{x:st[0],y:st[1]+.9}),()=>{ac.spot=seat;ac.pos={x:seat.x,y:seat.y};placeActor(ac);ac.demo='🍿 Nonton bareng Han';ac.sayText='Nonton bareng yuk sayang 🍿';ac.sayUntil=performance.now()+6000;thActSt('🍿 '+nameOf(id)+' udah duduk, Baris C');});
- thActSt('🚶 '+nameOf(id)+' lagi jalan ke Bioskop Lt 4…');log('🎬 Han ngajak '+nameOf(id)+' nonton bareng');}
+ ac.path=null;ac.spot=seat;ac.pos={x:seat.x,y:seat.y};placeActor(ac);ac.demo='🍿 Nonton bareng Han';ac.sayText='Nonton bareng yuk sayang 🍿';ac.sayUntil=performance.now()+6000;
+ thActSt('🍿 '+nameOf(id)+' udah duduk, Baris C');log('🎬 Han ngajak '+nameOf(id)+' nonton bareng');}
 function thDateEnd(id){const ac=actors[id];if(!ac||!ac.cinemaDate){thActSt('');return;}ac.cinemaDate=false;ac.demo=null;goHome(ac,null);thActSt('👋 '+nameOf(id)+' balik ke rutinitas');}
 function thHanSit(){const ac=actors.han;if(!POV.on||!ac)return;const st=TH_SEATS.han;ac.pos={x:st[0],y:st[1]};POV.yaw=Math.PI;ac.c.root.rotation.y=POV.yaw;
  POV.fpPref=true;POV.look=-.08;POV.snap=true;povButtons();onFloor(ac,ac.pos.y);ac.c.root.position.set(tx(st[0]),0,tz(st[1]));thClose();}
