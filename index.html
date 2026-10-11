@@ -1836,6 +1836,7 @@ const TH_ACTS=[
  {id:'bareng',label:'💗 Panggil Ophelia',run:()=>thDateStart('ophelia1')},
  {id:'duduk',label:'💺 Han duduk di sebelah',run:()=>thHanSit()},
  {id:'privat',label:'🔒 Mode privat',toggle:true,run:()=>thSexSet(!TH.sexMode,true)},
+ {id:'brutal',label:'⚡ Mode brutal',gated:true,toggle:true,run:()=>thBrutalSet(!TH.brutal,true)},
  {id:'kiss',label:'💋 Ciuman',run:()=>thIntim('kiss')},
  {id:'bj',label:'👄 Oral',gated:true,run:()=>thIntim('bj')},
  {id:'suck',label:'🍼 Hisap tetek',gated:true,run:()=>thIntim('suck')},
@@ -1846,10 +1847,15 @@ const TH_ACTS=[
  {id:'selesai',label:'🚶 Selesai',run:()=>thDateEnd('ophelia1')},
 ];
 function thActRender(){const el=$('thAct');el.innerHTML='';TH_ACTS.forEach(a=>{const b=document.createElement('button');b.type='button';b.className='thb';b.dataset.act=a.id;b.textContent=a.label;
- if(a.gated)b.hidden=!TH.sexMode;if(a.toggle&&TH.sexMode){b.classList.add('on');b.textContent='🔓 Mode privat ON';}
+ if(a.gated)b.hidden=!TH.sexMode;
+ if(a.id==='privat'&&TH.sexMode){b.classList.add('on');b.textContent='🔓 Mode privat ON';}
+ if(a.id==='brutal'&&TH.brutal){b.classList.add('on');b.textContent='⚡ Mode brutal ON';}
  b.onclick=()=>a.run();el.appendChild(b);});const ps=$('thPrivSt');if(ps)ps.hidden=!TH.sexMode;}
 /* 💞 Mode privat (sexMode): label aman, efek visual saja (vignette / hati / glow), non-eksplisit */
 TH.sexMode=false;try{TH.sexMode=sessionStorage.getItem('thSexMode')==='1';}catch(_){}
+TH.brutal=false;try{TH.brutal=localStorage.getItem('kantorThBrutal')==='1';}catch(_){}
+function thBrutalSet(on,announce){TH.brutal=!!on;try{localStorage.setItem('kantorThBrutal',TH.brutal?'1':'0');}catch(_){}
+ thActRender();if(announce){thActSt(TH.brutal?'⚡ Mode brutal ON — animasi ~2.3×':'⚡ Mode brutal OFF');if(typeof log==='function')log(TH.brutal?'⚡ Mode brutal Bioskop ON':'⚡ Mode brutal Bioskop OFF');}}
 const thFX=()=>$('thSexFX');let thFXT=0;
 function thSexSet(on,announce){TH.sexMode=!!on;try{sessionStorage.setItem('thSexMode',TH.sexMode?'1':'0');}catch(_){}
  const fx=thFX();if(fx){if(TH.sexMode)fx.classList.add('soft');else{fx.classList.remove('soft','peak');fx.innerHTML='';}}
@@ -1968,8 +1974,8 @@ function thScene(kind){const han=actors.han,oph=actors.ophelia1,cfg=TH_SCENE[kin
 /* loop ritmis per posisi: p = dorongan 0..1 (cepat masuk, pelan balik), q = reaksi pasangan (sedikit telat) */
 function thSceneTick(now){const S=POV.scene,han=actors.han,oph=actors.ophelia1;if(!S||!han||!oph)return;
  if(!oph.cinemaDate){thSceneEnd(true);return;}
- const cfg=TH_SCENE[S.kind],peak=S.pulse>now,t=(now-S.t0)/1000;
- S.ph=(S.ph||0)+(S.lt?Math.min(.1,(now-S.lt)/1000):0)*cfg.w*(peak?1.6:1);S.lt=now;const ph=S.ph;
+ const cfg=TH_SCENE[S.kind],peak=S.pulse>now,spd=TH.brutal?2.3:1,t=(now-S.t0)/1000*spd;
+ S.ph=(S.ph||0)+(S.lt?Math.min(.1,(now-S.lt)/1000):0)*cfg.w*(peak?1.6:1)*spd;S.lt=now;const ph=S.ph;
  const wave=x=>{const u=(1-Math.cos(x))/2;return Math.pow(u,.7);}; // ritme: dorong tajam, balik halus
  const p=wave(ph),q=wave(ph-.7),s=Math.sin(ph),hc=han.c,oc=oph.c;TH_FLIP=S.kind!=='kiss';
  if(S.kind==='kiss'){ // 💋 duduk BERSILA berhadapan di ranjang, pelukan erat + ciuman brutal (condong keras, kepala miring gantian, lengan melingkar)
