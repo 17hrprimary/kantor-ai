@@ -114,6 +114,28 @@ body.noinfo aside{display:none}
  .ntag .n{font-size:10px;padding:1px 7px}.rsign{font-size:10px}.hint{font-size:9.5px}
  .jtoggle.open{right:calc(min(250px,80%) + 18px)}
 }
+
+/* 🎬 Bioskop Lt 4 */
+.thpanel{display:none;position:absolute;right:12px;top:12px;z-index:9;width:min(330px,calc(100% - 24px));max-height:calc(100% - 24px);overflow:auto;background:rgba(27,18,38,.94);color:#fff;border:2px solid #b3122e;border-radius:16px;padding:10px 12px;box-shadow:0 8px 24px rgba(0,0,0,.35)}
+.thpanel.on{display:block}
+.thpanel .small{color:#e8d6e8}.thpanel .small b{color:#ffd2e4}.thpanel .sec{color:#ffb3cf;margin-top:8px}
+.thh{display:flex;justify-content:space-between;align-items:center;margin-bottom:6px}.thh b{color:#ffd2e4;font-size:14px}
+.thh button{border:none;background:none;color:#ffd2e4;font-size:16px;cursor:pointer}
+.throw{display:flex;gap:6px;margin-top:8px;flex-wrap:wrap}
+#thCode{flex:1;min-width:0;border-radius:10px;border:2px solid #ff9cc7;padding:7px 10px;font:inherit;font-size:16px;letter-spacing:4px;background:#fff;color:#5a3a52}
+.thb{border:2px solid #ff9cc7;background:#3a1f3c;color:#fff;font:inherit;font-size:12px;font-weight:800;border-radius:10px;padding:6px 9px;cursor:pointer}
+.thb:hover{background:#5a2a52}.thpick{display:inline-block}
+.therr{color:#ff9c9c;font-size:12px;font-weight:700;margin-top:6px;min-height:14px}
+.thnow{font-weight:800;font-size:12.5px;color:#ffe28a;margin-bottom:6px;word-break:break-word}
+.thctl{display:flex;gap:5px;flex-wrap:wrap}
+#thSeek{width:100%;margin-top:8px;accent-color:#f2559a}#thVol{width:80px;vertical-align:middle;accent-color:#f2559a}
+.thtime{display:flex;justify-content:space-between;align-items:center}
+.thlist{display:flex;flex-direction:column;gap:4px;max-height:190px;overflow:auto;margin-top:4px}
+.thlist button{text-align:left;border:1.5px solid #5a3a5e;background:#2a1a30;color:#fff;font:inherit;font-size:12px;border-radius:9px;padding:5px 8px;cursor:pointer;word-break:break-word}
+.thlist button.on{border-color:#ffe28a;background:#5a2a52}
+#thVideo{position:fixed;left:0;bottom:0;width:2px;height:2px;opacity:.01;pointer-events:none;z-index:-1;background:#000}
+#thVideo.full{width:100vw;height:100vh;opacity:1;pointer-events:auto;z-index:99}
+.povbtns button.st.dis[data-a="th"]{opacity:.35}
 /* 🎮 Mode POV Han */
 .btn.povon{background:linear-gradient(180deg,#6aa8f5,#3c7fd6);box-shadow:0 5px 0 #2a5fa8,0 8px 18px rgba(60,127,214,.35)}
 #povMini.on{background:linear-gradient(180deg,#6aa8f5,#3c7fd6);color:#fff;border-color:#fff}
@@ -132,7 +154,7 @@ body.pov.touch .povpad{display:block}
 .povbtns button{width:50px;height:50px;border-radius:15px;border:2px solid #ffd2e4;background:rgba(255,255,255,.92);color:#d6457f;font-size:20px;font-weight:900;cursor:pointer;box-shadow:0 3px 0 #ffe0ec;touch-action:none;user-select:none;-webkit-user-select:none;-webkit-touch-callout:none}
 .povbtns button.on{background:linear-gradient(180deg,#6aa8f5,#3c7fd6);color:#fff;border-color:#fff}
 .povbtns button.st.dis{opacity:.35}
-.povbtns button.x{grid-column:span 2;width:auto;height:38px;font-size:13px}
+.povbtns button.x{grid-column:span 1;width:auto;height:38px;font-size:13px}
 @media(max-width:900px){body.pov .povpad{display:block}.povhint .kbd{display:none}.povhint .tch{display:inline}.povhint{max-width:calc(100% - 70px);font-size:10.5px;padding:5px 10px}}
 body.touch .povhint .kbd{display:none}body.touch .povhint .tch{display:inline}
 </style>
@@ -157,14 +179,30 @@ body.touch .povhint .kbd{display:none}body.touch .povhint .tch{display:inline}
       <button id="home" title="Reset kamera">⌂</button>
       <button id="povMini" title="🎮 Mode POV Han (Han jalan sendiri pakai keyboard / stick)">🎮</button>
     </div>
-    <div class="floors" id="floors"><button data-f="all" class="on">🏢 Semua</button><button data-f="2">Lt 3 🛏️</button><button data-f="1">Lt 2 🛋️</button><button data-f="0">Lt 1 💼</button></div>
+    <div class="floors" id="floors"><button data-f="all" class="on">🏢 Semua</button><button data-f="3">Lt 4 🎬</button><button data-f="2">Lt 3 🛏️</button><button data-f="1">Lt 2 🛋️</button><button data-f="0">Lt 1 💼</button></div>
     <button class="jtoggle" id="jToggle">📅 Jadwal per Karakter</button>
     <div class="jp" id="jPanel"><h3>📅 Jadwal per Karakter</h3><div class="list" id="jList"></div></div>
     <div class="pop" id="pop"></div>
     <div class="hint">Drag: putar · klik kanan/2 jari: geser · scroll/pinch: zoom · klik karakter buat detail · <a href="index-iso.html">isometrik</a> · <a href="index-2d.html">2D</a></div>
     <div class="povhint" id="povHint"><b>🎮 Mode POV Han</b> <span class="kbd">· <span class="kb">W</span><span class="kb">A</span><span class="kb">S</span><span class="kb">D</span> / <span class="kb">↑↓←→</span> jalan · <span class="kb">Q</span><span class="kb">E</span> / drag mouse: putar · <span class="kb">Shift</span> lari · <span class="kb">V</span> 1st/3rd person · scroll: jarak kamera · <span class="kb">Esc</span> keluar</span><span class="tch">· stick kiri: jalan (dorong penuh = lari) · ⟲ ⟳ / geser layar: putar · 🏃 lari · ✕ keluar</span><div class="povst" id="povStair"></div></div>
+
+    <div class="thpanel" id="thPanel">
+     <div class="thh"><b>🎬 Bioskop Han · Lt 4</b><button id="thX" title="Tutup (Esc)">✕</button></div>
+     <div id="thLock"><div class="small">🔒 Bioskop dikunci. Masukkan <b>kode kunci</b> buat buka layar.</div>
+      <div class="throw"><input id="thCode" type="password" inputmode="numeric" autocomplete="off" maxlength="16" placeholder="Kode kunci"><button class="thb" id="thGo">🔓 Buka</button></div>
+      <div class="therr" id="thErr"></div></div>
+     <div id="thMain" hidden>
+      <div class="thnow" id="thNow">Pilih film dari daftar 👇</div>
+      <div class="thctl"><button class="thb" id="thPrev" title="Sebelumnya">⏮</button><button class="thb" id="thPlay" title="Putar / jeda (Spasi)">▶️</button><button class="thb" id="thNext" title="Berikutnya">⏭</button><button class="thb" id="thStop" title="Stop">⏹</button><button class="thb" id="thFull" title="Layar penuh">⛶ Layar penuh</button></div>
+      <input type="range" id="thSeek" min="0" max="1000" value="0"><div class="small thtime"><span id="thT">0:00 / 0:00</span><span>🔊 <input type="range" id="thVol" min="0" max="100" value="90"></span></div>
+      <div class="sec">🎞️ Folder theater/ <span id="thCount"></span></div><div class="thlist" id="thList"><div class="small">Memuat daftar…</div></div>
+      <div class="throw"><label class="thb thpick">📂 Putar dari folder komputer<input type="file" id="thPick" accept="video/*" webkitdirectory multiple hidden></label><button class="thb" id="thLockBtn" title="Kunci lagi">🔒 Kunci</button></div>
+      <div class="sec">💞 Interaksi Ophelia 1</div><div class="thctl" id="thAct"></div><div class="small" id="thActSt"></div>
+      <div class="small">Tips: duduk di kursi & tekan <b>V</b> (1st person) biar layar bioskop full di depan mata.</div></div>
+    </div>
+    <video id="thVideo" playsinline preload="metadata"></video>
     <div class="povpad" id="povPad"><div class="stick" id="povStick"><div class="knob" id="povKnob"></div></div>
-     <div class="povbtns"><button data-k="tl" title="Putar kiri (Q)">⟲</button><button data-k="tr" title="Putar kanan (E)">⟳</button><button data-a="run" title="Lari (Shift)">🏃</button><button data-a="fp" title="1st / 3rd person (V)">👁️</button><button data-a="up" class="st dis" title="Naik tangga/lift (R)">⬆️</button><button data-a="down" class="st dis" title="Turun tangga/lift (F)">⬇️</button><button data-a="exit" class="x" title="Keluar POV (Esc)">✕ Keluar POV</button></div></div>
+     <div class="povbtns"><button data-k="tl" title="Putar kiri (Q)">⟲</button><button data-k="tr" title="Putar kanan (E)">⟳</button><button data-a="run" title="Lari (Shift)">🏃</button><button data-a="fp" title="1st / 3rd person (V)">👁️</button><button data-a="up" class="st dis" title="Naik tangga/lift (R)">⬆️</button><button data-a="down" class="st dis" title="Turun tangga/lift (F)">⬇️</button><button data-a="th" class="st dis" title="Bioskop: kode kunci & putar film (T)">🎬</button><button data-a="exit" class="x" title="Keluar POV (Esc)">✕ Keluar POV</button></div></div>
   </section>
   <aside>
     <div class="card">
@@ -179,6 +217,7 @@ body.touch .povhint .kbd{display:none}body.touch .povhint .tch{display:inline}
     </div>
     <div class="card"><h2>⚡ Kualitas grafis</h2><div class="qrow"><button type="button" id="qRingan" class="on">⚡ Ringan</button><button type="button" id="qNormal">✨ Normal</button></div><div class="small" style="margin-top:6px" id="qHint">Default <b>Ringan</b> biar laptop lemah (i5 gen 3 dll) lebih mulus di POV — resolusi lebih rendah, tanpa bayangan lembut.</div></div>
     <div class="card povcard"><h2>🎮 Mode POV Han</h2><button class="btn" id="btnPov" style="width:100%;white-space:normal">🎮 Mode POV Han</button><div class="small" style="margin-top:6px">Han jalan sendiri: <b>WASD/panah</b> jalan, <b>Q/E</b> atau drag mouse putar, <b>Shift</b> lari, <b>R/F</b> naik/turun di tangga/lift, <b>V</b> 1st/3rd person, <b>Esc</b> keluar. Di HP: stick + tombol di layar.</div></div>
+    <div class="card"><h2>🎬 Bioskop Lt 4</h2><button class="btn" id="btnBioskop" style="width:100%;white-space:normal">🎮 Ke Bioskop (Mode POV)</button><div class="small" style="margin-top:6px">Film dari folder <b>theater/</b>, dikunci <b>kode kunci</b>. Di POV: naik tangga/lift ke <b>Lt 4</b> (R), masuk Bioskop, tekan <b>T</b> / 🎬 → kode → pilih film.</div></div>
     <div class="card" id="chatCard"></div>
     <div class="card">
       <h2>📅 Jadwal hari ini</h2>
@@ -241,8 +280,8 @@ const LOVE_SCHEDULE=[
 
 /* ================= Denah (tile) ================= */
 const W=36,D=25; // pusat gambar (tile); tiap lantai punya band y sendiri (DY) di koordinat logika
-const DY=40,FH=3.2,NFLOOR=3;
-const FLOOR_NAMES=['Lantai 1 · Kantor 💼','Lantai 2 · Santai 🛋️','Lantai 3 · Kamar Tidur 🛏️'];
+const DY=40,FH=3.2,NFLOOR=4;
+const FLOOR_NAMES=['Lantai 1 · Kantor 💼','Lantai 2 · Santai 🛋️','Lantai 3 · Kamar Tidur 🛏️','Lantai 4 · Bioskop 🎬'];
 const ROOMS=[
  {id:'ceo',name:'👑 Ruang CEO',x:0,y:0,w:9,d:8,c1:'#fde6c6',c2:'#f7d8ae',sign:'#f0a92a'},
  {id:'ig',name:'📸 Kantor IG',x:9,y:0,w:12,d:8,c1:'#ffe0ee',c2:'#ffcfe3',sign:'#f2559a'},
@@ -268,6 +307,9 @@ const NEW_ROOMS=[
  {id:'tangga-1',name:'🪜 Tangga & Lift',f:0,x:21,y:0,w:11,d:8,c1:'#f3eefa',c2:'#e9e1f5',sign:'#8a7aa8',stairs:true},
  {id:'tangga-2',name:'🪜 Tangga & Lift',f:1,x:25,y:0,w:7,d:8,c1:'#f3eefa',c2:'#e9e1f5',sign:'#8a7aa8',stairs:true},
  {id:'tangga-3',name:'🪜 Lobi Lantai 3',f:2,x:14,y:0,w:22,d:9,c1:'#f3eefa',c2:'#e9e1f5',sign:'#8a7aa8',stairs:true},
+ // 🎬 Lantai 4: Bioskop Han (layar penuh, video dari folder theater/, dikunci kode)
+ {id:'tangga-4',name:'🪜 Tangga & Lift',f:3,x:25,y:0,w:7,d:9,c1:'#f3eefa',c2:'#e9e1f5',sign:'#8a7aa8',stairs:true},
+ {id:'bioskop',name:'🎬 Bioskop Han',f:3,x:0,y:0,w:25,d:14,c1:'#3b2340',c2:'#33203a',sign:'#b3122e',cinema:true},
  {id:'lorong-3a',name:'Lorong',f:2,x:0,y:9,w:4,d:9,c1:'#efe6dc',c2:'#e6dbcf',hall:true},
  {id:'lorong-3b',name:'Lorong',f:2,x:34,y:9,w:2,d:9,c1:'#efe6dc',c2:'#e6dbcf',hall:true},
  {id:'lorong-3',name:'Lorong',f:2,x:4,y:16,w:30,d:2,c1:'#efe6dc',c2:'#e6dbcf',hall:true},
@@ -563,6 +605,61 @@ function stairsTop(r){ // lubang tangga di lantai atas (pagar)
  rug(27.6,1.7+o,2,5.2,0xcfc2e6);label('⬇️ Turun','seat pink',28.6,4.2+o,1.3);}
 function lift(r){const o=r.f*DY;box(30.3,.25+o,0,1.6,1.6,2.4,0xcfd8ff);box(30.45,1.86+o,0,.62,.04,2.1,0xe8eeff);box(31.13,1.86+o,0,.62,.04,2.1,0xe8eeff);box(30.9,1.88+o,2.15,.4,.02,.18,0xff7eb6);
  label('🛗 Lift','seat',31.1,2.2+o,2.7);}
+
+/* ================= 🎬 Bioskop Lt 4 =================
+   Layar besar (VideoTexture) di dinding utara, 4 baris kursi merah, proyektor di belakang.
+   Video: semua file di folder theater/ (daftar dari theater/videos.json, cadangan: GitHub API listing folder theater/)
+   + opsi "📂 Putar dari folder komputer" (file lokal, gak di-upload ke mana-mana).
+   Kunci: kode dicek pakai SHA-256 (yang disimpan cuma hash-nya, bukan kodenya). Ganti kode: lihat README. */
+const TH_SALT='kantor-ai-bioskop:',TH_HASH='33fd05f2730af5a504f44819feb9f2f790eefd15f4fea0cfc5a4d398dbaa13e7';
+const TH_REPO='17hrprimary/kantor-ai',TH_DIR='theater',TH_EXT=/\.(mp4|webm|m4v|mov|ogv|ogg|mkv)$/i;
+const TH={screen:null,mat:null,idle:null,vtex:null,beam:null,light:null,video:null,list:[],cur:-1,unlocked:false,open:false,loaded:false};
+function thIdleTex(lines){const c=document.createElement('canvas');c.width=1280;c.height=720;const g=c.getContext('2d');
+ const gr=g.createLinearGradient(0,0,0,720);gr.addColorStop(0,'#1b1226');gr.addColorStop(1,'#3a1530');g.fillStyle=gr;g.fillRect(0,0,1280,720);
+ g.strokeStyle='rgba(255,210,228,.35)';g.lineWidth=6;g.strokeRect(24,24,1232,672);g.textAlign='center';
+ g.fillStyle='#ffd2e4';g.font='bold 92px "Segoe UI",system-ui,sans-serif';g.fillText('🎬 Bioskop Han HQ',640,250);
+ g.font='bold 46px "Segoe UI",system-ui,sans-serif';g.fillStyle='#fff';lines.forEach((t,i)=>g.fillText(t,640,380+i*70));
+ const t=new THREE.CanvasTexture(c);t.colorSpace=THREE.SRGBColorSpace;return t;}
+function thSetIdle(lines){if(!TH.mat)return;if(TH.idle)TH.idle.dispose();TH.idle=thIdleTex(lines);if(!TH.playing){TH.mat.map=TH.idle;TH.mat.needsUpdate=true;}}
+function cinemaRoom(r){P=FLOORS[r.f];const X=r.x,Y=r.y,sw=12.8,sh=7.2,cx=X+r.w/2;
+ box(cx-7.4,Y+.02,0,14.8,.22,sh+1.25,0x140e18); // dinding layar (hitam)
+ TH.mat=new THREE.MeshBasicMaterial({color:0xffffff,toneMapped:false});
+ TH.screen=mesh(new THREE.PlaneGeometry(sw,sh),TH.mat,P,false);TH.screen.position.set(tx(cx),.7+sh/2,tz(Y+.25));
+ thSetIdle(TH.unlocked?['🔓 Kebuka! Pilih film di panel 🎬','Selamat nonton, Papa 🍿']:['🔒 Masukkan kode kunci di 🔐 Konsol','Mode POV: jalan ke sini, tekan T / tombol 🎬']);
+ box(cx-7.9,Y+.15,0,1.0,.4,sh+1.25,0x9a1b2e);box(cx+6.9,Y+.15,0,1.0,.4,sh+1.25,0x9a1b2e); // gorden
+ box(cx-7.9,Y+.15,sh+.85,15.8,.45,.45,0x7d1424); // valance
+ box(cx-7,Y+.25,0,14,1.0,.22,0x2a1c26); // panggung kecil
+ for(let row=0;row<4;row++){const yy=Y+4.4+row*2.0;
+  [[X+3.0,X+10.6],[X+14.4,X+22.0]].forEach(([a,b])=>{for(let x=a;x<=b+1e-6;x+=1.15){
+   box(x-.42,yy-.32,0,.84,.72,.42,0xb3122e);box(x-.42,yy+.3,0,.84,.16,.72,0x8a0e22);box(x-.48,yy-.3,0,.08,.6,.62,0x3a2a30);}});
+  label('Baris '+'ABCD'[row],'seat',X+1.6,yy,.9);}
+ // booth proyektor di belakang
+ box(cx-2.6,Y+12.4,0,5.2,1.3,1.2,0x2b2333);box(cx-.45,Y+12.5,1.2,.9,.8,.5,0x55505e);
+ cyl(cx,Y+12.45,1.42,.14,.12,0x88e0ff,10,.08);
+ const bm=new THREE.MeshBasicMaterial({color:0xcfe8ff,transparent:true,opacity:.0,depthWrite:false,toneMapped:false});
+ const len=12.2,bg=new THREE.CylinderGeometry(4.2,.12,len,4,1,true);TH.beam=mesh(bg,bm,P,false);
+ TH.beam.rotation.x=-Math.PI/2+Math.atan2(2.6,len);TH.beam.rotation.y=Math.PI/4*0;TH.beam.position.set(tx(cx),(1.45+.7+sh/2)/2,tz(Y+12.45-len/2));TH.beam.visible=false;
+ label('📽️ Proyektor','seat',cx,Y+13.1,1.9);
+ // konsol kunci dekat pintu masuk (sisi timur)
+ box(X+22.9,Y+4.9,0,.9,.7,1.05,0x2b2333);box(X+22.95,Y+4.95,1.05,.8,.6,.06,0x6aa8f5,{mo:{emissive:0x3c7fd6,emissiveIntensity:.8}});
+ label('🔐 Konsol Bioskop','seat pink',X+23.35,Y+5.25,1.6);
+ [X+2,X+12,X+22].forEach(x=>box(x,Y+r.d-.25,1.6,.5,.12,.25,0xffd9a0,{mo:{emissive:0xffb070,emissiveIntensity:1.2}})); // lampu dinding
+ TH.light=new THREE.PointLight(0xffc9a0,2.2,18);TH.light.position.set(tx(cx),2.6,tz(Y+8));P.add(TH.light);
+ plant(X+.7,Y+r.d-.7,1,0x5fae6a);plant(X+24.2,Y+r.d-.7,1,0x5fae6a);}
+/* SHA-256 (cadangan kalau crypto.subtle gak ada, mis. dibuka via http biasa) */
+function thSha256Fallback(str){const K=[],H=[];let n=2,c=0;const isP=v=>{for(let i=2;i*i<=v;i++)if(v%i===0)return false;return true;};
+ while(c<64){if(isP(n)){if(c<8)H[c]=(Math.pow(n,.5)*4294967296)|0;K[c++]=(Math.pow(n,1/3)*4294967296)|0;}n++;}
+ const b=new TextEncoder().encode(str),l=b.length,words=[];for(let i=0;i<l;i++)words[i>>2]|=b[i]<<(24-(i%4)*8);
+ words[l>>2]|=0x80<<(24-(l%4)*8);const nw=((l+8)>>6<<4)+16;for(let i=words.length;i<nw;i++)words[i]=words[i]|0;words[nw-1]=l*8;
+ const h=H.slice(),r=(v,s)=>(v>>>s)|(v<<(32-s));
+ for(let j=0;j<nw;j+=16){const w=words.slice(j,j+16);let [a,bb,cc,d,e,f,g,hh]=h;
+  for(let i=0;i<64;i++){if(i>=16){const x=w[i-15],y=w[i-2];w[i]=(w[i-16]+(r(x,7)^r(x,18)^(x>>>3))+w[i-7]+(r(y,17)^r(y,19)^(y>>>10)))|0;}
+   const t1=(hh+(r(e,6)^r(e,11)^r(e,25))+((e&f)^(~e&g))+K[i]+(w[i]|0))|0,t2=((r(a,2)^r(a,13)^r(a,22))+((a&bb)^(a&cc)^(bb&cc)))|0;
+   hh=g;g=f;f=e;e=(d+t1)|0;d=cc;cc=bb;bb=a;a=(t1+t2)|0;}
+  [a,bb,cc,d,e,f,g,hh].forEach((v,i)=>h[i]=(h[i]+v)|0);}
+ return h.map(v=>(v>>>0).toString(16).padStart(8,'0')).join('');}
+async function thSha256(str){try{if(crypto&&crypto.subtle){const d=await crypto.subtle.digest('SHA-256',new TextEncoder().encode(str));return[...new Uint8Array(d)].map(x=>x.toString(16).padStart(2,'0')).join('');}}catch(_){}return thSha256Fallback(str);}
+window.kantorBioskopHash=c=>thSha256(TH_SALT+c).then(h=>{console.log('TH_HASH baru:',h);return h;}); // bantu ganti kode (lihat README)
 function buildWorld(){
  ROOMS.forEach(r=>{P=FLOORS[r.f];
   const sl=r.f>0?FH-2.4:.35;box(r.x-.05,r.y-.05,-sl,r.w+.1,r.d+.1,sl,r.outdoor?0x9ccf7e:0xf3c6dc); // pelat lantai (outdoor: tanah berumput; lantai atas lebih tebal = plafon lantai bawahnya)
@@ -611,6 +708,7 @@ function buildWorld(){
  // tangga & lift
  ROOMS.filter(r=>r.stairs).forEach(r=>{P=FLOORS[r.f];if(r.f<NFLOOR-1)stairsUp(r);if(r.f>0)stairsTop(r);lift(r);
   plant(r.x+.7,r.y+.8,1);if(r.w>12){sofa(r.x+2,r.y+5.6,3.2,0xc8a6ff,-1);plant(r.x+6.2,r.y+7.6,1.1);box(r.x+2.4,r.y+4.3,0,2.4,.8,.35,0xfff1d6);}});
+ ROOMS.filter(r=>r.cinema).forEach(r=>cinemaRoom(r));
  ROOMS.filter(r=>r.hall).forEach(r=>{P=FLOORS[r.f];if(r.w>8)for(let x=r.x+3;x<r.x+r.w-1;x+=7)plant(x,r.y+1,.7,0x7fcf9a);});
 
  // ---- Ruang CEO
@@ -1139,6 +1237,7 @@ function syncActors(walk){
  eff.forEach(a=>{
   const id=idOf(a),s=spotFor(a,used);let ac=actors[id];
   if(ac&&id==='han'&&(ac.pov||ac.together)){ac.a=a;if(ac.pov)ac.home=s;return;} // POV: posisi Han dipegang keyboard
+  if(ac&&ac.cinemaDate){ac.a=a;ac.home=s;return;} // 🎬 lagi diajak Han ke Bioskop Lt 4: rutinitas di-pause
   if(ac&&ac.home&&Math.hypot(ac.home.x-s.x,ac.home.y-s.y)<.05){
    if(id==='keira'&&(ac.brain||ac.walking||ac.waitUntil||ac.napUntil||ac.nextBrain)){ac.a=a;ac.home=s;return;}
    if(id!=='keira'&&(ac.brain||ac.napUntil)&&ac.brain&&a.status===ac.brain.status){ac.a=a;ac.home=s;return;}
@@ -1233,7 +1332,7 @@ function keiraTour(ac,done){
 function brainTick(now){
  pondokGuard();
  Object.values(actors).forEach(ac=>{
-  const kind=BRAIN[ac.id];if(!kind)return;
+  const kind=BRAIN[ac.id];if(!kind||ac.cinemaDate)return;
   if(kind!=='keiraWander'&&ac.a.status!=='santai')return;
   if(kind==='keiraWander'&&ac.a.status==='tidur')return;
   if(ac.napUntil){if(now>ac.napUntil){const f=ac.afterNap;ac.afterNap=null;wakeUp(ac);f&&f();}return;}
@@ -1480,11 +1579,13 @@ function povState(ac,moving,now){ // status/tugas lokal Han + refresh UI pas ber
  POV.moving=mv;POV.room=rid;ac.demo=mv?'Han lagi jalan (POV) 🎮':'🎮 Mode POV';
  const e=effective().find(a=>idOf(a)==='han');if(e)ac.a=e;
  renderChips();renderJadwal();if(popId==='han')openPop('han');}
-function povZoneUI(ac,now){const z=povStairZone(ac),f=floorOfY(ac.pos.y),msg=POV.msgUntil>now?POV.msg:'',key=z+'|'+f+'|'+msg;if(key===POV.zoneKey)return;POV.zoneKey=key;
+function povZoneUI(ac,now){const z=povStairZone(ac),f=floorOfY(ac.pos.y),msg=POV.msgUntil>now?POV.msg:'',cin=thInCinema(),key=z+'|'+f+'|'+msg+'|'+cin+'|'+TH.unlocked;if(key===POV.zoneKey)return;POV.zoneKey=key;
  let t=msg;
+ if(!t&&cin)t='🎬 Bioskop Han · '+(TH.unlocked?'🔓 pilih/putar film':'🔒 masukkan kode kunci')+': <span class="kb">T</span>/🎬';
+ const tb=document.querySelector('#povPad [data-a="th"]');if(tb)tb.classList.toggle('dis',!cin);
  if(!t&&z)t=(z==='lift'?'🛗 Di depan lift':'🪜 Di kaki tangga')+(f<NFLOOR-1?' · naik ke Lt '+(f+2)+': <span class="kb">R</span>/⬆️':'')+(f>0?' · turun ke Lt '+f+': <span class="kb">F</span>/⬇️':'');
  const el=$('povStair');el.innerHTML=t;el.classList.toggle('on',!!t);
- document.querySelectorAll('#povPad .st').forEach(b=>b.classList.toggle('dis',!z||(b.dataset.a==='up'?f>=NFLOOR-1:f<=0)));}
+ document.querySelectorAll('#povPad .st:not([data-a="th"])').forEach(b=>b.classList.toggle('dis',!z||(b.dataset.a==='up'?f>=NFLOOR-1:f<=0)));}
 function povAnimate(ac,now,dt){ // dipanggil dari updateActors tiap frame (gantiin jalur otomatis)
  const c=ac.c,K=POV.keys,st=POV.stick;
  const turn=(K.has('tl')?1:0)-(K.has('tr')?1:0);if(turn)POV.yaw+=turn*2.3*dt;
@@ -1547,12 +1648,90 @@ function povExit(){if(!POV.on)return;const ac=actors.han;POV.on=false;POV.keys.c
  log('🎮 Han keluar Mode POV'+(home?', jalan balik ke Pondok Taman 🏠':''));}
 $('btnPov').onclick=()=>POV.on?povExit():povEnter();
 $('povMini').onclick=()=>POV.on?povExit():povEnter();
+
+/* ===== 🎬 Bioskop: panel, kunci, daftar & pemutar ===== */
+const thV=$('thVideo');TH.video=thV;thV.volume=.9;
+function thInCinema(){const h=actors.han;if(!POV.on||!h||!h.pos)return false;const r=roomAt(h.pos.x,h.pos.y);return !!(r&&r.cinema);}
+const thFmt=s=>{s=Math.max(0,Math.floor(s||0));const h=Math.floor(s/3600),m=Math.floor(s/60)%60,x=String(s%60).padStart(2,'0');return h?h+':'+String(m).padStart(2,'0')+':'+x:m+':'+x;};
+const thName=f=>decodeURIComponent(String(f).split('/').pop()).replace(TH_EXT,'').replace(/[_]+/g,' ');
+function thUI(){$('thLock').hidden=TH.unlocked;$('thMain').hidden=!TH.unlocked;
+ const it=TH.list[TH.cur];$('thNow').textContent=it?(thV.paused?'⏸ ':'▶️ ')+it.title:'Pilih film dari daftar 👇';$('thPlay').textContent=thV.paused?'▶️':'⏸';
+ [...$('thList').querySelectorAll('button')].forEach((b,i)=>b.classList.toggle('on',i===TH.cur));POV.zoneKey='';}
+function thRenderList(){const L=$('thList');L.innerHTML='';$('thCount').textContent=TH.list.length?'('+TH.list.length+' film)':'';
+ if(!TH.list.length){L.innerHTML='<div class="small">Belum ada video di folder <b>theater/</b>. Pakai <b>📂 Putar dari folder komputer</b> buat langsung dari PC.</div>';return;}
+ TH.list.forEach((it,i)=>{const b=document.createElement('button');b.textContent=(it.local?'💻 ':'🎞️ ')+it.title;b.onclick=()=>thPlayIdx(i);L.appendChild(b);});thUI();}
+async function thLoadList(){if(TH.loaded)return;TH.loaded=true;let files=[];
+ try{const r=await fetch(TH_DIR+'/videos.json?'+Date.now(),{cache:'no-store'});if(r.ok){const j=await r.json();files=(Array.isArray(j)?j:(j.videos||[])).map(x=>typeof x==='string'?{file:x}:x).filter(x=>x&&x.file);}}catch(_){}
+ if(!files.length)try{const r=await fetch('https://api.github.com/repos/'+TH_REPO+'/contents/'+TH_DIR);if(r.ok)files=(await r.json()).filter(x=>x.type==='file'&&TH_EXT.test(x.name)).map(x=>({file:x.name}));}catch(_){}
+ TH.list=TH.list.filter(x=>x.local).concat(files.filter(x=>TH_EXT.test(x.file)).map(x=>({title:x.title||thName(x.file),src:TH_DIR+'/'+String(x.file).split('/').map(encodeURIComponent).join('/')})));
+ thRenderList();}
+function thEnsureTex(){if(!TH.vtex){TH.vtex=new THREE.VideoTexture(thV);TH.vtex.colorSpace=THREE.SRGBColorSpace;}TH.mat.map=TH.vtex;TH.mat.needsUpdate=true;TH.playing=true;TH.beam.visible=true;TH.beam.material.opacity=.07;TH.light.intensity=.5;}
+function thIdle(){TH.playing=false;TH.mat.map=TH.idle;TH.mat.needsUpdate=true;TH.beam.visible=false;TH.light.intensity=2.2;}
+function thPlayIdx(i){if(!TH.unlocked||!TH.list[i])return;TH.cur=i;const it=TH.list[i];thV.src=it.src;thV.load();thEnsureTex();
+ thV.play().catch(e=>{$('thNow').textContent='⚠️ Gagal putar: '+it.title+' ('+(e.name||e)+')';});log('🎬 Bioskop Lt 4: Han nonton '+it.title);thUI();}
+thV.addEventListener('play',thUI);thV.addEventListener('pause',thUI);
+thV.addEventListener('ended',()=>{if(TH.cur<TH.list.length-1)thPlayIdx(TH.cur+1);else{thIdle();thUI();}});
+thV.addEventListener('error',()=>{const it=TH.list[TH.cur];$('thNow').textContent='⚠️ Format gak didukung browser: '+(it?it.title:'')+' (pakai mp4 H.264 / webm)';thIdle();});
+thV.addEventListener('timeupdate',()=>{const d=thV.duration||0;if(!TH.seeking)$('thSeek').value=d?Math.round(thV.currentTime/d*1000):0;$('thT').textContent=thFmt(thV.currentTime)+' / '+thFmt(d);});
+$('thSeek').addEventListener('input',()=>{TH.seeking=true;const d=thV.duration||0;if(d)thV.currentTime=$('thSeek').value/1000*d;});$('thSeek').addEventListener('change',()=>TH.seeking=false);
+$('thVol').addEventListener('input',()=>thV.volume=$('thVol').value/100);
+$('thPlay').onclick=()=>{if(TH.cur<0){if(TH.list.length)thPlayIdx(0);return;}if(thV.paused){thEnsureTex();thV.play();}else thV.pause();};
+$('thPrev').onclick=()=>{if(TH.list.length)thPlayIdx((TH.cur-1+TH.list.length)%TH.list.length);};
+$('thNext').onclick=()=>{if(TH.list.length)thPlayIdx((TH.cur+1)%TH.list.length);};
+$('thStop').onclick=()=>{thV.pause();thV.removeAttribute('src');thV.load();TH.cur=-1;thIdle();thUI();};
+$('thFull').onclick=()=>{if(TH.cur<0)return;const v=thV;v.classList.add('full');v.controls=true;
+ const rq=v.requestFullscreen||v.webkitRequestFullscreen;if(rq)rq.call(v).catch(()=>{});else if(v.webkitEnterFullscreen)v.webkitEnterFullscreen();};
+const thUnfull=()=>{if(!document.fullscreenElement&&!document.webkitFullscreenElement){thV.classList.remove('full');thV.controls=false;}};
+document.addEventListener('fullscreenchange',thUnfull);document.addEventListener('webkitfullscreenchange',thUnfull);thV.addEventListener('webkitendfullscreen',()=>{thV.classList.remove('full');thV.controls=false;});
+thV.addEventListener('dblclick',()=>{if(document.fullscreenElement)document.exitFullscreen();else{thV.classList.remove('full');thV.controls=false;}});
+$('thPick').addEventListener('change',e=>{const fs=[...e.target.files].filter(f=>TH_EXT.test(f.name)||/^video\//.test(f.type)).sort((a,b)=>a.name.localeCompare(b.name));
+ if(!fs.length){$('thNow').textContent='⚠️ Gak ada file video di folder itu';return;}
+ TH.list.filter(x=>x.local).forEach(x=>URL.revokeObjectURL(x.src));
+ TH.list=fs.map(f=>({title:thName(f.name),src:URL.createObjectURL(f),local:true})).concat(TH.list.filter(x=>!x.local));TH.cur=-1;thRenderList();});
+async function thTry(){const c=$('thCode').value.trim();if(!c)return;const h=await thSha256(TH_SALT+c);
+ if(h===TH_HASH){TH.unlocked=true;try{sessionStorage.setItem('thUnlock',h);}catch(_){}$('thErr').textContent='';$('thCode').value='';
+  thSetIdle(['🔓 Kebuka! Pilih film di panel 🎬','Selamat nonton, Papa 🍿']);log('🎬 Bioskop Lt 4 dibuka 🔓');thLoadList();thUI();}
+ else{$('thErr').textContent='❌ Kode salah, coba lagi';$('thCode').select();}}
+$('thGo').onclick=thTry;$('thCode').addEventListener('keydown',e=>{e.stopPropagation();if(e.key==='Enter')thTry();if(e.key==='Escape')thClose();});
+$('thLockBtn').onclick=()=>{TH.unlocked=false;try{sessionStorage.removeItem('thUnlock');}catch(_){}$('thStop').onclick();thSetIdle(['🔒 Masukkan kode kunci di 🔐 Konsol','Mode POV: jalan ke sini, tekan T / tombol 🎬']);thUI();};
+$('thX').onclick=()=>thClose();
+function thOpen(){if(!thInCinema()){POV.msg='🎬 Panel bioskop cuma bisa dibuka di dalam Bioskop Lt 4';POV.msgUntil=performance.now()+2500;POV.zoneKey='';return;}
+ TH.open=true;$('thPanel').classList.add('on');POV.keys.clear();thUI();if(TH.unlocked)thLoadList();else setTimeout(()=>$('thCode').focus(),30);}
+function thClose(){TH.open=false;$('thPanel').classList.remove('on');if(document.activeElement)document.activeElement.blur();}
+function thToggle(){TH.open?thClose():thOpen();}
+try{if(sessionStorage.getItem('thUnlock')===TH_HASH){TH.unlocked=true;thSetIdle(['🔓 Kebuka! Pilih film di panel 🎬','Selamat nonton, Papa 🍿']);}}catch(_){}
+setInterval(()=>{if(TH.open&&!thInCinema())thClose();},700); // keluar bioskop / keluar POV: panel nutup (film tetap jalan sampai di-stop)
+$('btnBioskop').onclick=()=>{if(!POV.on)povEnter();const ac=actors.han;if(!POV.on||!ac)return;
+ const q=povUnstick(...snapIn(STAIR_FOOT[3][0],STAIR_FOOT[3][1]+.35));ac.pos={x:q[0],y:q[1]};POV.yaw=-Math.PI/2;ac.c.root.rotation.y=POV.yaw;
+ onFloor(ac,ac.pos.y);ac.c.root.position.set(tx(ac.pos.x),0,tz(ac.pos.y));setFloor(3,false);POV.snap=true;POV.zoneKey='';log('🎮 Han ke Lt 4 · Bioskop 🎬');};
+
+/* ===== 💞 Interaksi Ophelia 1 di Bioskop (daftar bisa ditambah: push objek baru ke TH_ACTS) ===== */
+const TH_SEATS={partner:[9.9,3*DY+8.4],han:[8.75,3*DY+8.4]}; // Baris C, dekat lorong tengah, hadap layar
+const TH_ACTS=[
+ {id:'bareng',label:'🍿 Nonton bareng',run:()=>thDateStart('ophelia1')},
+ {id:'duduk',label:'💺 Han duduk di sebelah',run:()=>thHanSit()},
+ {id:'selesai',label:'🚶 Selesai',run:()=>thDateEnd('ophelia1')},
+];
+function thActRender(){const el=$('thAct');el.innerHTML='';TH_ACTS.forEach(a=>{const b=document.createElement('button');b.className='thb';b.textContent=a.label;b.onclick=()=>a.run();el.appendChild(b);});}
+const thActSt=t=>{$('thActSt').textContent=t||'';};
+function thDateStart(id){const ac=actors[id];if(!ac){thActSt('⚠️ '+id+' belum ada di denah');return;}
+ if(ac.cinemaDate){thActSt('🍿 '+nameOf(id)+' udah di bioskop');return;}
+ Object.assign(ac,{cinemaDate:true,brain:null,napUntil:0,afterNap:null,waitUntil:0,afterWait:null,demo:'Diajak Han nonton 🎬'});
+ const st=TH_SEATS.partner,seat={x:st[0],y:st[1],pose:'sit',face:Math.PI};
+ if(ac.spot&&ac.spot.pose==='bed')wakeUp&&wakeUp(ac);
+ startWalk(ac,route({x:ac.pos.x,y:ac.pos.y},{x:st[0],y:st[1]+.9}),()=>{ac.spot=seat;ac.pos={x:seat.x,y:seat.y};placeActor(ac);ac.demo='🍿 Nonton bareng Han';ac.sayText='Nonton bareng yuk sayang 🍿';ac.sayUntil=performance.now()+6000;thActSt('🍿 '+nameOf(id)+' udah duduk, Baris C');});
+ thActSt('🚶 '+nameOf(id)+' lagi jalan ke Bioskop Lt 4…');log('🎬 Han ngajak '+nameOf(id)+' nonton bareng');}
+function thDateEnd(id){const ac=actors[id];if(!ac||!ac.cinemaDate){thActSt('');return;}ac.cinemaDate=false;ac.demo=null;goHome(ac,null);thActSt('👋 '+nameOf(id)+' balik ke rutinitas');}
+function thHanSit(){const ac=actors.han;if(!POV.on||!ac)return;const st=TH_SEATS.han;ac.pos={x:st[0],y:st[1]};POV.yaw=Math.PI;ac.c.root.rotation.y=POV.yaw;
+ POV.fpPref=true;POV.look=-.08;POV.snap=true;povButtons();onFloor(ac,ac.pos.y);ac.c.root.position.set(tx(st[0]),0,tz(st[1]));thClose();}
+thActRender();
 // keyboard
 const POV_KEYS={KeyW:'f',ArrowUp:'f',KeyS:'b',ArrowDown:'b',KeyA:'l',ArrowLeft:'l',KeyD:'r',ArrowRight:'r',KeyQ:'tl',KeyE:'tr',ShiftLeft:'run',ShiftRight:'run'};
 const povTyping=e=>{const t=e.target;return !!t&&(t.tagName==='INPUT'||t.tagName==='TEXTAREA'||t.tagName==='SELECT'||t.isContentEditable);};
-window.addEventListener('keydown',e=>{if(!POV.on||povTyping(e)||e.ctrlKey||e.metaKey||e.altKey)return;const c=e.code;
+window.addEventListener('keydown',e=>{if(TH.open&&e.code==='Escape'){e.preventDefault();thClose();return;}if(!POV.on||povTyping(e)||e.ctrlKey||e.metaKey||e.altKey)return;const c=e.code;
  if(c==='Escape'){e.preventDefault();povExit();return;}
  if(c==='KeyV'){e.preventDefault();if(!e.repeat){POV.fpPref=!POV.fpPref;povButtons();}return;}
+ if(c==='KeyT'){e.preventDefault();if(!e.repeat)thToggle();return;}
  if(c==='KeyR'||c==='PageUp'){e.preventDefault();if(!e.repeat)povFloor(1);return;}
  if(c==='KeyF'||c==='PageDown'){e.preventDefault();if(!e.repeat)povFloor(-1);return;}
  const k=POV_KEYS[c];if(k){e.preventDefault();POV.keys.add(k);}});
@@ -1576,7 +1755,7 @@ renderer.domElement.addEventListener('wheel',e=>{if(!POV.on)return;e.preventDefa
   ['pointerup','pointercancel','lostpointercapture'].forEach(n=>b.addEventListener(n,off));
   b.addEventListener('contextmenu',e=>e.preventDefault());});
  document.querySelectorAll('#povPad [data-a]').forEach(b=>b.addEventListener('click',e=>{e.preventDefault();const a=b.dataset.a;
-  if(a==='run')POV.run=!POV.run;else if(a==='fp')POV.fpPref=!POV.fpPref;else if(a==='up')povFloor(1);else if(a==='down')povFloor(-1);else if(a==='exit'){povExit();return;}
+  if(a==='run')POV.run=!POV.run;else if(a==='fp')POV.fpPref=!POV.fpPref;else if(a==='up')povFloor(1);else if(a==='down')povFloor(-1);else if(a==='th'){thToggle();return;}else if(a==='exit'){povExit();return;}
   povButtons();}));}
 
 /* ================= 🌍 Lingkungan luar: rumput hijau tenang, hutan (pohon + tanaman liar acak), jalan raya + mobil lalu lalang, langit berawan & suasana pagi/siang/sore/malam (ikut jam WITA) ================= */
@@ -1785,7 +1964,7 @@ function loop(now){
  requestAnimationFrame(loop);
 }
 buildWorld();buildEnv();resize();
-const hf=location.hash.match(/lt([123])/);setFloor(hf?+hf[1]-1:'all',false);
+const hf=location.hash.match(/lt([1234])/);setFloor(hf?+hf[1]-1:'all',false);
 tick();setInterval(tick,20000);
 log('Kantor 3D buka, selamat datang Papa 🌸');
 await load();setInterval(load,60000);
@@ -1799,7 +1978,7 @@ bindQualityUI();applyQuality(qualityMode,false);
 requestAnimationFrame(loop);
 // opsi URL buat preview: #zoom, #kerja, #pop=lia
 const hs=location.hash;
-const PREV={langit:['taman-depan',[26,2.5,34]],atas:['taman-halaman',[0,62,8]],hutan:['taman-depan',[48,18,52]],dekat:['taman-depan',[18,14,28]],pondok:['pondok-taman',[0.8,4.2,-4]],kamarlove:['kamar-love',[3,8,-7.5]],lux:['kamar-hanrin',[3,8,-7.5]],tvroom:['lounge',[4,6.5,8]],school:['school',[4,8.5,-10.5]],close:['ig',[1.5,2.6,5.5]],zoom:['ig',[7,8.5,10]]};
+const PREV={bioskop:['bioskop',[0,5.5,9]],langit:['taman-depan',[26,2.5,34]],atas:['taman-halaman',[0,62,8]],hutan:['taman-depan',[48,18,52]],dekat:['taman-depan',[18,14,28]],pondok:['pondok-taman',[0.8,4.2,-4]],kamarlove:['kamar-love',[3,8,-7.5]],lux:['kamar-hanrin',[3,8,-7.5]],tvroom:['lounge',[4,6.5,8]],school:['school',[4,8.5,-10.5]],close:['ig',[1.5,2.6,5.5]],zoom:['ig',[7,8.5,10]]};
 const pv=Object.keys(PREV).find(k=>hs.includes(k));
 if(pv){const [rid,off]=PREV[pv],r=ROOMS.find(x=>x.id===rid);setFloor(r.f,false);const t=FLOORS[r.f].localToWorld(new THREE.Vector3(tx(r.x+r.w/2),.5,tz(r.y+r.d/2)));camera.position.copy(t.clone().add(new THREE.Vector3(...off)));controls.target.copy(t);if(pv==='langit')controls.target.y+=5;if(pv==='atas'){controls.target.set(tx(30),0,tz(12));camera.position.set(tx(30),62,tz(12)+8);}if(pv==='hutan')controls.target.y+=1;if(pv==='dekat'){controls.target.set(tx(30),1.5,tz(14));camera.position.set(tx(42),18,tz(46));controls.target.y+=2;}}
 if(hs.includes('povpad'))document.body.classList.add('touch');

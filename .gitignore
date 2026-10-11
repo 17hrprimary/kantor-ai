@@ -1,0 +1,5 @@
+# 🎬 Video bioskop: file film asli di folder theater/ TIDAK di-push ke GitHub (repo & Pages publik, batas 100 MB/file).
+# Putar dari PC lewat tombol "📂 Putar dari folder komputer" di panel Bioskop Lt 4.
+theater/*
+!theater/README.md
+!theater/videos.json
