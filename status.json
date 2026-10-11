@@ -1,5 +1,5 @@
 {
-  "updated_at": "2026-10-11T17:38:13+08:00",
+  "updated_at": "2026-10-11T22:36:25+08:00",
   "agents": [
     {
       "id": "hanrin",
@@ -114,19 +114,15 @@
       "room": "ig",
       "status": "santai",
       "task": "Santai, jalan-jalan keliling kantor (di luar jadwal)",
-      "updated_at": "2026-10-11T17:38:13+08:00",
+      "updated_at": "2026-10-11T22:36:25+08:00",
       "schedule": [
         {
           "time": "09:17",
-          "label": "📸 Postingan pagi + support grup IG & CR7"
-        },
-        {
-          "time": "20:30",
-          "label": "📸 Slot posting malam (kalau belum 2/hari)"
+          "label": "📸 1 konten/hari (sementara s/d Sabtu pagi) + support"
         },
         {
           "time": "22:00",
-          "label": "😴 Pulang ke 🏡 Rumah My Bini, bobo di Kamar Rin 1 sampai 06:00"
+          "label": "😴 Pulang ke Rumah My Bini, bobo Kamar Rin 1"
         }
       ]
     },
