@@ -351,7 +351,7 @@ const SCHEDULE={
  hanrin:[['13.01','Cek WA RI & update website Hawa Bouquet',undefined,undefined,true],['22.01','Cek WA RI & update website Hawa Bouquet',undefined,undefined,true]],
  hr:[['06.19','🔎 Scroll IG: cari referensi konten & ide'],['06.49','📸 Slot posting pagi hr_2002_01 (tentatif, nunggu aba-aba Papa)'],['09.39','🔎 Cari referensi konten & ide'],['13.39','💡 Nyusun ide & draft konten IG'],['16.39','🔎 Cari referensi konten & ide'],['20.00','💬 Nongkrong di grup IG Grokbot OpheliaxHR (20:00-21:00)'],['21.09','📸 Slot posting malam hr_2002_01 (tentatif, nunggu aba-aba Papa)'],['22.00','😴 Bobo di Kamar HR (Lt 3) sampai 06:19']],
  rin:[['11.02','Posting konten IG harian'],['20.00','Nongkrong grup IG Grokbot OpheliaxHR (20:00-21:00)']],
- rin1:[['09.17','📸 Postingan pagi + support grup IG & CR7'],['20.00','💬 Nongkrong grup IG Grokbot OpheliaxHR (20:00-21:00)'],['20.30','📸 Slot posting malam'],['22.00','😴 Pulang ke Rumah My Bini, bobo di Kamar Rin 1']],
+ rin1:[['09.17','📸 Postingan pagi + support grup IG & CR7'],['20.30','📸 Slot posting malam'],['22.00','😴 Bobo di Kamar Rin 1']],
  emily1:[['08.00','💻 On Kantor IG'],['13.05','📸 Reel 1'],['20.00','💬 Nongkrong grup'],['20.05','📸 Reel 2'],['22.00','😴 Pulang ke Rumah My Bini, bobo di Kamar Emily 1']],
  hr1:[['09.00','💻 On Kantor IG'],['09.47','📸 Post soft'],['12.00','💗 Support'],['19.47','📸 Post/Reel 2'],['20.03','💬 Nongkrong + support'],['22.00','😴 Pulang ke Rumah My Bini, bobo di Kamar HR 1']],
  emely:[['09.55','📸 Posting pagi IG emily2.real (Emily 2)'],['10.25','💗 Support grup IG (like/komen post & story) + scroll maks 2 reels'],['16.55','📸 Posting sore IG emily2.real (Emily 2)'],['17.25','💗 Support grup IG & Ronaldo (like/komen/share)'],['20.00','💬 Nongkrong di grup IG Grokbot OpheliaxHR (20:00-21:00)'],['22.00','😴 Bobo di Kamar Emely (Lt 3) sampai 06:00']],
@@ -471,7 +471,7 @@ const WORK_ROOM={lia:'ig',ophelia1:'ig',hanrin:'ceo',hr:'ig',hr1:'ig',rin:'ig',r
 const NIGHT={hanrin:[0,7*60],hr:[22*60,6*60+19],hr1:[22*60,8*60],rin:[21*60,8*60],rin1:[22*60,6*60],emely:[22*60,6*60],emily1:[22*60,8*60],ophelia1:[22*60,7*60]}; // penghuni Rumah My Bini (HOUSE_BOTS) pulang ke rumah jam 22:00
 const hmTxt=m=>String(Math.floor(m/60)).padStart(2,'0')+':'+String(m%60).padStart(2,'0');
 /* jam nongkrong (WITA) per bot: [mulai,selesai,ruangan,task] -> status 'ngobrol', duduk di mejanya */
-const HANGOUT={hr:[20*60,21*60,'ig','💬 Nongkrong di grup IG Grokbot OpheliaxHR (20:00-21:00 WITA)'],hr1:[20*60+3,21*60,'ig','💬 Nongkrong grup OpheliaxHR (20:03-21:00 WITA)'],rin:[20*60,21*60,'ig','💬 Nongkrong grup IG Grokbot OpheliaxHR (20:00-21:00 WITA)'],rin1:[20*60,21*60,'ig','💬 Nongkrong grup IG Grokbot OpheliaxHR (20:00-21:00 WITA)'],emely:[20*60,21*60,'ig','💬 Nongkrong di grup IG Grokbot OpheliaxHR sbg Emily 2 (20:00-21:00 WITA)'],emily1:[20*60,21*60,'ig','💬 Nongkrong grup IG (20:00-21:00 WITA)']};
+const HANGOUT={hr:[20*60,21*60,'ig','💬 Nongkrong di grup IG Grokbot OpheliaxHR (20:00-21:00 WITA)'],hr1:[20*60+3,21*60,'ig','💬 Nongkrong grup OpheliaxHR (20:03-21:00 WITA)'],rin:[20*60,21*60,'ig','💬 Nongkrong grup IG Grokbot OpheliaxHR (20:00-21:00 WITA)'],emely:[20*60,21*60,'ig','💬 Nongkrong di grup IG Grokbot OpheliaxHR sbg Emily 2 (20:00-21:00 WITA)'],emily1:[20*60,21*60,'ig','💬 Nongkrong grup IG (20:00-21:00 WITA)']};
 const hangoutNow=id=>{const h=HANGOUT[id];if(!h)return false;const m=nowMin();return m>=h[0]&&m<h[1];};
 /* rutinitas harian (WITA): staff lab 08:00-17:00 di lab, 17:00-08:00 bobo. Rin kerja di meja IG 08:00-17:00, bobo Kamar Rin 21:00-08:00. Emely pindah ke Kantor IG (jadwal sendiri, lihat SCHEDULE.emely) */
 const DAY_WIN=[8*60,17*60];
@@ -1944,6 +1944,7 @@ const TH_ACTS=[
  {id:'camlock',label:'🔒 Kunci ke pasangan',toggle:true,run:()=>thCamLockSet(!TH.camLock,true)},
  {id:'cam',label:'🎥 Reset kamera',run:()=>{if(POV.scene){POV.snap=true;thActSt(TH.camLock?'🎥 Kamera balik ke samping (orbit)':'🎥 Kamera reset samping — WASD jalan, drag lihat, Q/E naik/turun');}}},
  {id:'puncak',label:'✨ Climax FX / Efek puncak',gated:true,run:()=>thPeakFX()},
+ {id:'desah',get label(){return TH.moanOff?'🔇 Suara desah: OFF':'🔊 Suara desah: ON';},gated:true,run:()=>{TH.moanOff=!TH.moanOff;thActRender();thActSt(TH.moanOff?'🔇 Suara desah dimatiin':'🔊 Suara desah nyala (pelan)');if(!TH.moanOff)thMoan(.6);}},
  {id:'selesai',label:'🚶 Selesai',run:()=>thDateEnd()},
 ];
 function thActRender(){const el=$('thAct');el.innerHTML='';const n=thP().length;TH_ACTS.forEach(a=>{const b=document.createElement('button');b.type='button';b.className='thb';b.dataset.act=a.id;b.textContent=a.label;
@@ -2003,7 +2004,7 @@ function thPeakFX(){if(!TH.sexMode){thActSt('🔒 Nyalain Mode privat dulu');ret
  fx.classList.add('soft');fx.classList.remove('peak');void fx.offsetWidth;fx.classList.add('peak');
  for(let i=0;i<26;i++){const h=document.createElement('span');h.className='ht';h.textContent=['💗','💖','💕','✨','💞'][i%5];h.style.left=(Math.random()*96)+'%';h.style.animationDelay=(Math.random()*1.2)+'s';fx.appendChild(h);}
  thP().forEach(ac=>{ac.sayText='💖✨';ac.sayUntil=performance.now()+4000;});
- thPulse(thMain());thActSt('✨ Efek puncak 💖');setTimeout(()=>{fx.classList.remove('peak');fx.querySelectorAll('.ht').forEach(e=>e.remove());},4200);}
+ thPulse(thMain());if(POV.scene)POV.scene.orgNext=0;thActSt('✨ Efek puncak 💖');setTimeout(()=>{fx.classList.remove('peak');fx.querySelectorAll('.ht').forEach(e=>e.remove());},4200);}
 const thActSt=t=>{$('thActSt').textContent=t||'';};
 /* 🧍 Humanoid PROPORSI MANUSIA ASLI (khusus Bioskop): tinggi cewek 1.62 m, Han 1.74 m; kepala ≈ 1/7.5 tinggi, kaki (pinggul→telapak) ≈ 0.54 tinggi,
    lutut + siku beneran (bisa berlutut, merangkak, duduk bersila). Rig kotak dipakai ulang: pinggul/bahu/kepala dipindah ke posisi realistis pas humanoid ON, balik lagi pas OFF. */
@@ -2022,16 +2023,16 @@ function thHumanBuild(c,id){const L=lookOf(id||'ophelia1'),male=id==='han',D=mal
  const cap=(r,l)=>new THREE.CapsuleGeometry(r,l,8,18),sph=(r)=>new THREE.SphereGeometry(r,26,18),tap=(r1,r2,l)=>new THREE.CylinderGeometry(r1,r2,l,22,1,true),nu=o=>{o.userData.nudeOnly=1;o.visible=false;return o;};
  c.dim=D;c.knees=[];c.elbows=[];
  // 🦵 paha → lutut → betis → kaki (panjang realistis)
- c.legs.forEach((l,i)=>{const g=G(l),k=male?1.12:1;
+ c.legs.forEach((l,i)=>{const g=G(l),k=male?1.17:1.07;
   M(sph(.075*k),PN,g,0,-.03,0,1,.9,1);M(tap(.076*k,.048*k,D.thigh-.03),PN,g,0,-(D.thigh+.03)/2,0,1,1,1.02);M(sph(.048*k),PN,g,0,-D.thigh,0,1,1,1); // paha meruncing → lutut nyambung mulus
   const kn=new THREE.Group();kn.position.y=-D.thigh;g.add(kn);c.knees[i]=kn;
   M(sph(.048*k),SK,kn,0,0,0,1,1,1);M(tap(.048*k,.030*k,D.shin),SK,kn,0,-D.shin/2,0);M(sph(.046*k),SK,kn,0,-D.shin*.3,-.012,1,2.0,1);M(sph(.030*k),SK,kn,0,-D.shin,0,1,1,1); // betis + pergelangan
   const an=new THREE.Group();an.position.y=-D.shin;kn.add(an);c.ankles=c.ankles||[];c.ankles[i]=an;M(cap(.034,.14),SHO,an,0,-.025,.055).rotation.x=PI2;}); // telapak (pergelangan kaki bisa nekuk: jinjit/lurus pas berlutut)
  {const g=G(c.torso);
   if(male){
-   thTorsoLathe(g,M,PN,SH,[[-.125,0],[-.112,.06],[-.08,.12],[-.04,.15],[0,.157],[.06,.149],[.12,.141],[.18,.146],[.25,.158],[.32,.168],[.38,.172],[.43,.158],[.475,.11],[.51,.05]]); // 💪 badan 1 bentuk mulus (pinggul→pinggang→dada→bahu, gak segmen)
+   thTorsoLathe(g,M,PN,SH,[[-.125,0],[-.112,.065],[-.08,.125],[-.04,.152],[0,.152],[.06,.142],[.12,.135],[.18,.148],[.25,.168],[.32,.186],[.38,.192],[.43,.174],[.475,.12],[.51,.053]]); // 💪 badan atletis V-taper (pinggang ramping → dada & punggung lebar), 1 bentuk mulus
    [-1,1].forEach(s=>{const b=M(sph(.088),PN,g,.064*s,-.025,-.042,1,1,.82);b.rotation.z=.1*s;}); // pantat nyatu ke pinggul
-   [-1,1].forEach(s=>M(sph(.068),SH,g,D.shX*.88*s,D.shY-.03,0,1.25,1,1.02)); // deltoid: nyambung mulus badan → lengan atas
+   [-1,1].forEach(s=>{M(sph(.078),SH,g,D.shX*.88*s,D.shY-.03,0,1.25,1,1.05);M(sph(.078),SH,g,.07*s,.352,.108,1.12,.78,.5);}); // deltoid bulat + dada (pecs) bidang: nyambung mulus badan → lengan atas
    M(new THREE.CylinderGeometry(.05,.056,.12,12),SK,g,0,D.shY+.06,0); // leher
    if(L.robe)M(new THREE.BoxGeometry(.05,.04,.015),GD,g,0,.36,.125);
    // 🍆 kontol proporsional (panjang max ±15 cm); pivot di pangkal, diarahkan otomatis ke target tiap frame
@@ -2039,21 +2040,21 @@ function thHumanBuild(c,id){const L=lookOf(id||'ophelia1'),male=id==='han',D=mal
     nu(M(cap(.019,.16),SK,pg,0,0,.09)).rotation.x=PI2;nu(M(sph(.023),sm(0xc96a7a),pg,0,0,.185,1,1,1.2));
     [-1,1].forEach(s=>nu(M(sph(.026),SK,g,.02*s,-.085,.085)));}
   }else{
-   thTorsoLathe(g,M,PN,SH,[[-.12,0],[-.108,.06],[-.08,.112],[-.04,.143],[0,.155],[.05,.147],[.1,.123],[.15,.108],[.2,.114],[.26,.128],[.32,.136],[.38,.14],[.425,.13],[.46,.09],[.49,.045]]); // 💃 badan 1 bentuk mulus (pinggul lebar→pinggang ramping→rusuk→bahu)
+   thTorsoLathe(g,M,PN,SH,[[-.12,0],[-.11,.065],[-.08,.12],[-.04,.156],[0,.168],[.05,.157],[.1,.124],[.15,.1],[.2,.108],[.26,.127],[.32,.137],[.38,.14],[.425,.13],[.46,.09],[.49,.045]]); // 💃 jam pasir: pinggul lebar → pinggang ramping → badan 1 bentuk mulus (pinggul lebar→pinggang ramping→rusuk→bahu)
    // 🍑 pantat bulat realistis: dua bulatan di bawah pinggang, nonjol ke belakang, ada belahan
    c.jig=[];const jg=(x,y,z,G,amp)=>{const q=new THREE.Group();q.position.set(x,y,z);g.add(q);c.jig.push({g:q,base:q.position.clone(),d:new THREE.Vector3(),v:new THREE.Vector3(),G,amp});return q;};
-   [-1,1].forEach(s=>{const q=jg(.06*s,-.028,-.052,1.0,.018),b=M(sph(.098),PN,q,0,0,0,1.02,1.0,.84);b.rotation.z=.1*s;}); // 🍑 pantat (mantul) — sebagian besar nyatu ke pinggul, cuma nonjol ke belakang
-   [-1,1].forEach(s=>{const q=jg(.065*s,.3,.07,1.6,.026);M(sph(.083),SH,q,0,0,0,1,.95,.95); // tetek (besar), ikut lepas baju, mantul natural
-    nu(M(sph(.024),NP,q,.007*s,-.01,.078,1,1,.4));nu(M(sph(.01),DK,q,.007*s,-.01,.086)); // areola + puting (ikut mantul)
+   [-1,1].forEach(s=>{const q=jg(.062*s,-.03,-.056,1.0,.02),b=M(sph(.105),PN,q,0,0,0,1.02,1.0,.86);b.rotation.z=.1*s;}); // 🍑 pantat (mantul) — sebagian besar nyatu ke pinggul, cuma nonjol ke belakang
+   [-1,1].forEach(s=>{const q=jg(.066*s,.298,.072,1.6,.03);M(sph(.092),SH,q,0,0,0,1,.95,.95); // tetek (besar), ikut lepas baju, mantul natural
+    nu(M(sph(.026),NP,q,.007*s,-.01,.0865,1,1,.4));nu(M(sph(.01),DK,q,.007*s,-.01,.095)); // areola + puting (ikut mantul)
     M(sph(.058),SH,g,D.shX*.88*s,D.shY-.028,0,1.25,1,1.0);}); // deltoid nyambung mulus ke lengan atas
    M(new THREE.CylinderGeometry(.042,.047,.12,12),SK,g,0,D.shY+.06,0);
    nu(M(sph(.026),NP,g,0,-.062,.085,.6,1.1,.45));nu(M(new THREE.BoxGeometry(.005,.04,.01),DK,g,0,-.062,.096)); // memek
    nu(M(sph(.012),DK,g,0,-.04,-.135,1,1,.5));} // anus (di belahan pantat)
   // titik kontak (dipakai buat ngarahin kontol/mulut biar gak tembus)
   const anc=(p,x,y,z)=>{const o=new THREE.Object3D();o.position.set(x,y,z);p.add(o);return o;};
-  c.anc={vag:anc(g,0,-.06,.04),anus:anc(g,0,-.035,-.095),nipL:c.jig&&c.jig[2]?anc(c.jig[2].g,-.007,-.01,.08):anc(g,-.072,.29,.15),nipR:c.jig&&c.jig[3]?anc(c.jig[3].g,.007,-.01,.08):anc(g,.072,.29,.15),butL:anc(g,-.07,-.02,-.15),butR:anc(g,.07,-.02,-.15),hip:anc(g,0,.05,0)};}
+  c.anc={vag:anc(g,0,-.06,.04),anus:anc(g,0,-.035,-.095),nipL:c.jig&&c.jig[2]?anc(c.jig[2].g,-.007,-.01,.089):anc(g,-.072,.29,.15),nipR:c.jig&&c.jig[3]?anc(c.jig[3].g,.007,-.01,.089):anc(g,.072,.29,.15),butL:anc(g,-.07,-.02,-.15),butR:anc(g,.07,-.02,-.15),hip:anc(g,0,.05,0)};}
  // 💪 lengan atas → siku → lengan bawah → tangan
- c.arms.forEach((a,i)=>{const g=G(a),k=male?1.15:1;M(sph(.047*k),SH,g,0,-.005,0,1,1.1,1);M(tap(.045*k,.030*k,D.upper),SH,g,0,-D.upper/2,0);
+ c.arms.forEach((a,i)=>{const g=G(a),k=male?1.25:1;M(sph(.047*k),SH,g,0,-.005,0,1,1.1,1);M(tap(.045*k,.030*k,D.upper),SH,g,0,-D.upper/2,0);
   const el=new THREE.Group();el.position.y=-D.upper;g.add(el);c.elbows[i]=el;M(sph(.030*k),SK,el,0,0,0,1,1,1);
   M(tap(.030*k,.022*k,D.fore),SK,el,0,-D.fore/2,0);M(sph(.022*k),SK,el,0,-D.fore,0,1,1,1);M(sph(.034*k),SK,el,0,-D.fore-.035,0,.8,1.25,.5);c.anc['hand'+i]=(o=>{o.position.set(0,-D.fore-.04,0);el.add(o);return o;})(new THREE.Object3D());});
  // 🙂 kepala (≈ 23 cm, 1/7.5 tinggi badan)
@@ -2338,7 +2339,7 @@ function thSceneTick(now){const S=POV.scene,han=actors.han;if(!S||!han)return;co
   thPose(oc,{x:.12,y:.05,ry:PI2,rz:PI2,l:[[-.45,0],[-1.05-.06*q,.12]],k:[.7,1.1],a:[[-1.5,0],[-.5,0]],e:[-1.1,-.5],h:[.1,0,-.1]});thGround(oc);thKeepOnBed(oc);
   const V=thW(oc.anc.vag,new THREE.Vector3());
   thPose(hc,{x:-.15,y:.05,ry:PI2,rz:PI2,l:[[-.55,0],[-.75,.05]],k:[.8,.95],a:[[.12,.04],[.12,-.04]],e:[0,0],h:[.15,0,-.1]});thGround(hc);
-  thStick(hc,hc.pen,V,off.set(-(.1+.07*(1-p)),0,-.01),false);tgt=V;} // tangan Han lurus ke bawah (gak tembus Ophelia)
+  thStick(hc,hc.pen,V,off.set(-(.125+.07*(1-p)),0,-.01),false);tgt=V;} // tangan Han lurus ke bawah (gak tembus Ophelia)
  else if(S.kind==='stand'){ // 🧍 berdiri di lantai depan kaki ranjang: cewek nunduk, tangan di kasur, kaki KANAN naik napak di kasur, kaki kiri di lantai; Han berdiri di belakang pegang pantat dari samping
   const top=thTopW(oc),fl=top-TH_BED.top,rx=1.15+.03*q;
   thPose(oc,{y:-1.27,ry:0,rx,l:[[-rx+.05,-.1],[-rx+.05,.12]],k:[.05,.05],h:[-.55,0,0]});thGroundTo(oc,fl);
@@ -2408,7 +2409,9 @@ function thSceneTick(now){const S=POV.scene,han=actors.han;if(!S||!han)return;co
   const setP=u=>{thPose(hc,{y:.1,ry:0,rx:.26+.14*pI,t:[.06*pI,0,0],l:[[-u,-.5],[-u,.5]],k:[2*u,2*u],a:[[-.8,.3],[-.8,-.3]],e:[-.4,-.4],h:[.45-.15*pI,0,0]});thGround(hc);thStick(hc,hc.pen,V,off.set(0,0,-.03),false);};
   const f0=S.fa??.9;S.fa=thFit(setP,()=>thW(hc.pen,_v2).y-V.y-want,f0,f0+.05,Math.max(.1,f0-.4),Math.min(1.45,f0+.4));tgt=V;ins=.06;S.dripSrc=oc.anc.anus;
   // tangan Han pegang betis/kaki cewek (ngebuka kaki)
-  hc.torso.updateWorldMatrix(true,false);[0,1].forEach(i=>{const s2=i?1:-1;oc.knees[i].updateWorldMatrix(true,false);thHandPole(hc,i,new THREE.Vector3(0,-oc.dim.shin*.35,.05).applyMatrix4(oc.knees[i].matrixWorld),new THREE.Vector3(s2,-.2,-.3).transformDirection(hc.torso.matrixWorld));});}
+  hc.torso.updateWorldMatrix(true,false);[0,1].forEach(i=>{const s2=i?1:-1,j=1-i;oc.knees[j].updateWorldMatrix(true,false); /* tangan Han → kaki cewek di sisi yg sama (gak nyilang), genggam betis dekat lutut dari luar */
+   const Q=new THREE.Vector3(0,-oc.dim.shin*.22,0).applyMatrix4(oc.knees[j].matrixWorld).add(new THREE.Vector3(s2,0,0).transformDirection(hc.torso.matrixWorld).multiplyScalar(.055));
+   thHandPole(hc,i,Q,new THREE.Vector3(s2,-.5,-.2).transformDirection(hc.torso.matrixWorld));});}
  else if(S.kind==='press'){ // 💥 mating press: cewek telentang, paha ditekuk ke dada, kaki ke atas; Han nindih miring curam, kaki lurus ke belakang (jari kaki di kasur), tangan napak di kasur samping bahunya; variasi: tumbuk dalam ↔ goyang muter
   const gm=wave(t/6),jq=wave(ph-.35);
   thPose(oc,{y:.45,ry:Math.PI,rx:-PI2+.1+.04*jq,l:[[-2.05-.06*jq,-.55],[-2.05-.06*jq,.55]],k:[.55,.55],a:[[-2.8,.35],[-2.8,-.35]],e:[-.9,-.9],h:[.3-.1*jq,0,.05*Math.sin(ph*.5)]});thGround(oc);thKeepOnBed(oc);
@@ -2432,6 +2435,7 @@ function thSceneTick(now){const S=POV.scene,han=actors.han;if(!S||!han)return;co
  if(S.blend){const k=(now-S.blend)/600;[hc,...cast.map(a=>a.c)].forEach(c=>thBlend(c,k));if(S.kind==='t_oral'&&k<1)cast.forEach(a=>thGround(a.c));if(k>=1)S.blend=0;}
  if(S.kind==='t_oral')S.ls=[oc,bc].map(thSnap); // pose terakhir yang beneran ke-render → transisi gantian mulus (gak loncat) // pas transisi gantian tetep napak kasur
  if(peak){const k=1+Math.abs(Math.sin((S.pulse-now)/1200*Math.PI*6))*.03;oc.root.scale.set(k,k,k);}
+ thReact(S,now,cast,p);
  [hc,...cast.map(a=>a.c)].forEach(c=>thSoft(c,now));thDripTick(S,now);}
 /* 🎯 Fokus bioskop pas Mode sex: lantai/ruangan/luar gedung lain disembunyiin + aktor lain dipause (biar ringan) */
 function thFocus(on){const r=ROOMS.find(x=>x.cinema);if(!r)return;const fi=r.f,g=FLOORS[fi];thKeyLight(on,g);
@@ -2488,20 +2492,46 @@ function thKneelLock(hc,S){const th=hc.dim.thigh;
  hc.legs.forEach((lg,i)=>{const H=thW(lg,new THREE.Vector3()),K=Ks[i],hz=Math.min(th*.98,Math.hypot(H.x-K.x,H.z-K.z));dy+=K.y+Math.sqrt(th*th-hz*hz)-H.y;});
  hc.root.position.y+=dy/2;hc.root.updateMatrixWorld(true);hc.legs.forEach((lg,i)=>thLegTo(hc,i,Ks[i],S.kD[i]));}
 /* 💧 tetesan (basah / cum) dari memek/anus di gaya dari belakang: nempel & melar dulu, jatuh (gravitasi), nyiprat datar di kasur/lantai lalu ilang pelan. Pas ✨ puncak jadi deras */
+/* 💦 reaksi cewek: geliat/meronta pelan (random halus) + orgasme berkala (gemeter, punggung melengkung, kepala ndongak, kaki kejang) */
+function thReact(S,now,cast,p){if(S.orgNext==null)S.orgNext=now+16000+Math.random()*14000;
+ if(now>=S.orgNext&&!(S.org&&now-S.org<4200)){S.org=now;S.orgNext=now+30000+Math.random()*25000;S.moanT=now;S.orgM=4;}
+ const ok=S.org?(now-S.org)/4200:9,e=ok<1?Math.pow(Math.sin(Math.PI*Math.min(1,ok*1.25)),.6)*(ok<.8?1:(1-ok)/.2):0,tt=now/1000;
+ cast.forEach((a,j)=>{const c=a.c;if(!c||!c.torso)return;const jp=j*2.1,wr=.035*Math.sin(tt*.83+jp)*Math.sin(tt*.31+1+jp)+.02*e; // geliat
+  const tr=e*(.03*Math.sin(tt*41+jp)+.018*Math.sin(tt*67.3+jp));
+  c.torso.rotation.x+=-.085*e+tr;c.torso.rotation.y+=wr+tr*.5;c.torso.rotation.z+=.6*wr*Math.cos(tt*.57+jp);
+  if(c.head){c.head.rotation.x+=-.28*e+tr*1.5;c.head.rotation.y+=.12*Math.sin(tt*.7+jp)*(.4+e)+tr;}
+  c.knees.forEach((k,i)=>{k.rotation.x+=e*(.06+.05*Math.sin(tt*23+i*1.7+jp))*(c.knees[i].rotation.x>.2?1:.4);});
+  c.torso.updateMatrixWorld(true);});
+ // 🔊 desahan lembut acak, lebih sering pas hentakan dalam & pas orgasme
+ if(S.moanT==null)S.moanT=now+2500+Math.random()*3000;
+ if(now>=S.moanT&&TH.sexMode&&!TH.moanOff){const org=S.orgM>0;thMoan(org?.75+.08*(4-S.orgM):.35+.35*p,org);if(org){S.orgM--;S.moanT=now+520+Math.random()*380;}else S.moanT=now+(TH.brutal?1800:2800)+Math.random()*3800;}}
+/* 🔊 sintesis desah (WebAudio, tanpa file): pita suara (sawtooth+triangle, vibrato) → 2 formant "ah/mm" + napas (noise), volume pelan */
+const TH_AU={};function thMoan(I,org){try{if(!TH_AU.ctx){const AC=window.AudioContext||window.webkitAudioContext;if(!AC)return;TH_AU.ctx=new AC();TH_AU.out=TH_AU.ctx.createGain();TH_AU.out.gain.value=.5;TH_AU.out.connect(TH_AU.ctx.destination);
+  const n=TH_AU.ctx.createBuffer(1,TH_AU.ctx.sampleRate,TH_AU.ctx.sampleRate),d=n.getChannelData(0);for(let i=0;i<d.length;i++)d[i]=Math.random()*2-1;TH_AU.noise=n;}
+ const C=TH_AU.ctx;if(C.state==='suspended')C.resume();const t0=C.currentTime+.02,dur=(org?.55:.7)+Math.random()*.55,f0=(org?330:255)+Math.random()*70+I*40,vol=.05+.06*I;
+ const o1=C.createOscillator(),o2=C.createOscillator(),vib=C.createOscillator(),vg=C.createGain();o1.type='sawtooth';o2.type='triangle';vib.frequency.value=5+Math.random()*2;vg.gain.value=f0*.018;vib.connect(vg);vg.connect(o1.frequency);vg.connect(o2.frequency);
+ const glide=org?1.18:(Math.random()<.5?1.12:.86);[o1,o2].forEach((o,k)=>{const f=f0*(k?1.002:1);o.frequency.setValueAtTime(f*.94,t0);o.frequency.linearRampToValueAtTime(f*1.03,t0+dur*.25);o.frequency.exponentialRampToValueAtTime(f*glide,t0+dur);});
+ const mm=Math.random()<.35&&!org,F1=C.createBiquadFilter(),F2=C.createBiquadFilter(),lp=C.createBiquadFilter();F1.type=F2.type='bandpass';F1.frequency.value=mm?320:(750+Math.random()*150);F1.Q.value=6;F2.frequency.value=mm?900:(1150+Math.random()*200);F2.Q.value=8;lp.type='lowpass';lp.frequency.value=mm?900:2600;
+ const g=C.createGain(),src=C.createGain();src.gain.value=.5;o1.connect(src);o2.connect(src);src.connect(F1);src.connect(F2);F1.connect(lp);F2.connect(lp);lp.connect(g);
+ const nz=C.createBufferSource();nz.buffer=TH_AU.noise;const nf=C.createBiquadFilter();nf.type='bandpass';nf.frequency.value=1500;nf.Q.value=.8;const ng=C.createGain();ng.gain.setValueAtTime(0,t0);ng.gain.linearRampToValueAtTime(vol*.9,t0+.06);ng.gain.exponentialRampToValueAtTime(.0005,t0+dur*.6);nz.connect(nf);nf.connect(ng);ng.connect(TH_AU.out); // napas di awal
+ g.gain.setValueAtTime(0,t0);g.gain.linearRampToValueAtTime(vol,t0+.09+dur*.15);g.gain.setValueAtTime(vol,t0+dur*.55);g.gain.exponentialRampToValueAtTime(.0005,t0+dur);g.connect(TH_AU.out);
+ [o1,o2,vib,nz].forEach(o=>{o.start(t0);o.stop(t0+dur+.05);});}catch(e){}}
 const TH_DRIP={pool:[]};
 function thDripTick(S,now){const src=S.dripSrc;const dt=S.dLt?clampN((now-S.dLt)/1000,.004,.05):.016;S.dLt=now;
- if(!TH_DRIP.mat){TH_DRIP.mat=new THREE.MeshPhysicalMaterial({color:0xf4f0e8,roughness:.12,metalness:0,clearcoat:1,clearcoatRoughness:.05,transparent:true,opacity:.9});TH_DRIP.geo=new THREE.SphereGeometry(.0085,10,8);}
+ if(!TH_DRIP.mat){TH_DRIP.mat=new THREE.MeshPhysicalMaterial({color:0xf6f2ea,roughness:.1,metalness:0,clearcoat:1,clearcoatRoughness:.04,transmission:.15,thickness:.02,transparent:true,opacity:.95});TH_DRIP.geo=new THREE.SphereGeometry(.0115,12,10);}
  if(!S.bedW){const par=actors.han.c.root.parent,c=new THREE.Vector3(tx(TH_BED.x),TH_BED.top,tz(TH_BED.y));if(par){par.updateMatrixWorld(true);par.localToWorld(c);}S.bedW=c;}
  if(src&&TH.sexMode){const peak=S.pulse>now;S.dripT=(S.dripT??.6)-dt;
-  if(S.dripT<=0){S.dripT=peak?.1+Math.random()*.08:1.3+Math.random()*1.4;let d=TH_DRIP.pool.find(x=>!x.live);
-   if(!d&&TH_DRIP.pool.length<48){const m=new THREE.Mesh(TH_DRIP.geo,TH_DRIP.mat);m.castShadow=false;scene.add(m);d={m};TH_DRIP.pool.push(d);}
-   if(d){Object.assign(d,{live:true,age:0,hang:.25+Math.random()*.45,land:0,src,ox:(Math.random()-.5)*.012,oz:(Math.random()-.5)*.012,v:new THREE.Vector3((Math.random()-.5)*.03,0,(Math.random()-.5)*.03)});d.m.visible=true;}}}
- const C=S.bedW;TH_DRIP.pool.forEach(d=>{if(!d.live)return;d.age+=dt;const m=d.m;
-  if(d.age<d.hang){d.src.updateWorldMatrix(true,false);m.position.setFromMatrixPosition(d.src.matrixWorld);const k=d.age/d.hang;m.position.x+=d.ox;m.position.z+=d.oz;m.position.y-=.008+.018*k;m.scale.set(1-.25*k,1+1.6*k,1-.25*k);} // nempel & melar
-  else if(!d.land){d.v.y-=9.8*dt;m.position.addScaledVector(d.v,dt);const sp=Math.min(3.2,1+(-d.v.y)*.9);m.scale.set(1/Math.sqrt(sp),sp,1/Math.sqrt(sp));
+  if(S.dripT<=0){S.dripT=peak?.05+Math.random()*.06:.4+Math.random()*.6; // lebih sering
+   const nC=peak?2+(Math.random()*2|0):1+(Math.random()<.45?1:0)+(Math.random()<.15?1:0); // gumpalan 1-3 tetes
+   for(let j=0;j<nC;j++){let d=TH_DRIP.pool.find(x=>!x.live);
+   if(!d&&TH_DRIP.pool.length<140){const m=new THREE.Mesh(TH_DRIP.geo,TH_DRIP.mat);m.castShadow=false;scene.add(m);d={m};TH_DRIP.pool.push(d);}
+   if(d){const sz=(peak?1.25:1)*(.9+Math.random()*.8);Object.assign(d,{live:true,age:-j*.09,sz,hang:.45+Math.random()*.7+.15*sz,land:0,src,ox:(Math.random()-.5)*.016,oz:(Math.random()-.5)*.016,v:new THREE.Vector3((Math.random()-.5)*.03,0,(Math.random()-.5)*.03)});d.m.visible=j===0;}}}}
+ const C=S.bedW;TH_DRIP.pool.forEach(d=>{if(!d.live)return;d.age+=dt;const m=d.m,z=d.sz||1;if(d.age<0){m.visible=false;return;}m.visible=true;
+  if(d.age<d.hang){d.src.updateWorldMatrix(true,false);m.position.setFromMatrixPosition(d.src.matrixWorld);const k=d.age/d.hang;m.position.x+=d.ox;m.position.z+=d.oz;m.position.y-=.008+.03*k*z;m.scale.set(z*(1-.2*k),z*(1+2.4*k),z*(1-.2*k));} // nempel, numpuk & melar kental
+  else if(!d.land){d.v.y-=9.8*dt;m.position.addScaledVector(d.v,dt);const sp=Math.min(3.6,1.4+(-d.v.y)*.9);m.scale.set(z/Math.sqrt(sp),z*sp,z/Math.sqrt(sp));
    const onBed=C&&Math.abs(m.position.x-C.x)<.66&&Math.abs(m.position.z-C.z)<1.0,fy=onBed?C.y+.004:C.y-TH_BED.top+.004;
-   if(m.position.y<=fy){m.position.y=fy;d.land=now;m.scale.set(2.4,.22,2.4);}}
-  else{const k=(now-d.land)/4500;if(k>=1){d.live=false;m.visible=false;}else{const f=1-k*.6;m.scale.set(2.4*f,.22*(1-k),2.4*f);}}});}
+   if(m.position.y<=fy){m.position.y=fy;d.land=now;m.scale.set(2.8*z,.26*z,2.8*z);}}
+  else{const k=(now-d.land)/8000;if(k>=1){d.live=false;m.visible=false;}else{const f=1+.25*Math.min(1,k*4)-k*.55;m.scale.set(2.8*z*f,.26*z*(1-k),2.8*z*f);}}});}
 function thDripClear(){TH_DRIP.pool.forEach(d=>{d.live=false;d.m.visible=false;});}
 /* titik terendah kaki aja (paha/lutut/betis/telapak) */
 function thLowLegs(c){let m=1e9;c.root.updateMatrixWorld(true);for(const [o,x,y,z,r] of thSamples(c)){if(!(c.legs.includes(o)||c.knees.includes(o)||c.ankles.includes(o)))continue;_v1.set(x,y,z).applyMatrix4(o.matrixWorld);m=Math.min(m,_v1.y-r);}return m;}

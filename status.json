@@ -1,5 +1,5 @@
 {
-  "updated_at": "2026-10-11T10:05:00+08:00",
+  "updated_at": "2026-10-11T17:38:13+08:00",
   "agents": [
     {
       "id": "hanrin",
@@ -114,15 +114,11 @@
       "room": "ig",
       "status": "santai",
       "task": "Santai, jalan-jalan keliling kantor (di luar jadwal)",
-      "updated_at": "2026-10-11T10:05:00+08:00",
+      "updated_at": "2026-10-11T17:38:13+08:00",
       "schedule": [
         {
           "time": "09:17",
           "label": "📸 Postingan pagi + support grup IG & CR7"
-        },
-        {
-          "time": "20:00",
-          "label": "💬 Nongkrong grup IG Grokbot OpheliaxHR (20:00-21:00)"
         },
         {
           "time": "20:30",
