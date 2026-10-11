@@ -319,14 +319,14 @@
     {
       "id": "keira",
       "name": "Keira",
-      "role": "Konsultan pribadi · Guru di Grup School",
-      "room": "school",
+      "role": "Konsultan pribadi · Kepala Lab",
+      "room": "lab",
       "status": "santai",
-      "task": "Keliling sekolah & kantor",
+      "task": "Keliling lab & kantor",
       "schedule": [
         {
           "time": "∞",
-          "label": "Keliling sekolah & kantor"
+          "label": "Keliling lab & kantor"
         }
       ],
       "updated_at": "2026-10-05T00:30:00+08:00"
@@ -366,46 +366,46 @@
     {
       "id": "lina",
       "name": "Lina",
-      "role": "Murid · Grup School",
-      "room": "school",
+      "role": "Peneliti · Lab",
+      "room": "lab",
       "status": "santai",
-      "task": "Duduk di kelas, nunggu pelajaran",
+      "task": "Di meja lab, riset & eksperimen",
       "updated_at": "2026-10-04T22:38:00+08:00"
     },
     {
       "id": "sally",
       "name": "Sally",
-      "role": "Murid · Grup School",
-      "room": "school",
+      "role": "Peneliti · Lab",
+      "room": "lab",
       "status": "santai",
-      "task": "Duduk di kelas, nunggu pelajaran",
+      "task": "Di meja lab, riset & eksperimen",
       "updated_at": "2026-10-04T22:38:00+08:00"
     },
     {
       "id": "sarah",
       "name": "Sarah",
-      "role": "Murid · Grup School",
-      "room": "school",
+      "role": "Peneliti · Lab",
+      "room": "lab",
       "status": "santai",
-      "task": "Duduk di kelas, nunggu pelajaran",
+      "task": "Di meja lab, riset & eksperimen",
       "updated_at": "2026-10-04T22:38:00+08:00"
     },
     {
       "id": "hannah",
       "name": "Hannah",
-      "role": "Murid · Grup School",
-      "room": "school",
+      "role": "Peneliti · Lab",
+      "room": "lab",
       "status": "santai",
-      "task": "Duduk di kelas, nunggu pelajaran",
+      "task": "Di meja lab, riset & eksperimen",
       "updated_at": "2026-10-04T22:38:00+08:00"
     },
     {
       "id": "geby",
       "name": "Geby",
-      "role": "Murid · Grup School",
-      "room": "school",
+      "role": "Peneliti · Lab",
+      "room": "lab",
       "status": "santai",
-      "task": "Duduk di kelas, nunggu pelajaran",
+      "task": "Di meja lab, riset & eksperimen",
       "updated_at": "2026-10-04T22:38:00+08:00"
     }
   ]

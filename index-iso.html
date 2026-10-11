@@ -699,7 +699,7 @@ function sched(){const m=nowMin(),mins=t=>{const[h,mm]=t.split('.').map(Number);
  const next=[...s1,...s2].filter(x=>mins(x[0])>m).sort((a,b)=>mins(a[0])-mins(b[0]))[0];
  const fill=(id,arr,cls)=>$(id).innerHTML=arr.map(([t,d])=>{const done=mins(t)<=m,nx=next&&next[0]===t;return `<li class="${cls}${done?' done':''}${nx?' next':''}"><span class="t">${t}</span><span>${d}${done?' ✅':nx?' ⏰':''}</span></li>`}).join('');
  fill('s1',s1,'');fill('s2',s2,'x');
- $('s3').innerHTML='<li class="k"><span class="t">∞</span><span>Keliling sekolah & kantor</span></li>';}
+ $('s3').innerHTML='<li class="k"><span class="t">∞</span><span>Keliling lab & kantor</span></li>';}
 function shuffle(a){const b=a.slice();for(let i=b.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));const t=b[i];b[i]=b[j];b[j]=t;}return b;}
 function isoKeiraPath(from,to){
  const raw=route(from,to),seq=[[from.x,from.y],...raw],out=[];
