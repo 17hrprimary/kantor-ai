@@ -1967,6 +1967,7 @@ const TH_ACTS=[
  {id:'puncak',label:'✨ Climax FX / Efek puncak',gated:true,run:()=>thPeakFX()},
  {id:'desah',get label(){return TH.moanOff?'🔇 Suara desah: OFF':'🔊 Suara desah: ON';},gated:true,run:()=>{TH.moanOff=!TH.moanOff;thActRender();thActSt(TH.moanOff?'🔇 Suara desah dimatiin':'🔊 Suara desah nyala (lebih sering & keras)');if(!TH.moanOff)thMoan(.6);}},
  {id:'kasur',label:'🛏️ Nonton di kasur',run:()=>thBedToggle()},
+ {id:'glbtest',get label(){return TH.glb&&TH.glb.on?'🧪 Tes model GLB: ON (Cowgirl)':'🧪 Tes model GLB (Cowgirl, lag test)';},gated:true,run:()=>thGlbToggle()},
  {id:'selesai',label:'🚶 Selesai',run:()=>thDateEnd()},
 ];
 function thActRender(){const el=$('thAct');el.innerHTML='';const n=thP().length;TH_ACTS.forEach(a=>{const b=document.createElement('button');b.type='button';b.className='thb';b.dataset.act=a.id;b.textContent=a.label;
@@ -2556,7 +2557,7 @@ function thSceneTick(now){const S=POV.scene,han=actors.han;if(!S||!han)return;co
  if(peak){const k=1+Math.abs(Math.sin((S.pulse-now)/1200*Math.PI*6))*.03;oc.root.scale.set(k,k,k);}
  thAnRing(cast.map(a=>a.c),[hc,hc2]);
  if(S.kind!=='bedwatch')thReact(S,now,cast,p);
- [hc,...cast.map(a=>a.c),...(hc2?[hc2]:[])].forEach(c=>thSoft(c,now));thDripTick(S,now);}
+ [hc,...cast.map(a=>a.c),...(hc2?[hc2]:[])].forEach(c=>thSoft(c,now));thDripTick(S,now);thGlbTick(S,oc);}
 /* 🎯 Fokus bioskop pas Mode sex: lantai/ruangan/luar gedung lain disembunyiin + aktor lain dipause (biar ringan) */
 function thFocus(on){const r=ROOMS.find(x=>x.cinema);if(!r)return;const fi=r.f,g=FLOORS[fi];thKeyLight(on,g);
  if(!on){if(!TH.focus)return;TH.focus.hid.forEach(o=>o.visible=true);TH.focus=null;layoutFloors();return;}
@@ -2656,6 +2657,50 @@ function thAnRing(ws,men){ws.forEach(w=>{const rg=w&&w.anRing;if(!rg)return;cons
  rg.position.x+=(cx-rg.position.x)*f;rg.position.y+=(cy-rg.position.y)*f;rg.position.z+=(pz-rg.position.z)*f;rg.rotation.z+=(rz-rg.rotation.z)*f;
  rg.scale.x+=(sx-rg.scale.x)*f;rg.scale.y+=(sy-rg.scale.y)*f;rg.scale.z=1;});}
 function thAnRingReset(c){const rg=c&&c.anRing;if(!rg)return;rg.position.copy(rg.userData.rest);rg.rotation.set(0,0,0);rg.scale.set(1,1,1);rg.userData.dep=undefined;}
+/* 🧪 TES LAG: model GLB (Quaternius "Animated Woman", CC0, ~338 KB) gantiin badan cewek di 1 pose aja (Cowgirl).
+   Tulang GLB diarahin ngikut rig bawaan tiap frame (retarget arah ruas + sumbu depan). Dimuat malas (lazy) pas tombol dipencet. */
+TH.glb={on:false,loading:false,model:null,fps:{n:0,t0:0,v:0}};const TH_GLB_POSE='cowgirl';
+async function thGlbToggle(){const G=TH.glb;if(!TH.unlocked){thGatePrompt();return;}if(!TH.sexMode){thActSt('🔒 Nyalain Mode privat dulu');return;}
+ G.on=!G.on;thActRender();if(!G.on){thGlbHide();thActSt('🧪 Tes GLB mati — balik ke badan bawaan');return;}
+ if(!G.model&&!G.loading){G.loading=true;thActSt('🧪 Muat model GLB…');try{const {GLTFLoader}=await import('./vendor/GLTFLoader.js');const t0=performance.now();
+   const gl=await new GLTFLoader().loadAsync('./models/woman_casual.glb');G.loadMs=Math.round(performance.now()-t0);thGlbSetup(gl.scene);}catch(e){G.on=false;G.loading=false;thActRender();thActSt('⚠️ Gagal muat GLB: '+e.message);return;}G.loading=false;}
+ if(!G.on)return;thIntim(TH_GLB_POSE);thActSt('🧪 Tes GLB ON (Cowgirl) — model dimuat '+(G.loadMs??0)+' ms · FPS tampil di atas');}
+function thGlbSetup(root){const G=TH.glb,B={};root.traverse(o=>{if(o.isBone)B[o.name]=o;if(o.isMesh){o.castShadow=true;o.frustumCulled=false;const m=o.material;
+  if(m&&/^(White|Grey|Orange)$/.test(m.name)){o.material=m.clone();o.material.color.set(0xf0c8b0);} // baju → warna kulit (tes)
+  if(o.material)o.material.side=THREE.FrontSide;}});
+ root.position.set(0,0,0);root.rotation.set(0,0,0);root.scale.setScalar(1);root.updateMatrixWorld(true);
+ {let sk=null;root.traverse(o=>{if(o.isSkinnedMesh&&!sk)sk=o.skeleton;});if(sk)sk.pose();root.updateMatrixWorld(true);} // balik ke bind pose (T-pose) dulu
+ const P=n=>B[n].getWorldPosition(new THREE.Vector3()),Q=n=>B[n].getWorldQuaternion(new THREE.Quaternion()),F=new THREE.Vector3(0,0,1);
+ const legL=P('UpperLegL').distanceTo(P('LowerLegL'))+P('LowerLegL').distanceTo(P('FootL'));
+ const basis=(pr,se)=>{const y=pr.clone().normalize(),z=se.clone().addScaledVector(y,-se.dot(y));if(z.lengthSq()<1e-6)z.set(1,0,0).addScaledVector(y,-y.x);z.normalize();const x=new THREE.Vector3().crossVectors(y,z);return new THREE.Quaternion().setFromRotationMatrix(new THREE.Matrix4().makeBasis(x,y,z));};
+ const off=(n,pr)=>basis(pr,F).invert().multiply(Q(n)); // offset: basis(arah ruas, depan) → rotasi dunia tulang
+ const up=new THREE.Vector3(0,1,0);
+ G.map={Body:off('Body',up),Chest:off('Chest',up),Head:off('Head',up),
+  UpperArmL:off('UpperArmL',P('LowerArmL').sub(P('UpperArmL'))),LowerArmL:off('LowerArmL',P('WristL').sub(P('LowerArmL'))),
+  UpperArmR:off('UpperArmR',P('LowerArmR').sub(P('UpperArmR'))),LowerArmR:off('LowerArmR',P('WristR').sub(P('LowerArmR'))),
+  UpperLegL:off('UpperLegL',P('LowerLegL').sub(P('UpperLegL'))),LowerLegL:off('LowerLegL',P('FootL').sub(P('LowerLegL'))),
+  UpperLegR:off('UpperLegR',P('LowerLegR').sub(P('UpperLegR'))),LowerLegR:off('LowerLegR',P('FootR').sub(P('LowerLegR')))};
+ G.rest={Abdomen:B.Abdomen.quaternion.clone(),Torso:B.Torso.quaternion.clone()};G.legL=legL;G.B=B;G.basis=basis;G.model=root;root.visible=false;}
+const _gq=new THREE.Quaternion(),_gq2=new THREE.Quaternion(),_gp=new THREE.Vector3(),_gv=new THREE.Vector3(),_gz=new THREE.Vector3(),_gy=new THREE.Vector3();
+function thGlbHide(){const G=TH.glb;if(G.model)G.model.visible=false;const o=G.hidFor;if(o){o.root.visible=true;G.hidFor=null;}}
+function thGlbTick(S,oc){const G=TH.glb;if(!G.on||!G.model||!S||S.kind!==TH_GLB_POSE||!oc){thGlbHide();return;}const B=G.B,m=G.model,c=oc;
+ if(m.parent!==c.root.parent){c.root.parent.add(m);}if(G.hidFor!==c){thGlbHide();G.hidFor=c;}c.root.visible=false;m.visible=true;
+ const fps=G.fps,now=performance.now();fps.n++;if(now-fps.t0>1000){fps.v=Math.round(fps.n*1000/(now-fps.t0));fps.n=0;fps.t0=now;POV.msg='🧪 Tes GLB · '+fps.v+' FPS';POV.msgUntil=now+1500;POV.zoneKey='';}
+ c.root.updateMatrixWorld(true);const W=o=>o.getWorldPosition(new THREE.Vector3()),Z=o=>_gz.set(0,0,1).transformDirection(o.matrixWorld).clone(),Yd=o=>_gy.set(0,1,0).transformDirection(o.matrixWorld).clone();
+ const sideL=c.legs[0].position.x>0?0:1,sideR=1-sideL; // index rig bawaan buat sisi KIRI karakter (x+ pas hadap +z)
+ m.scale.setScalar(((c.dim.thigh+c.dim.shin))/G.legL);m.rotation.set(0,0,0);m.position.set(0,0,0);m.updateMatrixWorld(true);
+ const setW=(n,qW)=>{const b=B[n];b.parent.getWorldQuaternion(_gq2);b.quaternion.copy(_gq2.invert().multiply(qW));b.updateMatrixWorld(true);};
+ const aim=(n,pr,se)=>setW(n,G.basis(pr,se).multiply(G.map[n]));
+ aim('Body',Yd(c.body),Z(c.body)); // Body = induk Hips + pangkal paha di rig Quaternius
+ const qC=G.basis(Yd(c.torso),Z(c.torso)).multiply(G.map.Chest);
+ B.Abdomen.quaternion.copy(G.rest.Abdomen);B.Torso.quaternion.copy(G.rest.Torso);B.Body.updateMatrixWorld(true);
+ setW('Chest',qC);aim('Head',Yd(c.head),Z(c.head));
+ const wr=i=>new THREE.Vector3(0,-c.dim.fore,0).applyMatrix4(c.elbows[i].matrixWorld);
+ [['L',sideL],['R',sideR]].forEach(([s,i])=>{aim('UpperArm'+s,W(c.elbows[i]).sub(W(c.arms[i])),Z(c.arms[i]));aim('LowerArm'+s,wr(i).sub(W(c.elbows[i])),Z(c.elbows[i]));
+  aim('UpperLeg'+s,W(c.knees[i]).sub(W(c.legs[i])),Z(c.legs[i]));aim('LowerLeg'+s,W(c.ankles[i]).sub(W(c.knees[i])),Z(c.knees[i]));});
+ // tempel: tengah pangkal paha GLB = tengah pangkal paha rig bawaan
+ m.updateMatrixWorld(true);const gm=W(B.UpperLegL).add(W(B.UpperLegR)).multiplyScalar(.5),rm=W(c.legs[0]).add(W(c.legs[1])).multiplyScalar(.5);
+ m.parent.worldToLocal(_gp.copy(rm));m.parent.worldToLocal(_gv.copy(gm));m.position.add(_gp.sub(_gv));m.updateMatrixWorld(true);}
 const TH_DRIP={pool:[]};
 function thDripTick(S,now){const src=S.dripSrc;const dt=S.dLt?clampN((now-S.dLt)/1000,.004,.05):.016;S.dLt=now;
  if(!TH_DRIP.mat){TH_DRIP.mat=new THREE.MeshPhysicalMaterial({color:0xf6f2ea,roughness:.1,metalness:0,clearcoat:1,clearcoatRoughness:.04,transmission:.15,thickness:.02,transparent:true,opacity:.95});TH_DRIP.geo=new THREE.SphereGeometry(.0115,12,10);}
@@ -2732,7 +2777,7 @@ function thSceneCam(dt){const S=POV.scene,han=actors.han;if(!S||!han)return fals
  if(Math.abs(camera.fov-55)>.1){camera.fov+=(55-camera.fov)*Math.min(1,dt*6);camera.updateProjectionMatrix();}return true;}
 function thPulse(ac){if(POV.scene){POV.scene.pulse=performance.now()+1200;return;}if(!ac||!ac.c)return;const r=ac.c.root,t0=performance.now();
  (function f(){const e=(performance.now()-t0)/1200;if(e>=1){r.scale.set(1,1,1);return;}const k=1+Math.abs(Math.sin(e*Math.PI*6))*.07*(1-e);r.scale.set(k,k,k);requestAnimationFrame(f);})();}
-function thSceneEnd(quiet){const S=POV.scene;if(!S)return;POV.scene=null;thDripClear();[actors.han,...TH_PARTNERS.map(id=>actors[id])].forEach(a=>a&&(thSoftReset(a.c),thAnRingReset(a.c)));if(TH.han2)thHan2Set(false);thFocus(false);thFreeCam(false);controls.enabled=false;const han=actors.han;thNudeSync();thActRender();
+function thSceneEnd(quiet){const S=POV.scene;if(!S)return;POV.scene=null;thGlbHide();thDripClear();[actors.han,...TH_PARTNERS.map(id=>actors[id])].forEach(a=>a&&(thSoftReset(a.c),thAnRingReset(a.c)));if(TH.han2)thHan2Set(false);thFocus(false);thFreeCam(false);controls.enabled=false;const han=actors.han;thNudeSync();thActRender();
  thSeatAll();
  if(han){han.c.head.visible=true;thHumanize(han,false);thResetPose(han.c);han.c.root.position.y=0;han.c.root.rotation.set(0,Math.PI,0,'XYZ');
   if(S.prev){POV.fpPref=S.prev.fpPref;POV.yaw=Math.PI;POV.look=thScreenLook(TH_SEATS.han[1]);}}
