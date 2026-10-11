@@ -33,7 +33,17 @@ main{flex:1;display:grid;grid-template-columns:1fr 270px;gap:12px;padding:12px 1
 .floors{position:absolute;left:10px;top:264px;display:flex;flex-direction:column;gap:5px;z-index:5}
 .shownr{position:absolute;left:10px;top:228px;z-index:5;min-width:58px;height:30px;border-radius:11px;border:2px solid #ffd2e4;background:#fff;color:#d6457f;font:inherit;font-size:11px;font-weight:800;cursor:pointer;box-shadow:0 3px 0 #ffe0ec;padding:0 8px;white-space:nowrap}
 .shownr.on{background:linear-gradient(180deg,#6ad39a,#3cae6e);color:#fff;border-color:#fff;box-shadow:0 3px 0 #2a8a55}
-@media(max-width:900px){.shownr{top:224px;font-size:10px;min-width:52px;height:28px}}
+@media(max-width:900px){.shownr{top:224px;font-size:10px;min-width:52px;height:28px}.portmini{top:188px}}
+.portmini{position:absolute;left:10px;top:192px;z-index:5;min-width:58px;height:30px;border-radius:11px;border:2px solid #ffd2e4;background:#fff;color:#d6457f;font:inherit;font-size:11px;font-weight:800;cursor:pointer;box-shadow:0 3px 0 #ffe0ec;padding:0 8px;white-space:nowrap}
+.portmini.on{background:linear-gradient(180deg,#7eb6ff,#4a7fd6);color:#fff;border-color:#fff;box-shadow:0 3px 0 #2a5fa8}
+body.portrait .stage{height:min(82vh,780px);min-height:520px}
+body.portrait .hint{display:none}
+body.portrait #gl{clip-path:inset(0 6% 0 6%)}
+@media(max-width:900px){
+ body.portrait .stage{height:min(78vh,720px);min-height:480px}
+ body.portrait aside{max-height:38vh}
+ body.portrait #gl{clip-path:inset(0 4% 0 4%)}
+}
 .qrow{display:flex;gap:6px;margin-top:8px}
 .qrow button{flex:1;border:2px solid #ffd2e4;background:#fff;color:#d6457f;font:inherit;font-size:12px;font-weight:800;border-radius:12px;padding:7px 8px;cursor:pointer;box-shadow:0 3px 0 #ffe0ec}
 .qrow button.on{background:linear-gradient(180deg,#6ad39a,#3cae6e);color:#fff;border-color:#fff;box-shadow:0 3px 0 #2a8a55}
@@ -127,7 +137,7 @@ body.noinfo aside{display:none}
 .throw{display:flex;gap:6px;margin-top:8px;flex-wrap:wrap}
 #thCode{flex:1;min-width:0;border-radius:10px;border:2px solid #ff9cc7;padding:7px 10px;font:inherit;font-size:16px;letter-spacing:4px;background:#fff;color:#5a3a52}
 .thb{border:2px solid #ff9cc7;background:#3a1f3c;color:#fff;font:inherit;font-size:12px;font-weight:800;border-radius:10px;padding:6px 9px;cursor:pointer}
-.thb:hover{background:#5a2a52}.thpick{display:inline-block}
+.thb:hover{background:#5a2a52}.thb.on{border-color:#ffe28a;background:#5a2a52;color:#ffe28a}.thpick{display:inline-block}
 .therr{color:#ff9c9c;font-size:12px;font-weight:700;margin-top:6px;min-height:14px}
 .thnow{font-weight:800;font-size:12.5px;color:#ffe28a;margin-bottom:6px;word-break:break-word}
 .thctl{display:flex;gap:5px;flex-wrap:wrap}
@@ -182,6 +192,7 @@ body.touch .povhint .kbd{display:none}body.touch .povhint .tch{display:inline}
       <button id="home" title="Reset kamera">⌂</button>
       <button id="povMini" title="🎮 Mode POV Han (Han jalan sendiri pakai keyboard / stick)">🎮</button>
     </div>
+    <button type="button" class="portmini" id="btnPortraitMini" title="Mode Portrait: framing HP fokus kampus/kantor, ambience jauh di-crop. Show Near tetap ada.">📱 Port</button>
     <button type="button" class="shownr" id="btnShowNearMini" title="Show Near: suasana sekitar (hutan dekat + jalan). OFF = Fokus Kantor biar gak lag.">🏢 Fokus</button>
     <div class="floors" id="floors"><button data-f="all" class="on">🏢 Semua</button><button data-f="3">Lt 4 🎬</button><button data-f="2">Lt 3 🛏️</button><button data-f="1">Lt 2 🛋️</button><button data-f="0">Lt 1 💼</button></div>
     <button class="jtoggle" id="jToggle">📅 Jadwal per Karakter</button>
@@ -197,7 +208,7 @@ body.touch .povhint .kbd{display:none}body.touch .povhint .tch{display:inline}
       <div class="therr" id="thErr"></div></div>
      <div id="thMain" hidden>
       <div class="thnow" id="thNow">Pilih film dari daftar 👇</div>
-      <div class="thctl"><button class="thb" id="thPrev" title="Sebelumnya">⏮</button><button class="thb" id="thPlay" title="Putar / jeda (Spasi)">▶️</button><button class="thb" id="thNext" title="Berikutnya">⏭</button><button class="thb" id="thStop" title="Stop">⏹</button><button class="thb" id="thFull" title="Layar penuh">⛶ Layar penuh</button></div>
+      <div class="thctl"><button class="thb" id="thPrev" title="Sebelumnya">⏮</button><button class="thb" id="thPlay" title="Putar / jeda (Spasi)">▶️</button><button class="thb" id="thNext" title="Berikutnya">⏭</button><button class="thb" id="thStop" title="Stop">⏹</button><button class="thb" id="thFull" title="Layar penuh">⛶ Layar penuh</button><button class="thb on" id="thAutoNext" title="Auto play next: lanjut film berikutnya otomatis">⏭ Auto ON</button></div>
       <input type="range" id="thSeek" min="0" max="1000" value="0"><div class="small thtime"><span id="thT">0:00 / 0:00</span><span>🔊 <input type="range" id="thVol" min="0" max="100" value="90"></span></div>
       <div class="sec">🎞️ Folder theater/ <span id="thCount"></span></div><div class="thlist" id="thList"><div class="small">Memuat daftar…</div></div>
       <div class="throw"><label class="thb thpick">📂 Putar dari folder komputer<input type="file" id="thPick" accept="video/*" webkitdirectory multiple hidden></label><button class="thb" id="thLockBtn" title="Kunci lagi">🔒 Kunci</button></div>
@@ -222,7 +233,10 @@ body.touch .povhint .kbd{display:none}body.touch .povhint .tch{display:inline}
     <div class="card"><h2>⚡ Kualitas grafis</h2><div class="qrow"><button type="button" id="qRingan" class="on">⚡ Ringan</button><button type="button" id="qNormal">✨ Normal</button></div><div class="small" style="margin-top:6px" id="qHint">Default <b>Ringan</b> biar laptop lemah (i5 gen 3 dll) lebih mulus di POV — resolusi lebih rendah, tanpa bayangan lembut.</div>
       <div class="sec" style="margin-top:10px">🌍 Suasana sekitar</div>
       <div class="qrow"><button type="button" id="btnShowNear">🌲 Show Near</button><button type="button" id="btnFokusKantor" class="on">🏢 Fokus Kantor</button></div>
-      <div class="small" style="margin-top:6px" id="nearHint">Default <b>Fokus Kantor</b> (hutan jauh/dekat &amp; jalan disembunyiin) biar gak lag. Nyalain <b>Show Near</b> buat hutan dekat pagar + jalan/mobil.</div></div>
+      <div class="small" style="margin-top:6px" id="nearHint">Default <b>Fokus Kantor</b> (hutan jauh/dekat &amp; jalan disembunyiin) biar gak lag. Nyalain <b>Show Near</b> buat hutan dekat pagar + jalan/mobil.</div>
+      <div class="sec" style="margin-top:10px">📱 Layar</div>
+      <div class="qrow"><button type="button" id="btnPortrait">📱 Mode Portrait</button></div>
+      <div class="small" style="margin-top:6px" id="portHint">Mode <b>Portrait</b>: framing HP fokus kampus/kantor, ambience jauh di-crop biar gak mengganggu. <b>Show Near</b> tetap bisa dipakai terpisah.</div></div>
     <div class="card povcard"><h2>🎮 Mode POV Han</h2><button class="btn" id="btnPov" style="width:100%;white-space:normal">🎮 Mode POV Han</button><div class="small" style="margin-top:6px">Han jalan sendiri: <b>WASD/panah</b> jalan, <b>Q/E</b> atau drag mouse putar, <b>Shift</b> lari, <b>R/F</b> naik/turun di tangga/lift, <b>V</b> 1st/3rd person, <b>Esc</b> keluar. Di HP: stick + tombol di layar.</div></div>
     <div class="card"><h2>🎬 Bioskop Lt 4</h2><button class="btn" id="btnBioskop" style="width:100%;white-space:normal">🎮 Ke Bioskop (Mode POV)</button><div class="small" style="margin-top:6px">Film dari folder <b>theater/</b>, dikunci <b>kode kunci</b>. Di POV: naik tangga/lift ke <b>Lt 4</b> (R), masuk Bioskop, tekan <b>T</b> / 🎬 → kode → pilih film.</div></div>
     <div class="card" id="chatCard"></div>
@@ -620,7 +634,7 @@ function lift(r){const o=r.f*DY;box(30.3,.25+o,0,1.6,1.6,2.4,0xcfd8ff);box(30.45
    Kunci: kode dicek pakai SHA-256 (yang disimpan cuma hash-nya, bukan kodenya). Ganti kode: lihat README. */
 const TH_SALT='kantor-ai-bioskop:',TH_HASH='33fd05f2730af5a504f44819feb9f2f790eefd15f4fea0cfc5a4d398dbaa13e7';
 const TH_REPO='17hrprimary/kantor-ai',TH_DIR='theater',TH_EXT=/\.(mp4|webm|m4v|mov|ogv|ogg|mkv)$/i;
-const TH={screen:null,mat:null,idle:null,vtex:null,beam:null,light:null,video:null,list:[],cur:-1,unlocked:false,open:false,loaded:false};
+const TH={screen:null,mat:null,idle:null,vtex:null,beam:null,light:null,video:null,list:[],cur:-1,unlocked:false,open:false,loaded:false,autoNext:true};
 function thIdleTex(lines){const c=document.createElement('canvas');c.width=1280;c.height=720;const g=c.getContext('2d');
  const gr=g.createLinearGradient(0,0,0,720);gr.addColorStop(0,'#1b1226');gr.addColorStop(1,'#3a1530');g.fillStyle=gr;g.fillRect(0,0,1280,720);
  g.strokeStyle='rgba(255,210,228,.35)';g.lineWidth=6;g.strokeRect(24,24,1232,672);g.textAlign='center';
@@ -1417,7 +1431,10 @@ function viewBox(){const b=new THREE.Box3();FLOORS.forEach((g,f)=>{if(!g.visible
 function fitHome(){
  const asp=stage.clientWidth/stage.clientHeight,b=viewBox(),c=b.getCenter(new THREE.Vector3()),sz=b.getSize(new THREE.Vector3());
  const panel=!jp.classList.contains('hide')&&stage.clientWidth>700?1.22:1;
- if(asp<.9){const th=Math.tan(THREE.MathUtils.degToRad(16)),k=Math.max(sz.x/2/(th*asp),sz.z*.9/2/th)*(floorMode==="all"?1.2:1.1);return{pos:c.clone().add(new THREE.Vector3(1,82,40).setLength(k)),target:c};}
+ const port=!!(typeof ENV!=='undefined'&&ENV.portrait)||document.body.classList.contains('portrait');
+ if(port||asp<.9){const th=Math.tan(THREE.MathUtils.degToRad(port?13:16)),mul=port?(floorMode==="all"?0.92:0.85):(floorMode==="all"?1.2:1.1);
+  const k=Math.max(sz.x/2/(th*Math.max(asp,.45)),sz.z*(port?.8:.9)/2/th)*mul;
+  return{pos:c.clone().add(new THREE.Vector3(port?.4:1,port?68:82,port?28:40).setLength(k)),target:c.clone().add(new THREE.Vector3(0,port?.8:0,0))};}
  const k=Math.max(sz.x,sz.z*asp*.8)*(asp<1.15?1.15/asp:1)*panel;
  return{pos:c.clone().add(new THREE.Vector3(30,40,36).setLength(k*1.32)),target:c};
 }
@@ -1677,7 +1694,12 @@ function thIdle(){TH.playing=false;TH.mat.map=TH.idle;TH.mat.needsUpdate=true;TH
 function thPlayIdx(i){if(!TH.unlocked||!TH.list[i])return;TH.cur=i;const it=TH.list[i];thV.src=it.src;thV.load();thEnsureTex();
  thV.play().catch(e=>{$('thNow').textContent='⚠️ Gagal putar: '+it.title+' ('+(e.name||e)+')';});log('🎬 Bioskop Lt 4: Han nonton '+it.title);thUI();}
 thV.addEventListener('play',thUI);thV.addEventListener('pause',thUI);
-thV.addEventListener('ended',()=>{if(TH.cur<TH.list.length-1)thPlayIdx(TH.cur+1);else{thIdle();thUI();}});
+function thAutoUI(){const b=$('thAutoNext');if(!b)return;b.classList.toggle('on',!!TH.autoNext);b.textContent=TH.autoNext?'⏭ Auto ON':'⏭ Auto OFF';b.title=TH.autoNext?'Auto play next ON — film berikutnya otomatis. Klik buat mati.':'Auto play next OFF — berhenti di akhir film. Klik buat nyala.';}
+function loadAutoNext(){try{const v=localStorage.getItem('kantorThAutoNext');if(v==='0')TH.autoNext=false;else TH.autoNext=true;}catch(_){TH.autoNext=true;}}
+function applyAutoNext(on,announce){TH.autoNext=!!on;try{localStorage.setItem('kantorThAutoNext',TH.autoNext?'1':'0');}catch(_){}thAutoUI();if(announce&&typeof log==='function')log(TH.autoNext?'⏭ Auto play next: ON':'⏭ Auto play next: OFF');}
+thV.addEventListener('ended',()=>{if(TH.autoNext&&TH.cur<TH.list.length-1)thPlayIdx(TH.cur+1);else{thIdle();thUI();}});
+loadAutoNext();thAutoUI();
+$('thAutoNext').onclick=()=>applyAutoNext(!TH.autoNext,true);
 thV.addEventListener('error',()=>{const it=TH.list[TH.cur];$('thNow').textContent='⚠️ Format gak didukung browser: '+(it?it.title:'')+' (pakai mp4 H.264 / webm)';thIdle();});
 thV.addEventListener('timeupdate',()=>{const d=thV.duration||0;if(!TH.seeking)$('thSeek').value=d?Math.round(thV.currentTime/d*1000):0;$('thT').textContent=thFmt(thV.currentTime)+' / '+thFmt(d);});
 $('thSeek').addEventListener('input',()=>{TH.seeking=true;const d=thV.duration||0;if(d)thV.currentTime=$('thSeek').value/1000*d;});$('thSeek').addEventListener('change',()=>TH.seeking=false);
@@ -1765,7 +1787,7 @@ renderer.domElement.addEventListener('wheel',e=>{if(!POV.on)return;e.preventDefa
   povButtons();}));}
 
 /* ================= 🌍 Lingkungan luar: rumput hijau tenang, hutan (pohon + tanaman liar acak), jalan raya + mobil lalu lalang, langit berawan & suasana pagi/siang/sore/malam (ikut jam WITA) ================= */
-const ENV={g:new THREE.Group(),near:null,far:null,ambience:null,cars:[],lampMats:[],head:null,tail:null,win:null,stars:null,orb:null,sky:null,skyU:null,clouds:[],cloudMat:null,lastK:null,showNear:false,nearBuilt:false,farBuilt:false};
+const ENV={g:new THREE.Group(),near:null,far:null,ambience:null,cars:[],lampMats:[],head:null,tail:null,win:null,stars:null,orb:null,sky:null,skyU:null,clouds:[],cloudMat:null,lastK:null,showNear:false,nearBuilt:false,farBuilt:false,portrait:false};
 scene.add(ENV.g);
 function loadShowNear(){try{return localStorage.getItem('kantorShowNear')==='1';}catch(_){return false;}}
 function applyShowNear(on,announce){
@@ -1782,6 +1804,7 @@ function applyShowNear(on,announce){
  if(hint)hint.innerHTML=ENV.showNear
   ?'Mode <b>Show Near</b>: hutan dekat pagar + jalan/mobil. Hutan jauh tetap off biar gak lag.'
   :'Mode <b>Fokus Kantor</b>: fokus kampus aja (hutan &amp; jalan disembunyiin) — lebih mulus.';
+ if(typeof syncPortraitEnv==='function')syncPortraitEnv();
  if(announce&&typeof log==='function')log(ENV.showNear?'🌲 Show Near: suasana sekitar nyala':'🏢 Fokus Kantor: sekitar disembunyiin biar gak lag');
 }
 function bindShowNearUI(){
@@ -1789,6 +1812,40 @@ function bindShowNearUI(){
  if(bn)bn.onclick=()=>{if(ENV.showNear)return;applyShowNear(true,true);};
  if(bf)bf.onclick=()=>{if(!ENV.showNear)return;applyShowNear(false,true);};
  if(bm)bm.onclick=()=>applyShowNear(!ENV.showNear,true);
+}
+function loadPortrait(){try{return localStorage.getItem('kantorPortrait')==='1';}catch(_){return false;}}
+function syncPortraitEnv(){
+ // Mode Portrait: crop ambience jauh (hutan jauh selalu off). Show Near tetap mengontrol hutan dekat + jalan.
+ if(ENV.far)ENV.far.visible=false;
+ if(ENV.portrait){
+  if(ENV.near)ENV.near.visible=!!ENV.showNear;
+  if(ENV.ambience)ENV.ambience.visible=!!ENV.showNear;
+  camera.far=160;camera.updateProjectionMatrix();
+ }else{
+  if(ENV.near)ENV.near.visible=!!ENV.showNear;
+  if(ENV.ambience)ENV.ambience.visible=!!ENV.showNear;
+  camera.far=400;camera.updateProjectionMatrix();
+ }
+}
+function applyPortrait(on,announce){
+ ENV.portrait=!!on;
+ document.body.classList.toggle('portrait',ENV.portrait);
+ try{localStorage.setItem('kantorPortrait',ENV.portrait?'1':'0');}catch(_){}
+ syncPortraitEnv();
+ const bp=document.getElementById('btnPortrait'),bm=document.getElementById('btnPortraitMini'),hint=document.getElementById('portHint');
+ if(bp)bp.classList.toggle('on',ENV.portrait);
+ if(bm){bm.classList.toggle('on',ENV.portrait);bm.textContent=ENV.portrait?'📱 Port':'📱 Port';bm.title=ENV.portrait?'Mode Portrait ON — framing HP fokus kampus. Klik buat mati.':'Mode Portrait OFF — klik buat framing HP fokus kampus/kantor.';}
+ if(hint)hint.innerHTML=ENV.portrait
+  ?'Mode <b>Portrait</b> ON: framing HP fokus kampus/kantor, ambience jauh di-crop. <b>Show Near</b> tetap bisa nyala terpisah.'
+  :'Mode <b>Portrait</b>: framing HP fokus kampus/kantor, ambience jauh di-crop biar gak mengganggu. <b>Show Near</b> tetap bisa dipakai terpisah.';
+ if(announce&&!POV.on){const h=fitHome();flyTo(h.pos,h.target,650);}
+ if(typeof resize==='function')resize();
+ if(announce&&typeof log==='function')log(ENV.portrait?'📱 Mode Portrait: framing HP fokus kampus':'📱 Mode Portrait: OFF');
+}
+function bindPortraitUI(){
+ const bp=document.getElementById('btnPortrait'),bm=document.getElementById('btnPortraitMini');
+ if(bp)bp.onclick=()=>applyPortrait(!ENV.portrait,true);
+ if(bm)bm.onclick=()=>applyPortrait(!ENV.portrait,true);
 }
 const ROAD={y0:32,y1:38,x0:-260,x1:320,cx0:-70,cx1:130}; // cx0..cx1 = rentang muter mobil (biar rame di sekitar kantor) // koordinat logika lantai 1 (depan gedung, di bawah Taman Depan / Pondok)
 // keyframe suasana per jam (WITA): langit atas/bawah (sRGB), kekuatan cahaya, warna matahari/bulan
@@ -2026,7 +2083,7 @@ function chatSay(m){const ac=actors[m.from],txt=Array.from(m.text.replace(/\s+/g
  log('💬 '+m.name+': '+(txt.length>60?txt.slice(0,60).join('')+'…':t));}
 try{if(window.KantorChat)KantorChat.init({el:$('chatCard'),nameOf:id=>{const a=agentsData.find(x=>idOf(x)===id);return a&&a.name;},onNew:chatSay});}catch(e){console.warn('chat',e);}
 $('loading').remove();
-bindQualityUI();applyQuality(qualityMode,false);bindShowNearUI();applyShowNear(ENV.showNear,false);
+bindQualityUI();applyQuality(qualityMode,false);bindShowNearUI();bindPortraitUI();ENV.portrait=loadPortrait();applyPortrait(ENV.portrait,false);
 requestAnimationFrame(loop);
 // opsi URL buat preview: #zoom, #kerja, #pop=lia
 const hs=location.hash;

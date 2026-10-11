@@ -25,6 +25,7 @@ Tambah pesan: edit `chat.json` di GitHub web, tambahin objek baru di **akhir** a
 - Rumput hijau tenang di sekeliling kantor & Rumah My Bini; **hutan** dengan banyak pohon (oak + pinus) dan tanaman liar (semak, bunga, rumput tinggi) ditempatkan acak di sekitar situs — tidak menutupi jalan raya, jalan masuk, atau gedung/rumah.
 - Jalan raya 2 lajur (trotoar, marka, zebra cross, lampu jalan) di depan Taman Depan, 14 mobil lalu lalang 2 arah.
 - Langit gradasi + awan lembut + matahari/bulan + bintang; suasana Pagi / Siang / Sore / Malam ikut jam WITA (cahaya, warna langit, awan redup malam, lampu jalan & lampu mobil nyala pas gelap).
+- **📱 Mode Portrait**: tombol di kartu Kualitas / mini **📱 Port** di stage — framing HP fokus kampus/kantor, ambience jauh di-crop (camera.far lebih pendek + clip stage). **Show Near** tetap terpisah (hutan dekat + jalan). Preferensi disimpan di `localStorage` (`kantorPortrait`).
 - Preview jam: tambah `#jam=21` (atau `#jam=7.5`) di URL. Sudut kamera: `#langit` (langit rendah), `#atas` (pandangan atas hutan), `#hutan` (lihat hutan seberang jalan). Bisa digabung: `#langit,jam=17.5`.
 
 ## 🎬 Bioskop Lt 4 (index.html)
@@ -34,5 +35,5 @@ Tambah pesan: edit `chat.json` di GitHub web, tambahin objek baru di **akhir** a
   - Catatan: ini kunci tampilan di web statis (bukan keamanan server).
 - **Cara masuk (Mode POV)**: 🎮 Mode POV → jalan ke 🪜 Tangga & Lift → **R** naik sampai Lt 4 → masuk Bioskop → **T** / tombol 🎬 → kode → pilih film. Shortcut: tombol **🎮 Ke Bioskop (Mode POV)** di kolom info.
 - **Film**: daftar "Folder theater/" dari `theater/videos.json` (bikin pakai `python3 tools/theater-list.py`; cadangan: listing folder `theater/` via GitHub API). Video asli **gak di-push** (lihat `.gitignore` & `theater/README.md`); dari web pakai **📂 Putar dari folder komputer** → pilih folder `D:\teather`, semua video di folder itu masuk daftar dan diputar langsung dari PC.
-- Kontrol: ⏮ ▶️/⏸ ⏭ ⏹, seek, volume, **⛶ Layar penuh**, auto lanjut ke film berikutnya. Duduk & tekan **V** (1st person) biar layar full di depan mata.
+- Kontrol: ⏮ ▶️/⏸ ⏭ ⏹, seek, volume, **⛶ Layar penuh**, **⏭ Auto ON** (auto play next, default nyala, bisa dimatiin; simpan di `localStorage` `kantorThAutoNext`). Duduk & tekan **V** (1st person) biar layar full di depan mata.
 - 💞 **Interaksi Ophelia 1**: 🍿 Nonton bareng (Ophelia 1 jalan ke Bioskop & duduk Baris C), 💺 Han duduk di sebelah, 🚶 Selesai (balik ke rutinitas). Tambah interaksi baru: push objek `{id,label,run}` ke `TH_ACTS`.
