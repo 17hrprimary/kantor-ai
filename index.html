@@ -2,6 +2,7 @@
 <html lang="id">
 <head>
 <meta charset="UTF-8">
+<meta name="robots" content="noindex, nofollow">
 <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
 <title>Kantor AI by Han HQ · 3D</title>
 <script type="importmap">{"imports":{"three":"./vendor/three.module.min.js"}}</script>
@@ -1871,7 +1872,7 @@ async function thTry(){const c=$('thCode').value.trim();if(!c)return;const h=awa
   thSetIdle(['🔓 Kebuka! Pilih film di panel 🎬','Selamat nonton, Papa 🍿']);log('🎬 Bioskop Lt 4 dibuka 🔓');thLoadList();thUI();
   const enter=!!TH.pendingEnter;TH.pendingEnter=false;if(enter)thDoEnterCinema();else if(thInCinema()){/* sudah di dalam: panel film siap */}}
  else{$('thErr').textContent='❌ Kode salah, coba lagi';$('thCode').select();}}
-$('thGo').onclick=thTry;$('thCode').addEventListener('keydown',e=>{e.stopPropagation();if(e.key==='Enter')thTry();if(e.key==='Escape')thClose();});
+$('thGo').onclick=()=>thTry();$('thCode').addEventListener('keydown',e=>{e.stopPropagation();if(e.key==='Enter')thTry();if(e.key==='Escape')thClose();});
 $('thLockBtn').onclick=()=>{if(TH.scrLock)thScrLock(false);TH.unlocked=false;TH.pendingEnter=false;if(typeof thSexSet==='function')thSexSet(false,false);try{sessionStorage.removeItem('thUnlock');}catch(_){}$('thStop').onclick();thSetIdle(['🔒 Masukkan kode kunci di 🔐 Konsol','Mode POV: jalan ke sini, tekan T / tombol 🎬']);thKickFromCinema();thUI();};
 $('thX').onclick=()=>thClose();
 /* 🎯 kunci kamera: lurus di tengah layar bioskop, tegak lurus, seluruh layar 9:16 pas kelihatan (override kamera tiap frame) */
@@ -3256,4 +3257,29 @@ if(hs.includes('povpad'))document.body.classList.add('touch');
 if(hs.includes('pov'))setTimeout(()=>{if(hs.includes('povfp'))POV.fpPref=true;povEnter();},500);
 if(hs.includes('kerja'))setTimeout(()=>suruhKerja(),300);
 const pm=hs.match(/pop=(\w+)/);if(pm)setTimeout(()=>openPop(pm[1]),400);
+
+// 🔞 Gerbang usia 18+ sebelum konten Bioskop (konfirmasi disimpan per sesi saja)
+(function(){
+ const K='age18ok';const ok=()=>{try{return sessionStorage.getItem(K)==='1';}catch(_){return false;}};
+ const css=document.createElement('style');css.textContent='#ageGate{position:fixed;inset:0;z-index:99999;display:flex;align-items:center;justify-content:center;padding:16px;background:rgba(40,20,40,.82);backdrop-filter:blur(8px)}#ageGate[hidden]{display:none}#ageGate .box{max-width:420px;width:100%;background:linear-gradient(160deg,#ffe4ef,#fdf0ff 55%,#e9f3ff);color:#5a3a52;border-radius:18px;padding:22px 20px;text-align:center;box-shadow:0 10px 40px rgba(0,0,0,.35);font-family:"Segoe UI","Nunito",system-ui,sans-serif}#ageGate h2{margin:0 0 10px;font-size:22px}#ageGate p{margin:0 0 18px;line-height:1.5;font-size:15px}#ageGate .row{display:flex;gap:10px;flex-wrap:wrap}#ageGate button{flex:1 1 140px;min-height:46px;border:0;border-radius:12px;font-size:16px;font-weight:700;cursor:pointer}#ageGate .yes{background:#d6336c;color:#fff}#ageGate .no{background:#fff;color:#5a3a52;border:2px solid #e8b9cf}';
+ document.head.appendChild(css);
+ const g=document.createElement('div');g.id='ageGate';g.hidden=true;g.setAttribute('role','dialog');g.setAttribute('aria-modal','true');
+ g.innerHTML='<div class="box"><h2>🔞 Konten Dewasa 18+</h2><p>Bagian Bioskop ini berisi konten dewasa eksplisit yang hanya ditujukan untuk orang dewasa berusia 18 tahun ke atas. Jika usiamu di bawah 18 tahun atau tidak ingin melihatnya, silakan keluar.</p><div class="row"><button class="no" id="ageNo">Keluar</button><button class="yes" id="ageYes">Saya 18+ / Masuk</button></div></div>';
+ document.body.appendChild(g);
+ let pending=null;
+ function ask(fn){if(ok())return fn();pending=fn;g.hidden=false;try{POV.keys.clear();}catch(_){}}
+ g.querySelector('#ageYes').onclick=()=>{try{sessionStorage.setItem(K,'1');}catch(_){}g.hidden=true;const f=pending;pending=null;if(f)f();};
+ g.querySelector('#ageNo').onclick=()=>{pending=null;g.hidden=true;try{if(typeof thKickFromCinema==='function'&&thInCinema())thKickFromCinema();}catch(_){}try{TH.open=false;TH.pendingEnter=false;$('thPanel').classList.remove('on');thUI();}catch(_){}};
+ const W=o=>function(...a){return ask(()=>o.apply(this,a));};
+ thGatePrompt=W(thGatePrompt);
+ thGoCinema=W(thGoCinema);
+ thOpen=W(thOpen);
+ thTry=W(thTry);
+ thDoEnterCinema=W(thDoEnterCinema);
+ thScene=W(thScene);
+ thGlbToggle=W(thGlbToggle);
+ thBedToggle=W(thBedToggle);
+ thHanSit=W(thHanSit);
+ window.ageGateAsk=ask;
+})();
 </script></body></html>
