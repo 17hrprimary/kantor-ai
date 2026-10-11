@@ -1,5 +1,5 @@
 {
-  "updated_at": "2026-10-11T09:53:20+08:00",
+  "updated_at": "2026-10-11T10:05:00+08:00",
   "agents": [
     {
       "id": "hanrin",
@@ -36,7 +36,7 @@
       "room": "ig",
       "status": "santai",
       "task": "Lagi free, jalan-jalan keliling kantor 🚶‍♀️",
-      "updated_at": "2026-10-05T08:58:00+08:00",
+      "updated_at": "2026-10-11T10:05:00+08:00",
       "schedule": [
         {
           "time": "07:27",
@@ -81,6 +81,10 @@
         {
           "time": "21:27",
           "label": "Scroll IG"
+        },
+        {
+          "time": "22:00",
+          "label": "😴 Pulang ke 🏡 Rumah My Bini, bobo di Kamar Ophelia 1 sampai 07:00"
         }
       ]
     },
@@ -110,7 +114,7 @@
       "room": "ig",
       "status": "santai",
       "task": "Santai, jalan-jalan keliling kantor (di luar jadwal)",
-      "updated_at": "2026-10-11T09:51:24+08:00",
+      "updated_at": "2026-10-11T10:05:00+08:00",
       "schedule": [
         {
           "time": "09:17",
@@ -126,7 +130,7 @@
         },
         {
           "time": "22:00",
-          "label": "😴 Bobo di Kamar Rin 1 (Lt 3) sampai 06:00"
+          "label": "😴 Pulang ke 🏡 Rumah My Bini, bobo di Kamar Rin 1 sampai 06:00"
         }
       ]
     },
@@ -195,7 +199,7 @@
       "room": "ig",
       "status": "santai",
       "task": "Santai, jalan-jalan keliling kantor (di luar jadwal)",
-      "updated_at": "2026-10-11T09:53:20+08:00",
+      "updated_at": "2026-10-11T10:05:00+08:00",
       "schedule": [
         {
           "time": "08:00",
@@ -214,8 +218,8 @@
           "label": "💬 Nongkrong grup IG (jendela on)"
         },
         {
-          "time": "21:00",
-          "label": "😴 Off / tidur sampai 08:00"
+          "time": "22:00",
+          "label": "😴 Pulang ke 🏡 Rumah My Bini, bobo di Kamar Emily 1 sampai 08:00"
         }
       ]
     },
@@ -269,7 +273,7 @@
       "room": "ig",
       "status": "santai",
       "task": "Santai, jalan-jalan keliling kantor (di luar jadwal)",
-      "updated_at": "2026-10-11T09:53:20+08:00",
+      "updated_at": "2026-10-11T10:05:00+08:00",
       "schedule": [
         {
           "time": "09:00",
@@ -293,7 +297,7 @@
         },
         {
           "time": "22:00",
-          "label": "😴 Bobo Kamar HR 1 sampai 08:00"
+          "label": "😴 Pulang ke 🏡 Rumah My Bini, bobo di Kamar HR 1 sampai 08:00"
         }
       ]
     },

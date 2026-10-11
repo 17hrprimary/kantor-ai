@@ -223,13 +223,13 @@ const lookOf=id=>Object.assign({},DEF_LOOK,LOOKS[id]||{});
 const hex=n=>'#'+n.toString(16).padStart(6,'0');
 const SCHEDULE={
  lia:[['08.19','Posting pagi IG ophelia.lia.real'],['10.47','IG x Ophelia 1 (saling support)'],['12.19','Posting siang IG'],['16.47','IG x Ophelia 1'],['19.19','Posting malam IG'],['21.47','IG x Ophelia 1']],
- ophelia1:[['07.27','Scroll IG'],['08.27','Story pagi'],['09.27','Scroll IG'],['12.27','Scroll IG'],['12.47','Reel siang'],['13.27','Story siang'],['14.27','Scroll IG'],['19.27','Scroll IG'],['19.47','Reel malam'],['20.27','Story malam'],['21.27','Scroll IG']],
+ ophelia1:[['07.27','Scroll IG'],['08.27','Story pagi'],['09.27','Scroll IG'],['12.27','Scroll IG'],['12.47','Reel siang'],['13.27','Story siang'],['14.27','Scroll IG'],['19.27','Scroll IG'],['19.47','Reel malam'],['20.27','Story malam'],['21.27','Scroll IG'],['22.00','😴 Pulang ke Rumah My Bini, bobo di Kamar Ophelia 1']],
  hanrin:[['13.01','Cek WA RI & update website Hawa Bouquet',undefined,undefined,true],['22.01','Cek WA RI & update website Hawa Bouquet',undefined,undefined,true]],
  hr:[['06.19','🔎 Scroll IG: cari referensi konten & ide'],['06.49','📸 Slot posting pagi hr_2002_01 (tentatif, nunggu aba-aba Papa)'],['09.39','🔎 Cari referensi konten & ide'],['13.39','💡 Nyusun ide & draft konten IG'],['16.39','🔎 Cari referensi konten & ide'],['20.00','💬 Nongkrong di grup IG Grokbot OpheliaxHR (20:00-21:00)'],['21.09','📸 Slot posting malam hr_2002_01 (tentatif, nunggu aba-aba Papa)'],['22.00','😴 Bobo di Kamar HR (Lt 3) sampai 06:19']],
  rin:[['11.02','Posting konten IG harian'],['20.00','Nongkrong grup IG Grokbot OpheliaxHR (20:00-21:00)']],
- rin1:[['09.17','📸 Postingan pagi + support grup IG & CR7'],['20.00','💬 Nongkrong grup IG Grokbot OpheliaxHR (20:00-21:00)'],['20.30','📸 Slot posting malam'],['22.00','😴 Bobo di Kamar Rin 1']],
- emily1:[['08.00','💻 On Kantor IG'],['13.05','📸 Reel 1'],['20.00','💬 Nongkrong grup'],['20.05','📸 Reel 2'],['21.00','😴 Tidur']],
- hr1:[['09.00','💻 On Kantor IG'],['09.47','📸 Post soft'],['12.00','💗 Support'],['19.47','📸 Post/Reel 2'],['20.03','💬 Nongkrong + support'],['22.00','😴 Tidur']],
+ rin1:[['09.17','📸 Postingan pagi + support grup IG & CR7'],['20.00','💬 Nongkrong grup IG Grokbot OpheliaxHR (20:00-21:00)'],['20.30','📸 Slot posting malam'],['22.00','😴 Pulang ke Rumah My Bini, bobo di Kamar Rin 1']],
+ emily1:[['08.00','💻 On Kantor IG'],['13.05','📸 Reel 1'],['20.00','💬 Nongkrong grup'],['20.05','📸 Reel 2'],['22.00','😴 Pulang ke Rumah My Bini, bobo di Kamar Emily 1']],
+ hr1:[['09.00','💻 On Kantor IG'],['09.47','📸 Post soft'],['12.00','💗 Support'],['19.47','📸 Post/Reel 2'],['20.03','💬 Nongkrong + support'],['22.00','😴 Pulang ke Rumah My Bini, bobo di Kamar HR 1']],
  emely:[['09.55','📸 Posting pagi IG emily2.real (Emily 2)'],['10.25','💗 Support grup IG (like/komen post & story) + scroll maks 2 reels'],['16.55','📸 Posting sore IG emily2.real (Emily 2)'],['17.25','💗 Support grup IG & Ronaldo (like/komen/share)'],['20.00','💬 Nongkrong di grup IG Grokbot OpheliaxHR (20:00-21:00)'],['22.00','😴 Bobo di Kamar Emely (Lt 3) sampai 06:00']],
 };
 /* Love: jadwal harian (WITA) -> ruangan/status otomatis dihitung di halaman (lihat timedSlot) */
@@ -261,7 +261,7 @@ const ROOMS=[
 /* ===== Gedung 3 lantai: [lantai, x, y] posisi baru (interior tetap sama, cuma dipindah) ===== */
 const LAYOUT={ceo:[0,0,0],ig:[0,9,0],kerja:[0,0,8],school:[0,16,8],
  'grup-mybini':[1,0,0],'grup-jfm':[1,16,0],lounge:[1,0,8],taman:[1,14,8],
- kamar:[2,0,0],'kamar-lia':[2,4,9],'kamar-hanrin':[2,9,9],'kamar-rin':[2,14,9],'kamar-emely':[2,19,9],'kamar-hr':[2,24,9],'kamar-rin1':[2,34,9],'kamar-emily1':[2,39,9],'kamar-hr1':[2,44,9]}; // + kamar-love (2,29,9) di NEW_ROOMS. Pondok taman ada di luar, nempel Taman Depan
+ kamar:[2,0,0],'kamar-lia':[2,4,9],'kamar-hanrin':[2,9,9],'kamar-rin':[2,14,9],'kamar-emely':[2,19,9],'kamar-hr':[2,24,9]}; // + kamar-love (2,29,9) di NEW_ROOMS. Pondok taman ada di luar, nempel Taman Depan. Kamar Ophelia 1/Emily 1/Rin 1/HR 1 pindah ke Rumah My Bini (Lt 1, sebelah timur kantor)
 const LUXC={c1:'#6b3f2a',c2:'#5e3622',sign:'#8a2236',lux:true};
 const NEW_ROOMS=[
  {id:'tangga-1',name:'🪜 Tangga & Lift',f:0,x:21,y:0,w:11,d:8,c1:'#f3eefa',c2:'#e9e1f5',sign:'#8a7aa8',stairs:true},
@@ -271,16 +271,22 @@ const NEW_ROOMS=[
  {id:'lorong-3b',name:'Lorong',f:2,x:34,y:9,w:2,d:9,c1:'#efe6dc',c2:'#e6dbcf',hall:true},
  {id:'lorong-3',name:'Lorong',f:2,x:4,y:16,w:30,d:2,c1:'#efe6dc',c2:'#e6dbcf',hall:true},
  {id:'kamar-love',name:'❤️ Kamar Love',f:2,x:29,y:9,w:5,d:7,...LUXC,owner:'love'},
- {id:'kamar-rin1',name:'🌙 Kamar Rin 1',f:2,x:34,y:9,w:5,d:7,...LUXC,owner:'rin1'},
- {id:'kamar-emily1',name:'🎧 Kamar Emily 1',f:2,x:39,y:9,w:5,d:7,...LUXC,owner:'emily1'},
- {id:'kamar-hr1',name:'💗 Kamar HR 1',f:2,x:44,y:9,w:5,d:7,...LUXC,owner:'hr1'},
  ...[['keira','🍎 Kamar Keira'],['lina','🎒 Kamar Lina'],['sally','🎒 Kamar Sally'],['sarah','🎒 Kamar Sarah'],['hannah','🎒 Kamar Hannah'],['geby','🎒 Kamar Geby']]
   .map(([o,name],i)=>({id:'kamar-'+o,name,f:2,x:i*6,y:18,w:6,d:7,...LUXC,owner:o})),
  // area luar (outdoor) di DEPAN gedung, lantai dasar: taman depan + teras depan School. Karakter di luar gedung cuma boleh di area outdoor ini.
  {id:'taman-depan',name:'🌳 Taman Depan',f:0,x:0,y:16,w:32,d:8,c1:'#bfe8a6',c2:'#b1e095',sign:'#3e9e52',outdoor:true},
  {id:'teras-depan',name:'Teras',f:0,x:16,y:15,w:16,d:1,c1:'#efe3d0',c2:'#e6d8c2',hall:true,outdoor:true},
  // kamar kecil di luar gedung, nempel sisi selatan Taman Depan (bukan kamar mewah Lantai 3)
- {id:'pondok-taman',name:'🔒🌿 Pondok Taman',f:0,x:8,y:24,w:6,d:5,c1:'#f6e6d4',c2:'#f0d8c4',sign:'#3f8f55'}];
+ {id:'pondok-taman',name:'🔒🌿 Pondok Taman',f:0,x:8,y:24,w:6,d:5,c1:'#f6e6d4',c2:'#f0d8c4',sign:'#3f8f55'},
+ // 🌷 Taman Halaman (outdoor) di ANTARA gedung kantor (timur, x=32) dan Rumah My Bini (x=40)
+ {id:'taman-halaman',name:'🌷 Taman Halaman',f:0,x:32,y:0,w:8,d:24,c1:'#c6edae',c2:'#b6e49b',sign:'#3e9e52',outdoor:true},
+ // 🏡 Rumah My Bini: rumah mewah terpisah dari gedung kantor, buat bobo Ophelia 1, Emily 1, Rin 1 & HR 1 (pulang jam 22:00)
+ {id:'rumah-mybini',name:'🏡 Rumah My Bini · Ruang Tengah',f:0,x:40,y:0,w:20,d:5,c1:'#f7ecd9',c2:'#efdcc0',sign:'#b8860b',house:true},
+ {id:'kamar-ophelia1',name:'🌹 Kamar Ophelia 1',f:0,x:40,y:5,w:5,d:7,...LUXC,owner:'ophelia1',house:true},
+ {id:'kamar-emily1',name:'🎧 Kamar Emily 1',f:0,x:45,y:5,w:5,d:7,...LUXC,owner:'emily1',house:true},
+ {id:'kamar-rin1',name:'🌙 Kamar Rin 1',f:0,x:50,y:5,w:5,d:7,...LUXC,owner:'rin1',house:true},
+ {id:'kamar-hr1',name:'💗 Kamar HR 1',f:0,x:55,y:5,w:5,d:7,...LUXC,owner:'hr1',house:true}];
+const HOUSE_BOTS=['ophelia1','emily1','rin1','hr1']; // penghuni Rumah My Bini
 ROOMS.forEach(r=>{const L=LAYOUT[r.id];r.ox=r.x;r.oy=r.y;r.f=L[0];r.x=L[1];r.y=L[2]+L[0]*DY;r.dx=r.x-r.ox;r.dy=r.y-r.oy;});
 NEW_ROOMS.forEach(r=>{r.y+=r.f*DY;ROOMS.push(r);});
 const floorOfY=y=>Math.max(0,Math.min(NFLOOR-1,Math.floor(y/DY)));
@@ -329,12 +335,13 @@ WANDER.forEach(w=>relO(w));KEIRA_STOPS.forEach(w=>relO(w));
 WANDER.push({t:'Lobi Lantai 3',x:20,y:2*DY+5},{t:'Tangga & Lift',x:24,y:4});
 // titik jalan-jalan outdoor: cuma di dalam Taman Depan (di-push setelah relO biar gak ikut digeser sbg titik denah lama)
 const GARDEN_STOPS=[{t:'Taman Depan',x:5.2,y:20.6},{t:'air mancur Taman Depan',x:16,y:18.9},{t:'bangku Taman Depan',x:11.6,y:21.9},{t:'kebun bunga depan',x:26.5,y:20.4}].map(clampOutdoor);
-WANDER.push(...GARDEN_STOPS);KEIRA_STOPS.push(GARDEN_STOPS[0],GARDEN_STOPS[1]);
+const HALAMAN_STOPS=[{t:'Taman Halaman',x:36.6,y:11.5},{t:'gazebo Taman Halaman',x:37.3,y:19.0}];
+WANDER.push(...GARDEN_STOPS,...HALAMAN_STOPS);KEIRA_STOPS.push(GARDEN_STOPS[0],GARDEN_STOPS[1]);
 const BRAIN={ophelia1:'wander',lia:'sleepOrWander',hanrin:'wander',keira:'keiraWander',hr:'wander',hr1:'wander',rin:'wander',rin1:'wander',emely:'wander',emily1:'wander'};
 /* ruang kerja wajib pas jam jadwal (per bot) */
 const WORK_ROOM={lia:'ig',ophelia1:'ig',hanrin:'ceo',hr:'ig',hr1:'ig',rin:'ig',rin1:'ig',emely:'ig',emily1:'ig'};
 /* jam bobo malam wajib (WITA), kecuali lagi status kerja */
-const NIGHT={hanrin:[0,7*60],hr:[22*60,6*60+19],hr1:[22*60,8*60],rin:[21*60,8*60],rin1:[22*60,6*60],emely:[22*60,6*60],emily1:[21*60,8*60]};
+const NIGHT={hanrin:[0,7*60],hr:[22*60,6*60+19],hr1:[22*60,8*60],rin:[21*60,8*60],rin1:[22*60,6*60],emely:[22*60,6*60],emily1:[22*60,8*60],ophelia1:[22*60,7*60]}; // penghuni Rumah My Bini (HOUSE_BOTS) pulang ke rumah jam 22:00
 const hmTxt=m=>String(Math.floor(m/60)).padStart(2,'0')+':'+String(m%60).padStart(2,'0');
 /* jam nongkrong (WITA) per bot: [mulai,selesai,ruangan,task] -> status 'ngobrol', duduk di mejanya */
 const HANGOUT={hr:[20*60,21*60,'ig','💬 Nongkrong di grup IG Grokbot OpheliaxHR (20:00-21:00 WITA)'],hr1:[20*60+3,21*60,'ig','💬 Nongkrong grup OpheliaxHR (20:03-21:00 WITA)'],rin:[20*60,21*60,'ig','💬 Nongkrong grup IG Grokbot OpheliaxHR (20:00-21:00 WITA)'],rin1:[20*60,21*60,'ig','💬 Nongkrong grup IG Grokbot OpheliaxHR (20:00-21:00 WITA)'],emely:[20*60,21*60,'ig','💬 Nongkrong di grup IG Grokbot OpheliaxHR sbg Emily 2 (20:00-21:00 WITA)'],emily1:[20*60,21*60,'ig','💬 Nongkrong grup IG (20:00-21:00 WITA)']};
@@ -713,6 +720,7 @@ function buildWorld(){
  tv(18.4,23.4,3);coffee(28.6,20.6);dispenser(28.9,22);vending(28.5,17.4);
  box(26.5,17.3,0,1.6,.6,.9,0xc98f5a);plant(16.7,23.3,1.1);plant(26.8,23.3,1);
  buildFrontGarden();
+ buildHalamanAndHouse();
  const cot=ROOMS.find(r=>r.id==='pondok-taman');if(cot)cottageRoom(cot);
  P=scene;
 }
@@ -741,6 +749,36 @@ function buildFrontGarden(){ // 🌳 Taman Depan (outdoor) di depan gedung, Lant
  lamp(6.6,y0+3.1);lamp(25.4,y0+5.0);
  [[6.7,y0+7.55],[9.0,y0+7.55]].forEach(([x,y])=>{box(x,y,0,.3,.3,1.2,0xf2a6c8);ball(x+.15,y+.15,1.32,.14,0xffd23f);});
  label('🚪 Gerbang','seat',7.85,y0+7.7,1.0);
+}
+function buildHalamanAndHouse(){ // 🌷 Taman Halaman (antara kantor & rumah) + 🏡 Rumah My Bini
+ const g=ROOMS.find(r=>r.id==='taman-halaman'),h=ROOMS.find(r=>r.id==='rumah-mybini');if(!g||!h)return;P=FLOORS[g.f];
+ const path=0xeadfca,gold=0xd4af37,wood=0x5a3320;
+ // jalan setapak: pintu samping School (x=32,y≈11) -> lurus ke utara -> pintu Ruang Tengah rumah (x=40,y≈2); plus sambung ke Taman Depan
+ rug(32,10.6,4.6,1.3,path);rug(35.9,1.6,1.3,22.4,path);rug(35.9,1.6,4.1,1.3,path);
+ // air mancur kecil + bangku + bunga
+ cyl(37.4,7.2,0,.95,.35,0xcfe4ff,18);cyl(37.4,7.2,.35,.75,.05,0x9cd4ff,18);cyl(37.4,7.2,.35,.12,.6,0xffffff,8);ball(37.4,7.2,.98,.16,0x9cd4ff);
+ bench(32.6,13.2,1);bench(37.6,13.6,1);
+ [[33.3,3.6,.9],[33.2,21.6,1],[39.0,22.6,.85],[33.4,17.2,.8]].forEach(([x,y,s])=>tree(x,y,s));
+ for(let i=0;i<10;i++)ball(37.2+(i%2)*.9,15.6+Math.floor(i/2)*.55,.18,.18,[0xff9cc7,0xffd23f,0xc79bff,0xffffff][i%4]);
+ for(let i=0;i<6;i++)ball(32.6+i*.55,8.9,.18,.18,[0xffd23f,0xff9cc7,0xffffff][i%3]);
+ lamp(35.4,4.2);lamp(35.4,15.2);lamp(39.3,1.0);
+ // gazebo kecil
+ {const gx=36.6,gy=18.2,s=1.6;[[gx,gy],[gx+s,gy],[gx,gy+s],[gx+s,gy+s]].forEach(([x,y])=>box(x,y,0,.12,.12,1.9,0xfff5fa));box(gx-.25,gy-.25,1.9,s+.62,s+.62,.14,0xb8865a);box(gx+.1,gy+.1,1.98,s-.08,s-.08,.18,0xa0704a);cyl(gx+s/2+.06,gy+s/2+.06,0,.35,.6,0xffffff,12);}
+ // ---- Rumah My Bini: Ruang Tengah mewah
+ P=FLOORS[h.f];
+ rug(h.x+3,h.y+.8,14,3.4,0xd4af37);box(h.x+3.15,h.y+.95,.03,13.7,3.1,.01,0x7a1e2c,{shadow:false});
+ sofa(h.x+4,h.y+.4,3.4,0x8a2236);sofa(h.x+12.6,h.y+.4,3.4,0x8a2236);
+ cyl(h.x+10,h.y+2.5,0,.7,.4,wood,16);cyl(h.x+10,h.y+2.5,.4,.75,.04,gold,16);ball(h.x+10,h.y+2.5,.62,.16,0xff9cc7);
+ box(h.x+8.4,h.y+.15,0,3.2,.35,.9,wood);box(h.x+8.5,h.y+.2,.9,3.0,.1,1.2,0x2b2733); // lemari TV
+ [[h.x+.8,h.y+.8],[h.x+19.2,h.y+.8],[h.x+19.2,h.y+4.2]].forEach(([x,y])=>plant(x,y,1,0x5fae6a));
+ painting(h.x+5.2,h.y+.08,1.1,1.6,.9,0x3a5a8a,'y',1);painting(h.x+13.2,h.y+.08,1.1,1.6,.9,0x8a3a4a,'y',1);
+ {const ch=new THREE.Group();ch.position.set(tx(h.x+10),2.55,tz(h.y+2.5));P.add(ch);const gm=new THREE.MeshStandardMaterial({color:gold,metalness:.7,roughness:.3});
+  const ring=mesh(new THREE.TorusGeometry(.55,.04,6,18),gm,ch,false);ring.rotation.x=Math.PI/2;const chain=mesh(new THREE.CylinderGeometry(.015,.015,.8,4),gm,ch,false);chain.position.y=.4;
+  for(let i=0;i<10;i++){const a=i/10*Math.PI*2;const f=mesh(new THREE.IcosahedronGeometry(.05,0),new THREE.MeshBasicMaterial({color:0xffe28a}),ch,false);f.position.set(Math.cos(a)*.55,.12,Math.sin(a)*.55);}
+  const pl=new THREE.PointLight(0xffd9a0,3.5,9);pl.position.set(tx(h.x+10),2.3,tz(h.y+2.5));P.add(pl);}
+ label('🏡 Rumah My Bini · bobo 22:00','seat pink',h.x+10,h.y+4.4,1.6).element.style.background='#b8860b';
+ // pagar emas rendah di sepanjang belakang rumah
+ box(h.x,h.y+12.05,0,h.w,.12,.5,gold);
 }
 function cottageRoom(r){ // pondok kecil: atap, pintu tertutup, gorden rapat. Isi tidak kelihatan dari taman.
  P=FLOORS[r.f];const wood=0x8a5a3a,cream=0xfff6ee,linen=0xc4b49a,cloth=0xb5a48c,b=COTTAGE_BED;
@@ -865,7 +903,7 @@ function effective(){return chatPair(agentsData.map(a0=>{const a=applyTimed(a0),
  if(id==='hr1'&&!ov){const m=nowMin();if(m>=9*60&&m<21*60)r={...r,room:'ig',status:'kerja',task:'💻 Kerja di Kantor IG · hr_2002_01 (09:00-21:00 WITA)',auto:true};}
  if(BRAIN[id]&&id!=='keira'){const sl=activeSlot(id);if(sl)r={...r,room:WORK_ROOM[id]||'ig',status:'kerja',task:'⏰ '+sl[0].replace('.',':')+' '+sl[1]+' (sesuai jadwal)',auto:true};
   else if(r.status==='kerja')r={...r,room:WORK_ROOM[id]||'ig'};
-  else if(nightNow(id))r={...r,room:'kamar',status:'tidur',task:'Bobo malam di kamar 😴 ('+hmTxt(NIGHT[id][0])+'-'+hmTxt(NIGHT[id][1])+' WITA)',auto:true};}
+  else if(nightNow(id))r={...r,room:'kamar',status:'tidur',task:(HOUSE_BOTS.includes(id)?'🏡 Pulang ke Rumah My Bini, bobo di kamar 😴 (':'Bobo malam di kamar 😴 (')+hmTxt(NIGHT[id][0])+'-'+hmTxt(NIGHT[id][1])+' WITA)',auto:true};}
  if(HANGOUT[id]&&!ov&&hangoutNow(id))r={...r,room:HANGOUT[id][2],status:'ngobrol',task:HANGOUT[id][3],auto:true};
  if(id==='han'&&POV.on)r={...r,...povPatch()}; // Mode POV: status lokal Han menang lawan rutinitas otomatis
  return r;}));}
@@ -890,7 +928,7 @@ function autoCheck(){const cur={__day:dayNow()?'day':'night',__chat:effective().
 const NAMES={lia:'Lia',ophelia1:'Ophelia 1',hanrin:'Hanrin'};
 function nameOf(id){const a=agentsData.find(x=>idOf(x)===id)||(actors[id]&&actors[id].a);return NAMES[id]||(a&&a.name)||id;}
 /* tempat tidur siang pas santai (per bot) */
-function napSpotOf(id){if(id==='ophelia1')return{sp:SOFA2_SPOT,label:'Capek, ke Ruang TV 🛋️'};const lx=LUX[id];if(lx)return{sp:bedSpot(luxBed(lx)),label:'Ngantuk, ke '+lx.name.replace(/^\S+ /,'')+' 😴'};return{sp:SOFA2_SPOT,label:'Capek, ke Ruang TV 🛋️'};}
+function napSpotOf(id){if(id==='ophelia1'&&!LUX.ophelia1)return{sp:SOFA2_SPOT,label:'Capek, ke Ruang TV 🛋️'};const lx=LUX[id];if(lx)return{sp:bedSpot(luxBed(lx)),label:'Ngantuk, ke '+lx.name.replace(/^\S+ /,'')+' 😴'};return{sp:SOFA2_SPOT,label:'Capek, ke Ruang TV 🛋️'};}
 /* kursi grup: cocokkan per id (bukan cuma nama), biar nama baru (mis. 'Lia CO') gak numpuk di kursi orang lain (dulu nyasar ke kursi Rin → Rin keliatan double) */
 const SEAT_OWNER={'Rin':'rin','Rin 1':'rin1','Emily 1':'emily1','Keira':'keira','Co Agent 2 Lia':'ornf','Lia CO':'ornf','Hanrin':'hanrin','Emely':'emely','HR':'hr','HR 1':'hr1','Love':'love'};
 function groupSeat(g,a,id,used){const k='seat:'+g.id,taken=used[k]=used[k]||new Set();
@@ -903,7 +941,7 @@ function spotFor(a,used){
  const id=idOf(a);let room=a.room;
  if(id==='han')return hanSeat();
  if(room==='kamar'&&LUX[id])room=LUX[id].id;
- if(id==='ophelia1'&&a.status==='tidur')return SOFA2_SPOT;
+ if(id==='ophelia1'&&a.status==='tidur'&&!LUX.ophelia1)return SOFA2_SPOT; // sekarang bobo di Kamar Ophelia 1 (Rumah My Bini)
  const lx=ROOMS.find(r=>r.id===room&&r.lux);
  if(lx){const sp=bedSpot(luxBed(lx));if(a.status==='tidur')return sp;return{x:lx.x+1.2,y:lx.y+2.6,pose:'stand',face:Math.PI/2};}
  if(room==='school'){if(SCHOOL.students[id]){const s=SCHOOL.students[id];return{x:s[0],y:s[1],pose:'sit',face:Math.PI};}
@@ -923,6 +961,7 @@ function doorBetween(a,b){
  if(a.f!==b.f){if(a.stairs&&b.stairs&&Math.abs(a.f-b.f)===1)return[a.foot.slice(),b.foot.slice()];return null;}
  const lb=(r,o)=>r.lux&&o.y===r.y+r.d; // dinding belakang kamar mewah (di balik ranjang) gak ada pintu
  if(lb(a,b)||lb(b,a))return null;
+ if((a.house&&b.house&&a.lux&&b.lux)||(a.lux&&b.outdoor)||(b.lux&&a.outdoor)||(a.stairs&&b.outdoor)||(b.stairs&&a.outdoor))return null; // Rumah My Bini: masuk lewat Ruang Tengah; kamar gak nyambung samping/taman; tangga gak tembus taman
  const pick=(ra,rb,lo,hi)=>(ra-1>=lo&&ra+1<=hi)?ra:(rb-1>=lo&&rb+1<=hi)?rb:Math.floor((lo+hi)/2);
  if(a.y+a.d===b.y||b.y+b.d===a.y){const yy=a.y+a.d===b.y?b.y:a.y,x0=Math.max(a.x,b.x),x1=Math.min(a.x+a.w,b.x+b.w);if(x1-x0>=2){const ra=Math.floor(a.x+a.w/2),rb=Math.floor(b.x+b.w/2);const m=pick(ra,rb,x0,x1);const s=a.y<b.y?1:-1;return[[m,yy-.7*s],[m,yy+.7*s]];}}
  if(a.x+a.w===b.x||b.x+b.w===a.x){const xx=a.x+a.w===b.x?b.x:a.x,y0=Math.max(a.y,b.y),y1=Math.min(a.y+a.d,b.y+b.d);if(y1-y0>=2){const ra=Math.floor(a.y+a.d/2),rb=Math.floor(b.y+b.d/2);const m=pick(ra,rb,y0,y1);const s=a.x<b.x?1:-1;return[[xx-.7*s,m],[xx+.7*s,m]];}}
