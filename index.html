@@ -740,8 +740,8 @@ function cinemaRoom(r){P=FLOORS[r.f];const X=r.x,Y=r.y,sw=7.2,sh=12.8,cx=X+r.w/2
   box(bx+.05,by+.05,.5,1.2,.45,.03,0xd23a6e); // selimut terlipat di kaki ranjang
   box(bx+.2,by+1.5,.5,.9,.36,.1,0xffffff);box(bx,by+1.95,0,1.3,.1,.9,0x3a2430);} // bantal + headboard
  TH.light=new THREE.PointLight(0xffc9a0,2.2,18);TH.light.position.set(tx(cx),2.6,tz(Y+8));P.add(TH.light);
- // 🌑 dinding hitam + atap khusus Bioskop (Lt4) — ruangan terasa tertutup; atap di atas area kursi biar layar portrait tetap kelihatan
- {const wallH=3.9,thk=.2,darkC=0x0a0810,ceilC=0x07060c;
+ // 🌑 dinding hitam + atap khusus Bioskop (Lt4) — ruangan terasa tertutup; atap di atas puncak layar portrait (sh=12.8, top≈13.5)
+ {const wallH=sh+1.6,thk=.2,darkC=0x0a0810,ceilC=0x07060c; // ~14.4 — di atas layar biar gak kepotong atap
   // utara: panel kiri/kanan layar (tengah sudah dinding layar hitam)
   box(X+thk,Y+thk,0,cx-4.6-(X+thk),thk,wallH,darkC,{shadow:false});
   box(cx+4.6,Y+thk,0,(X+r.w-thk)-(cx+4.6),thk,wallH,darkC,{shadow:false});
@@ -750,14 +750,14 @@ function cinemaRoom(r){P=FLOORS[r.f];const X=r.x,Y=r.y,sw=7.2,sh=12.8,cx=X+r.w/2
   // timur: gap pintu ke Tangga Lt4 (~y 3.2–6.6)
   box(X+r.w-2*thk,Y+thk,0,thk,3.0,wallH,darkC,{shadow:false});
   box(X+r.w-2*thk,Y+6.6,0,thk,r.d-6.6-thk,wallH,darkC,{shadow:false});
-  // atap gelap di atas kursi (mulai di belakang bidang layar)
-  box(X+thk,Y+1.4,wallH-.1,r.w-2*thk,r.d-1.4-thk,.14,ceilC,{shadow:false});
+  // atap gelap penuh di atas layar + kursi (tinggi wallH > puncak layar)
+  box(X+thk,Y+thk,wallH-.1,r.w-2*thk,r.d-2*thk,.18,ceilC,{shadow:false});
   // trim atap / cornice gelap di sekeliling
-  box(X+thk,Y+1.4,wallH-.22,r.w-2*thk,.12,.12,0x1a1224,{shadow:false});
-  box(X+thk,Y+r.d-thk*2-.12,wallH-.22,r.w-2*thk,.12,.12,0x1a1224,{shadow:false});}
+  box(X+thk,Y+thk,wallH-.28,r.w-2*thk,.14,.14,0x1a1224,{shadow:false});
+  box(X+thk,Y+r.d-thk*2-.14,wallH-.28,r.w-2*thk,.14,.14,0x1a1224,{shadow:false});}
  // 🌈 neon RGB di 4 sudut ruangan (glow + PointLight, warna di-cycle thNeonTick)
  TH.neons=[];
- {const neonH=3.35,nr=.045;
+ {const neonH=sh+1.1,nr=.045; // neon sepanjang dinding tinggi biar nyala sampai dekat atap
   [[X+.55,Y+.55],[X+r.w-.55,Y+.55],[X+.55,Y+r.d-.55],[X+r.w-.55,Y+r.d-.55]].forEach(([nx,ny],i)=>{
    const matN=new THREE.MeshStandardMaterial({color:0xff0088,emissive:0xff0088,emissiveIntensity:3.2,roughness:.25,metalness:.15,toneMapped:false});
    const tube=mesh(new THREE.CylinderGeometry(nr,nr,neonH,12),matN,P,false);tube.position.set(tx(nx),neonH/2+.06,tz(ny));
