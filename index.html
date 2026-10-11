@@ -1887,7 +1887,11 @@ function thHumanBuild(c,id){const L=lookOf(id||'ophelia1'),male=id==='han',sm=(c
    M(new THREE.CylinderGeometry(.18,.145,.34,22),SH,g,0,.18,0,1,1,.74);M(sph(.135),PN,g,0,.015,0,1.12,.5,.85);
    [-1,1].forEach(s=>M(sph(.085),SH,g,.17*s,.32,0,1,.8,1)); // bahu
    M(new THREE.CylinderGeometry(.05,.055,.11,12),SK,g,0,.43,0);
-   if(L.robe){M(new THREE.BoxGeometry(.06,.05,.02),GD,g,0,.28,.12);} // medali emas kecil (tanpa jubah penuh biar pose intim bersih)
+   if(L.robe){M(new THREE.BoxGeometry(.06,.05,.02),GD,g,0,.28,.12);}
+   // 🍆 kontol (geometri sederhana) — cuma tampil pas telanjang di Mode privat; pivot di pangkal biar bisa diarahkan/dipanjangin per posisi
+   {const nu=o=>{o.userData.nudeOnly=1;o.visible=false;return o;},pg=new THREE.Group();pg.position.set(0,-.05,.1);g.add(pg);c.pen=pg;
+    nu(M(cap(.026,.15),SK,pg,0,0,.1)).rotation.x=Math.PI/2;nu(M(sph(.03),sm(0xc96a7a),pg,0,0,.19,1,1,1.1));
+    [-1,1].forEach(s=>nu(M(sph(.03),SK,g,.025*s,-.09,.085)));} // medali emas kecil (tanpa jubah penuh biar pose intim bersih)
   }else{ // Ophelia / cewek
    M(new THREE.CylinderGeometry(.155,.12,.3,22),SH,g,0,.17,0,1,1,.68);M(sph(.14),PN,g,0,.02,0,1.05,.55,.8);
    [-1,1].forEach(s=>{M(sph(.06),SH,g,.065*s,.22,.07,1,.9,.8);M(sph(.07),SH,g,.15*s,.3,0,1,.75,.9);});
@@ -1946,7 +1950,8 @@ const thResetPose=c=>{c.body.rotation.set(0,0,0);c.body.position.set(0,0,0);c.to
    rx>0 = condong ke depan (PI/2 = tengkurap), rx<0 = rebah telentang. Kaki/lengan: rotation.x<0 = ke depan, >0 = ke belakang. */
 const TH_BED={x:12.5,y:3*DY+6.4,top:.5},PI2=Math.PI/2;
 const TH_SCENE={suck:{ang:PI2+.35,dist:2.4,w:2.6},kiss:{ang:PI2-.25,dist:2.2,w:2.4},bj:{ang:PI2+.3,dist:2.7,w:3.0},cowgirl:{ang:PI2+.25,dist:2.8,w:3.3},doggy:{ang:PI2+.1,dist:2.7,w:4.0},rear:{ang:PI2+.3,dist:2.8,w:3.6}};
-function thPose(c,o){const B=TH_BED;c.body.position.set(0,-.34,0);c.body.rotation.set(0,0,0);
+let TH_FLIP=false; // 🎬 posisi sex diputar 180° biar pasangan menghadap layar bioskop (layar di arah -y); ciuman bersila tetap
+function thPose(c,o){const B=TH_BED;if(TH_FLIP)o={...o,y:-(o.y||0),x:-(o.x||0),ry:(o.ry||0)+Math.PI};c.body.position.set(0,-.34,0);c.body.rotation.set(0,0,0);
  c.root.position.set(tx(B.x+(o.x||0)),B.top+o.z,tz(B.y+(o.y||0)));c.root.rotation.set(o.rx||0,o.ry||0,o.rz||0,'YXZ');
  const L=o.l||[0,0],LZ=o.lz||[0,0],A=o.a||[0,0],AZ=o.az||[0,0];
  c.legs.forEach((l,i)=>l.rotation.set(L[i],0,LZ[i]));c.arms.forEach((m,i)=>m.rotation.set(A[i],0,AZ[i]));
@@ -1966,7 +1971,7 @@ function thSceneTick(now){const S=POV.scene,han=actors.han,oph=actors.ophelia1;i
  const cfg=TH_SCENE[S.kind],peak=S.pulse>now,t=(now-S.t0)/1000;
  S.ph=(S.ph||0)+(S.lt?Math.min(.1,(now-S.lt)/1000):0)*cfg.w*(peak?1.6:1);S.lt=now;const ph=S.ph;
  const wave=x=>{const u=(1-Math.cos(x))/2;return Math.pow(u,.7);}; // ritme: dorong tajam, balik halus
- const p=wave(ph),q=wave(ph-.7),s=Math.sin(ph),hc=han.c,oc=oph.c;
+ const p=wave(ph),q=wave(ph-.7),s=Math.sin(ph),hc=han.c,oc=oph.c;TH_FLIP=S.kind!=='kiss';
  if(S.kind==='kiss'){ // 💋 duduk BERSILA berhadapan di ranjang, pelukan erat + ciuman brutal (condong keras, kepala miring gantian, lengan melingkar)
   const sw=Math.sin(t*.9),h1=Math.sin(ph*1.15),h2=Math.sin(ph*.55+.8),lean=.2+.16*p,lean2=.2+.16*q,sit=.06;
   const cross=r=>-PI2+.12-r; // paha datar ke depan relatif pinggul yang condong
@@ -1989,6 +1994,8 @@ function thSceneTick(now){const S=POV.scene,han=actors.han,oph=actors.ophelia1;i
  else{ // rear: Ophelia tengkurap, Han rebah di atas dari belakang, ditopang lengan
   const a=PI2-.12;thPose(oc,{y:-.15+.03*q,z:.13,rx:a,l:[.1,.1],lz:[-.22,.22],a:[-2.9,-2.9],az:[.3,-.3],hx:-.45+.12*q,hz:.35});
   const b=PI2-.38-.06*p;thPose(hc,{y:-.27+.1*p,z:.36+.03*p,rx:b,l:[PI2-b-.12,PI2-b-.12],lz:[-.32,.32],a:[-b,-b],az:[-.3,.3],hx:-.3});}
+ if(hc.pen){const PA={kiss:[.9,.8],suck:[.9,.8],bj:[-.35,1.15],cowgirl:[-.6,1.1],doggy:[.1,1.25],rear:[.15,1.2]}[S.kind]||[0,1];
+  hc.pen.rotation.x=PA[0];hc.pen.scale.set(1,1,PA[1]*(S.kind==='kiss'||S.kind==='suck'?1:(1+.06*p)));} // tegang + nyelip masuk (overlap)
  if(peak){const k=1+Math.abs(Math.sin((S.pulse-now)/1200*Math.PI*6))*.05;oc.root.scale.set(k,k,k);}else oc.root.scale.set(1,1,1);}
 const _sm=new THREE.Vector3(),_sc=new THREE.Vector3();
 function thSceneCam(dt){const S=POV.scene,han=actors.han,oph=actors.ophelia1;if(!S||!han||!oph)return false;const cfg=TH_SCENE[S.kind],B=TH_BED;
