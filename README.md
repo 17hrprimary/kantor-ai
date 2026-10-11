@@ -22,6 +22,7 @@ Tambah pesan: edit `chat.json` di GitHub web, tambahin objek baru di **akhir** a
 `from` = id agen (`ophelia1`, `lia`, `han`), `at` = waktu ISO dengan `+08:00`. Pesan Han dari tombol **Kirim** jadi GitHub Issue berjudul `chat: ...` (label `chat`); selama issue masih terbuka, pesannya tampil dengan tanda ⏳. Bot memindahkannya ke `chat.json` dengan field tambahan `"issue": <nomor>` lalu menutup issue-nya.
 
 ## 🌍 Lingkungan luar (index.html)
-- Rumput hijau tenang di sekeliling kantor & Rumah My Bini, jalan raya 2 lajur (trotoar, marka, zebra cross, lampu jalan) di depan Taman Depan, 14 mobil lalu lalang 2 arah.
+- Rumput hijau tenang di sekeliling kantor & Rumah My Bini; **hutan** dengan banyak pohon (oak + pinus) dan tanaman liar (semak, bunga, rumput tinggi) ditempatkan acak di sekitar situs — tidak menutupi jalan raya, jalan masuk, atau gedung/rumah.
+- Jalan raya 2 lajur (trotoar, marka, zebra cross, lampu jalan) di depan Taman Depan, 14 mobil lalu lalang 2 arah.
 - Langit gradasi + awan lembut + matahari/bulan + bintang; suasana Pagi / Siang / Sore / Malam ikut jam WITA (cahaya, warna langit, awan redup malam, lampu jalan & lampu mobil nyala pas gelap).
-- Preview jam: tambah `#jam=21` (atau `#jam=7.5`) di URL. Sudut kamera rendah buat lihat langit: `#langit` (bisa digabung: `#langit,jam=17.5`).
+- Preview jam: tambah `#jam=21` (atau `#jam=7.5`) di URL. Sudut kamera: `#langit` (langit rendah), `#atas` (pandangan atas hutan), `#hutan` (lihat hutan seberang jalan). Bisa digabung: `#langit,jam=17.5`.
