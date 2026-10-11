@@ -247,7 +247,7 @@ body.touch .povhint .kbd{display:none}body.touch .povhint .tch{display:inline}
      <div id="thMain" hidden>
       <div class="thnow" id="thNow">Pilih film dari daftar 👇</div>
       <div class="thctl"><button class="thb" id="thPrev" title="Sebelumnya">⏮</button><button class="thb" id="thPlay" title="Putar / jeda (Spasi)">▶️</button><button class="thb" id="thNext" title="Berikutnya">⏭</button><button class="thb" id="thStop" title="Stop">⏹</button><button class="thb" id="thFull" title="Layar penuh">⛶ Layar penuh</button><button class="thb on" id="thAutoNext" title="Auto play next: lanjut film berikutnya otomatis">⏭ Auto ON</button></div>
-      <input type="range" id="thSeek" min="0" max="1000" value="0"><div class="small thtime"><span id="thT">0:00 / 0:00</span><span>🔊 <input type="range" id="thVol" min="0" max="100" value="90"></span></div>
+      <input type="range" id="thSeek" min="0" max="1000" value="0"><div class="small thtime"><span id="thT">0:00 / 0:00</span><span><button class="thb" id="thMute" title="Mute / unmute video">🔊</button> <input type="range" id="thVol" min="0" max="100" value="90"></span></div>
       <div class="sec">🎞️ Folder theater/ <span id="thCount"></span></div><div class="thlist" id="thList"><div class="small">Memuat daftar…</div></div>
       <div class="throw"><label class="thb thpick">📂 Putar dari folder komputer<input type="file" id="thPick" accept="video/*" webkitdirectory multiple hidden></label><button class="thb" id="thLockBtn" title="Kunci lagi">🔒 Kunci</button></div>
       <div class="sec">💞 Interaksi Ophelia 1</div><div class="thctl" id="thAct"></div><div class="small thpriv" id="thPrivSt" hidden>Mode privat aktif 💞</div><div class="small" id="thActSt"></div>
@@ -1680,6 +1680,7 @@ function povZoneUI(ac,now){const z=povStairZone(ac),f=floorOfY(ac.pos.y),msg=POV
  if(mp){const show=!!(cin&&TH.unlocked);mp.hidden=!show;if(show)mp.textContent=(!TH.list.length||TH.cur<0||thV.paused)?'▶️ Putar':'⏸ Jeda';}
  if(mf)mf.classList.toggle('on',!!POV.fpPref);}
 function povAnimate(ac,now,dt){ // dipanggil dari updateActors tiap frame (gantiin jalur otomatis)
+ if(POV.scene)return; // 💞 lagi adegan bioskop: Han duduk, pose diatur thSceneTick
  const c=ac.c,K=POV.keys,st=POV.stick;
  const turn=(K.has('tl')?1:0)-(K.has('tr')?1:0);if(turn)POV.yaw+=turn*2.3*dt;
  let fwd=(K.has('f')?1:0)-(K.has('b')?1:0),str=(K.has('r')?1:0)-(K.has('l')?1:0),mag=Math.min(1,Math.hypot(fwd,str));
@@ -1700,7 +1701,7 @@ const POV_ROOF=(r=>r?{x0:r.x-.55,x1:r.x+r.w+.55,y0:r.y-.45,y1:r.y+r.d+.35,h:2.75
 function povRoofHit(hx,hy,cx,cy,ch){const R=POV_ROOF;if(!R)return false; // garis pandang kamera -> badan Han (dari kaki) kena atap pondok?
  for(let i=1;i<=12;i++){const t=i/12,x=hx+(cx-hx)*t,y=hy+(cy-hy)*t,z=.35+(ch-.35)*t;if(z<R.h&&x>R.x0&&x<R.x1&&y>R.y0&&y<R.y1)return true;}return false;}
 function povCamera(dt){ // soft third-person di belakang-atas bahu Han; first-person kalau V atau lagi di dalam Pondok (beratap)
- const ac=actors.han;if(!ac)return;const fp=POV.fpNow=POV.fpPref||inPondok(ac.pos.x,ac.pos.y);
+ const ac=actors.han;if(!ac)return;if(POV.scene&&thSceneCam(dt))return;const fp=POV.fpNow=POV.fpPref||inPondok(ac.pos.x,ac.pos.y);
  if(ac.c.root.visible===fp){ac.c.root.visible=!fp;ac.tag.o.visible=!fp;camera.near=fp?.08:.3;camera.updateProjectionMatrix();}
  _pb.set(tx(ac.pos.x),0,tz(ac.pos.y));FLOORS[floorOfY(ac.pos.y)].localToWorld(_pb);
  const fx=Math.sin(POV.yaw),fz=Math.cos(POV.yaw),rx=-fz,rz=fx;
@@ -1727,7 +1728,7 @@ function povEnter(){if(POV.on)return;const ac=actors.han;if(!ac){log('🎮 Han b
  controls.enabled=false;camAnim=null;setFloor(floorOfY(q[1]),false);POV.snap=true;camera.near=.3;camera.updateProjectionMatrix();
  document.body.classList.add('pov');povButtons();povState(ac,false,performance.now());
  log('🎮 Han masuk Mode POV — jalan sendiri pakai '+(document.body.classList.contains('touch')?'stick layar':'keyboard'));}
-function povExit(){if(!POV.on)return;const ac=actors.han;POV.on=false;POV.keys.clear();POV.stick.x=POV.stick.y=0;POV.stick.id=null;POV.drag=null;$('povKnob').style.transform='';
+function povExit(){if(!POV.on)return;if(POV.scene)thSceneEnd(true);const ac=actors.han;POV.on=false;POV.keys.clear();POV.stick.x=POV.stick.y=0;POV.stick.id=null;POV.drag=null;$('povKnob').style.transform='';
  document.body.classList.remove('pov');document.querySelectorAll('#povPad .on[data-k]').forEach(b=>b.classList.remove('on'));
  camera.fov=32;camera.near=.5;camera.updateProjectionMatrix();applyShift();controls.enabled=true;
  let home=false;
@@ -1773,7 +1774,9 @@ $('thAutoNext').onclick=()=>applyAutoNext(!TH.autoNext,true);
 thV.addEventListener('error',()=>{const it=TH.list[TH.cur];$('thNow').textContent='⚠️ Format gak didukung browser: '+(it?it.title:'')+' (pakai mp4 H.264 / webm)';thIdle();});
 thV.addEventListener('timeupdate',()=>{const d=thV.duration||0;if(!TH.seeking)$('thSeek').value=d?Math.round(thV.currentTime/d*1000):0;$('thT').textContent=thFmt(thV.currentTime)+' / '+thFmt(d);});
 $('thSeek').addEventListener('input',()=>{TH.seeking=true;const d=thV.duration||0;if(d)thV.currentTime=$('thSeek').value/1000*d;});$('thSeek').addEventListener('change',()=>TH.seeking=false);
-$('thVol').addEventListener('input',()=>thV.volume=$('thVol').value/100);
+$('thVol').addEventListener('input',()=>{thV.volume=$('thVol').value/100;if(thV.muted&&thV.volume>0){thV.muted=false;thMuteUI();}});
+function thMuteUI(){const b=$('thMute');if(b){b.textContent=thV.muted?'🔇':'🔊';b.classList.toggle('on',thV.muted);}}
+$('thMute').onclick=()=>{thV.muted=!thV.muted;thMuteUI();};thV.addEventListener('volumechange',thMuteUI);
 $('thPlay').onclick=()=>{if(TH.cur<0){if(TH.list.length)thPlayIdx(0);return;}if(thV.paused){thEnsureTex();thV.play();}else thV.pause();};
 $('thPrev').onclick=()=>{if(TH.list.length)thPlayIdx((TH.cur-1+TH.list.length)%TH.list.length);};
 $('thNext').onclick=()=>{if(TH.list.length)thPlayIdx((TH.cur+1)%TH.list.length);};
@@ -1844,30 +1847,101 @@ function thSexSet(on,announce){TH.sexMode=!!on;try{sessionStorage.setItem('thSex
  const fx=thFX();if(fx){if(TH.sexMode)fx.classList.add('soft');else{fx.classList.remove('soft','peak');fx.innerHTML='';}}
  $('thPanel').classList.toggle('priv',TH.sexMode);thActRender();
  if(announce){thActSt(TH.sexMode?'💞 Mode privat aktif — lampu bioskop diredupin':'🔒 Mode privat OFF');if(typeof log==='function')log(TH.sexMode?'💞 Mode privat Bioskop ON':'🔒 Mode privat Bioskop OFF');}
- if(on&&actors.ophelia1&&!actors.ophelia1.cinemaDate)thDateStart('ophelia1');}
+ if(on&&actors.ophelia1&&!actors.ophelia1.cinemaDate)thDateStart('ophelia1');
+ if(announce){if(on&&actors.ophelia1&&actors.ophelia1.cinemaDate&&!POV.scene)thScene('dekat');else if(!on&&POV.scene)thSceneEnd(true);}}
 function thIntim(kind){const ac=actors.ophelia1;
  if(!ac||!ac.cinemaDate){thActSt('🍿 Ajak Ophelia dulu (🍿 Nonton bareng)');return;}
  const t=kind==='dekat'?{demo:'💞 Intim dekat sama Han',say:'Sini sayang, deketan… 💞',pov:'💞 Ophelia nyender deket banget, kepala di bahu Han'}
   :{demo:'🫂 Peluk dari belakang',say:'Aku peluk dari belakang ya sayang 🫂',pov:'🫂 Ophelia meluk Han dari belakang, hangat banget'};
- ac.demo=t.demo;ac.sayText=t.say;ac.sayUntil=performance.now()+7000;POV.msg=t.pov;POV.msgUntil=performance.now()+4000;POV.zoneKey='';
+ thScene(kind);ac.demo=t.demo;ac.sayText=t.say;ac.sayUntil=performance.now()+7000;POV.msg=t.pov;POV.msgUntil=performance.now()+4000;POV.zoneKey='';
  const fx=thFX();if(fx){fx.classList.add('soft');clearTimeout(thFXT);if(!TH.sexMode)thFXT=setTimeout(()=>fx.classList.remove('soft'),6000);}
  thActSt(t.demo);}
 function thPeakFX(){if(!TH.sexMode){thActSt('🔒 Nyalain Mode privat dulu');return;}const fx=thFX();if(!fx)return;
  fx.classList.add('soft');fx.classList.remove('peak');void fx.offsetWidth;fx.classList.add('peak');
  for(let i=0;i<26;i++){const h=document.createElement('span');h.className='ht';h.textContent=['💗','💖','💕','✨','💞'][i%5];h.style.left=(Math.random()*96)+'%';h.style.animationDelay=(Math.random()*1.2)+'s';fx.appendChild(h);}
  const ac=actors.ophelia1;if(ac&&ac.cinemaDate){ac.sayText='💖✨';ac.sayUntil=performance.now()+4000;}
- thActSt('✨ Efek puncak 💖');setTimeout(()=>{fx.classList.remove('peak');fx.querySelectorAll('.ht').forEach(e=>e.remove());},4200);}
+ thPulse(ac);thActSt('✨ Efek puncak 💖');setTimeout(()=>{fx.classList.remove('peak');fx.querySelectorAll('.ht').forEach(e=>e.remove());},4200);}
 const thActSt=t=>{$('thActSt').textContent=t||'';};
+/* 🧍‍♀️ Ophelia versi humanoid (halus, bukan kotak) — KHUSUS Bioskop. Nempel di rig yang sama (legs/arms/torso/head) jadi semua pose/animasi tetap jalan; lantai lain tetap boxy */
+function thHumanBuild(c){const L=lookOf('ophelia1'),sm=(col,o)=>new THREE.MeshStandardMaterial({color:col,roughness:.55,metalness:0,...(o||{})}),SK=sm(L.skin),HR=sm(L.hair,{roughness:.45,side:THREE.DoubleSide}),SH=sm(L.shirt),PN=sm(L.pants,{roughness:.8}),PL=sm(0xeeeef2,{roughness:.35,metalness:.1}),BK=sm(0x111111,{roughness:.3,metalness:.3});
+ const parts=[],G=parent=>{const g=new THREE.Group();g.userData.hum=1;parent.add(g);parts.push(g);return g;};
+ const M=(geo,m,g,x,y,z,sx,sy,sz)=>{const o=mesh(geo,m,g);o.position.set(x,y,z);if(sx)o.scale.set(sx,sy??sx,sz??sx);return o;};
+ const cap=(r,l)=>new THREE.CapsuleGeometry(r,l,6,14),sph=(r)=>new THREE.SphereGeometry(r,20,14);
+ c.legs.forEach(l=>{const g=G(l);M(cap(.058,.2),PN,g,0,-.14,0);M(sph(.05),SK,g,0,-.29,.0,1,.7,1);M(sph(.06),sm(0xf4f4f4),g,0,-.33,.04,1,.55,1.5);});
+ {const g=G(c.torso);M(new THREE.CylinderGeometry(.155,.12,.3,22),SH,g,0,.17,0,1,1,.68);M(sph(.14),PN,g,0,.02,0,1.05,.55,.8); // badan + pinggul
+  [-1,1].forEach(s=>{M(sph(.06),SH,g,.065*s,.22,.07,1,.9,.8);M(sph(.07),SH,g,.15*s,.3,0,1,.75,.9);}); // dada (sopan) + bahu
+  M(new THREE.CylinderGeometry(.042,.048,.12,12),SK,g,0,.4,0);}
+ c.arms.forEach((a,i)=>{const s=i?1:-1,g=G(a);g.position.x=-.08*s;M(cap(.045,.1),SH,g,0,-.07,0);M(cap(.036,.12),SK,g,0,-.21,0);M(sph(.038),SK,g,0,-.3,0,1,1.1,.8);});
+ {const g=G(c.head);M(sph(.15),SK,g,0,-.01,0,1,1.13,1.02); // wajah
+  [-1,1].forEach(s=>{M(sph(.024),sm(0x2a1f2a),g,.055*s,.0,.135,1,1.15,.6);M(sph(.008),sm(0xffffff),g,.06*s,.01,.15);M(sph(.02),sm(0xffa3c0,{transparent:true,opacity:.55}),g,.09*s,-.06,.12,1.3,.6,.4);
+   const fr=M(new THREE.TorusGeometry(.04,.006,6,4),BK,g,.055*s,.0,.158);fr.rotation.z=Math.PI/4;fr.scale.set(1.25,1,1);}); // kacamata kotak
+  M(new THREE.BoxGeometry(.03,.006,.006),BK,g,0,.005,.16);[-1,1].forEach(s=>{const t=M(new THREE.BoxGeometry(.006,.006,.13),BK,g,.105*s,.005,.095);});
+  M(sph(.02),sm(0xc0587e),g,0,-.085,.142,1.4,.55,.5);M(sph(.013),SK,g,0,-.035,.155); // bibir + hidung
+  M(new THREE.SphereGeometry(.165,24,16,0,Math.PI*2,0,Math.PI*.46),HR,g,0,.0,-.008,1.04,1.1,1.06); // atap rambut
+  M(new THREE.CylinderGeometry(.165,.2,.6,24,1,true,.62,Math.PI*2-1.24),HR,g,0,-.25,-.01,1,1,.95); // rambut panjang sampai punggung, depan kebuka buat muka
+  [[-.1,.09],[-.04,.1],[.03,.1],[.1,.085]].forEach(([x,y],i)=>M(sph(.045),HR,g,x,y,.12,1,.7+(i%2)*.25,.5)); // poni messy
+  M(cap(.016,.42),PL,g,-.13,-.2,.1);M(sph(.035),PL,g,-.095,.08,.135,1,.8,.5); // streak platinum
+  M(new THREE.BoxGeometry(.07,.022,.022),sm(L.clip||0xffd23f),g,.11,.12,.12);}
+ return parts;}
+function thHumanize(ac,on){if(!ac||!ac.c)return;const c=ac.c;
+ if(on&&!c.hum){c.hum=thHumanBuild(c);c.boxy=[];[c.body,c.torso,c.head,...c.legs,...c.arms].forEach(g=>g.children.forEach(o=>{if(o===c.eyes||o===c.closed)c.boxy.push(...o.children);else if(!o.userData.hum&&!c.legs.includes(o)&&!c.arms.includes(o)&&o!==c.torso&&o!==c.head)c.boxy.push(o);}));}
+ if(!c.hum)return;c.hum.forEach(g=>g.visible=!!on);c.boxy.forEach(o=>o.visible=!on);c.humOn=!!on;}
 function thDateStart(id){const ac=actors[id];if(!ac){thActSt('⚠️ '+id+' belum ada di denah');return;}
  if(ac.cinemaDate){thActSt('🍿 '+nameOf(id)+' udah di bioskop');return;}
  Object.assign(ac,{cinemaDate:true,brain:null,napUntil:0,afterNap:null,waitUntil:0,afterWait:null,demo:'Diajak Han nonton 🎬'});
  const st=TH_SEATS.partner,seat={x:st[0],y:st[1],pose:'sit',face:Math.PI};
  if(ac.spot&&ac.spot.pose==='bed')wakeUp&&wakeUp(ac);
  ac.path=null;ac.spot=seat;ac.pos={x:seat.x,y:seat.y};placeActor(ac);ac.demo='🍿 Nonton bareng Han';ac.sayText='Nonton bareng yuk sayang 🍿';ac.sayUntil=performance.now()+6000;
- thActSt('🍿 '+nameOf(id)+' udah duduk, Baris C');log('🎬 Han ngajak '+nameOf(id)+' nonton bareng');}
-function thDateEnd(id){const ac=actors[id];if(!ac||!ac.cinemaDate){thActSt('');return;}ac.cinemaDate=false;ac.demo=null;goHome(ac,null);thActSt('👋 '+nameOf(id)+' balik ke rutinitas');}
+ if(id==='ophelia1')thHumanize(ac,true); thActSt('🍿 '+nameOf(id)+' udah duduk, Baris C');log('🎬 Han ngajak '+nameOf(id)+' nonton bareng');}
+function thDateEnd(id){const ac=actors[id];if(POV.scene)thSceneEnd(true);if(!ac||!ac.cinemaDate){thActSt('');return;}ac.cinemaDate=false;ac.demo=null;thHumanize(ac,false);goHome(ac,null);thActSt('👋 '+nameOf(id)+' balik ke rutinitas');}
+/* 💞 Adegan bioskop: pose 3D beneran + kamera SAMPING (side view) — non-eksplisit (duduk mepet / peluk dari belakang, goyang pelan) */
+const TH_SCREEN={y:.25,h:12.8};
+function thScreenLook(seatY){const d=Math.max(2,seatY-TH_SCREEN.y),cy=.7+TH_SCREEN.h/2-1.16;return clampN(-Math.atan2(cy,d),-.8,.9);}
+const thResetPose=c=>{c.body.rotation.set(0,0,0);c.body.position.set(0,0,0);c.torso.rotation.set(0,0,0);c.head.rotation.set(0,0,0);c.root.scale.set(1,1,1);};
+const thOphAt=k=>{const o=TH_SCENE[k].oph;return [o[0],TH_SEATS.han[1]+o[1]];}; // oph:[x, offset-y dari kursi Han]
+const TH_SCENE={dekat:{oph:[9.3,0],ang:1.12,dist:3.0},belakang:{oph:[8.75,.62],ang:Math.PI/2+.5,dist:3.2}};
+function thScene(kind){const han=actors.han,oph=actors.ophelia1,cfg=TH_SCENE[kind];if(!han||!oph||!cfg)return;
+ if(!POV.on)povEnter();if(!POV.on)return;
+ if(!oph.cinemaDate)thDateStart('ophelia1');
+ const prev=POV.scene;POV.scene={kind,t0:performance.now(),yaw0:POV.yaw,pulse:0,prev:prev?prev.prev:{fpPref:POV.fpPref,yaw:POV.yaw,look:POV.look}};
+ // Han duduk di kursinya (Baris C), hadap layar
+ const hs=TH_SEATS.han;han.pos={x:hs[0],y:hs[1]};han.spot={pose:'sit',x:hs[0],y:hs[1],face:Math.PI};placeActor(han);thResetPose(han.c);han.c.root.position.y=.14;
+ // Ophelia: teleport ke posisi adegan (dekat = mepet di samping, belakang = sedikit di belakang kursi Han, hadap sama)
+ Object.assign(oph,{walking:false,path:[],after:null,waitUntil:0,afterWait:null});
+ const op=thOphAt(kind);oph.pos={x:op[0],y:op[1]};oph.spot={pose:'sit',x:op[0],y:op[1],face:Math.PI};placeActor(oph);thResetPose(oph.c);
+ setFloor(floorOfY(hs[1]),false);han.c.root.visible=true;han.tag.o.visible=true;camera.near=.1;camera.updateProjectionMatrix();POV.snap=true;POV.zoneKey='';thClose&&thClose();}
+function thSceneTick(now){const S=POV.scene,han=actors.han,oph=actors.ophelia1;if(!S||!han||!oph)return;
+ if(!oph.cinemaDate){thSceneEnd(true);return;}
+ const t=(now-S.t0)/1000,sw=Math.sin(t*2.2),pk=S.pulse>now?Math.sin((S.pulse-now)/1200*Math.PI*6):0,hc=han.c,oc=oph.c;
+ const hs=TH_SEATS.han;hc.root.position.set(tx(hs[0]),.14,tz(hs[1]));hc.root.rotation.set(0,Math.PI,0);hc.legs.forEach(l=>l.rotation.x=-Math.PI/2);
+ const ob=thOphAt(S.kind);oc.root.position.set(tx(ob[0]),S.kind==='belakang'?.3:.14,tz(ob[1]));oc.root.rotation.set(0,Math.PI,0);oc.legs.forEach(l=>l.rotation.x=-Math.PI/2);
+ if(S.kind==='dekat'){ // nyender: Ophelia miring ke Han (dunia -x = lokal +x krn hadap PI), Han miring balik, kepala nempel
+  oc.body.rotation.z=-.2-sw*.04;oc.head.rotation.set(0,-.35,-.15);oc.arms[0].rotation.x=-1.2;oc.arms[1].rotation.x=-.6;
+  hc.body.rotation.z=.1+sw*.03;hc.head.rotation.set(0,.3,.1);hc.arms[0].rotation.x=-.9;hc.arms[1].rotation.x=-1.25;
+  oc.body.position.y=Math.abs(sw)*.02+Math.abs(pk)*.06;hc.body.position.y=Math.abs(pk)*.04;}
+ else{ // peluk dari belakang: Ophelia condong ke depan, tangan melingkar ke depan, dagu di bahu Han
+  oc.body.rotation.x=.32+sw*.05;oc.head.rotation.set(.1,.25,0);oc.arms.forEach(a=>a.rotation.x=-1.55);oc.torso.rotation.y=sw*.05;
+  hc.body.rotation.x=-.06-sw*.03;hc.head.rotation.set(-.05,-.2,0);hc.arms.forEach(a=>a.rotation.x=-.7);
+  oc.body.position.y=Math.abs(sw)*.03+Math.abs(pk)*.07;hc.body.position.y=Math.abs(sw)*.015+Math.abs(pk)*.05;}
+ if(S.pulse>now){const k=1+Math.abs(pk)*.07;oc.root.scale.set(k,k,k);}else oc.root.scale.set(1,1,1);}
+const _sm=new THREE.Vector3(),_sc=new THREE.Vector3();
+function thSceneCam(dt){const S=POV.scene,han=actors.han,oph=actors.ophelia1;if(!S||!han||!oph)return false;const cfg=TH_SCENE[S.kind],hs=TH_SEATS.han;
+ POV.fpNow=false;if(!han.c.root.visible){han.c.root.visible=true;han.tag.o.visible=true;}
+ const op=thOphAt(S.kind);_sm.set(tx((hs[0]+op[0])/2),.78,tz((hs[1]+op[1])/2));{const g=FLOORS[floorOfY(hs[1])];g.updateWorldMatrix(true,false);g.localToWorld(_sm);}
+ // sudut dari arah layar: 0 = depan pasangan, PI/2 = samping kanan (lorong tengah). Geser/drag layar = muter kamera di sekitar mereka
+ const a=cfg.ang+(POV.yaw-S.yaw0),d=cfg.dist;
+ _sc.set(_sm.x+Math.sin(a)*d,_sm.y+.95+clampN(POV.pitch-.6,-.4,.8)*1.2,_sm.z-Math.cos(a)*d);
+ const k=POV.snap?1:1-Math.exp(-dt*6);POV.snap=false;camera.position.lerp(_sc,k);controls.target.lerp(_sm,k);camera.lookAt(controls.target);
+ if(Math.abs(camera.fov-55)>.1){camera.fov+=(55-camera.fov)*Math.min(1,dt*6);camera.updateProjectionMatrix();}return true;}
+function thPulse(ac){if(POV.scene){POV.scene.pulse=performance.now()+1200;return;}if(!ac||!ac.c)return;const r=ac.c.root,t0=performance.now();
+ (function f(){const e=(performance.now()-t0)/1200;if(e>=1){r.scale.set(1,1,1);return;}const k=1+Math.abs(Math.sin(e*Math.PI*6))*.07*(1-e);r.scale.set(k,k,k);requestAnimationFrame(f);})();}
+function thSceneEnd(quiet){const S=POV.scene;if(!S)return;POV.scene=null;const han=actors.han,oph=actors.ophelia1;
+ if(oph){thResetPose(oph.c);if(oph.cinemaDate){const st=TH_SEATS.partner;oph.pos={x:st[0],y:st[1]};oph.spot={x:st[0],y:st[1],pose:'sit',face:Math.PI};placeActor(oph);}}
+ if(han){thResetPose(han.c);han.c.legs.forEach(l=>l.rotation.x=0);han.c.arms.forEach(a=>a.rotation.x=0);han.c.root.position.y=0;han.c.root.rotation.set(0,Math.PI,0);
+  if(S.prev){POV.fpPref=S.prev.fpPref;POV.yaw=Math.PI;POV.look=thScreenLook(TH_SEATS.han[1]);}}
+ camera.near=.3;camera.updateProjectionMatrix();POV.snap=true;POV.zoneKey='';if(typeof povButtons==='function')povButtons();if(!quiet)thActSt('');}
 function thHanSit(){const ac=actors.han;if(!POV.on||!ac)return;const st=TH_SEATS.han;ac.pos={x:st[0],y:st[1]};POV.yaw=Math.PI;ac.c.root.rotation.y=POV.yaw;
- POV.fpPref=true;POV.look=-.08;POV.snap=true;povButtons();onFloor(ac,ac.pos.y);ac.c.root.position.set(tx(st[0]),0,tz(st[1]));thClose();}
+ POV.fpPref=true;POV.look=thScreenLook(st[1]);POV.snap=true;povButtons();onFloor(ac,ac.pos.y);ac.c.root.position.set(tx(st[0]),0,tz(st[1]));thClose();}
 thActRender();if(TH.sexMode&&TH.unlocked)thSexSet(true,false);else if(TH.sexMode)thSexSet(false,false);
 setInterval(()=>{const fx=$('thSexFX');if(fx)fx.style.visibility=(TH.unlocked&&thInCinema())?'visible':'hidden';},700); // efek privat cuma di dalam Bioskop
 // keyboard
@@ -2208,7 +2282,7 @@ function loop(now){
  OUTER_WALLS.forEach(w=>{if(!w.g.parent.visible||w.priv)return;tmpV.copy(camera.position).sub(wp(w.g));const facing=tmpV.dot(w.n)>0;const th=facing?.35:w.h;
   const cur=w.w.scale.y+(th-w.w.scale.y)*Math.min(1,dt*8);w.w.scale.y=cur;w.w.position.y=cur/2;w.cap.position.y=cur+.03;});
  const far=camera.position.distanceTo(controls.target)>(stage.clientWidth<700?34:50);labBox.classList.toggle('far',far);
- brainTick(now);updateActors(now,dt);if(POV.on)povCamera(dt);placePop();
+ brainTick(now);updateActors(now,dt);if(POV.scene)thSceneTick(now);if(POV.on)povCamera(dt);placePop();
  envTick(now,dt);
  renderer.render(scene,camera);labelR.render(scene,camera);
  requestAnimationFrame(loop);
