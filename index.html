@@ -2234,31 +2234,37 @@ function thSceneTick(now){const S=POV.scene,han=actors.han;if(!S||!han)return;co
   const P0=thW(hc.pen,new THREE.Vector3()),want=.008+.115*(1-p); // turun lebih dalam
   const setC=u=>{thPose(oc,{y:0,ry:ryS,rx:-.05+.08*s,l:[[-u,-.5],[-u,.5]],k:[u+.75,u+.75],a:[[-.3,.4],[-.3,-.4]],e:[-1.4,-1.4],t:[0,-.35,0],h:[0,-.55,.1]});thGround(oc);thStick(oc,oc.anc.vag,P0,off.set(0,0,-.02),false);};
   S.fa=thFit(setC,()=>thW(oc.anc.vag,_v2).y-P0.y-want,S.fa??.7,(S.fa??.7)+.05,.1,1.5);thW(oc.anc.vag,T);tgt=T.clone();
-  // B berlutut di SAMPING (sisi +x), badan hadap samping ke A; cuma kepala yang nyamperin buat ciuman; badan napas/goyang pelan (gak kaku)
-  const om=new THREE.Vector3(),ch=new THREE.Vector3(0,.3,0),br=Math.sin(t*1.25),br2=Math.sin(t*.7+.6);
-  const setBk=u=>{thPose(bc,{x:.5,y:0,ry:-PI2,rx:u,...kneelUp(bc,u,PI2+.15),a:[[-.3,.4],[-.3,-.4]],e:[-1.4,-1.4],t:[.03*br,.05*br2,.035*br2],h:[.1+.04*br,.12*Math.sin(t*.9),.05*br2]});thGround(bc);
-   thW(bc.anc.mouth,_v2);bc.root.position.x+=om.x+.035-_v2.x;bc.root.position.z+=om.z-_v2.z;bc.root.updateMatrixWorld(true);};
-  const placeB=()=>{thW(oc.anc.mouth,om);S.fb=thFit(setBk,()=>thW(bc.anc.mouth,_v2).y-om.y,S.fb??.3,(S.fb??.3)+.05,-.3,1.1);
-   const ca=ch.clone().applyMatrix4(oc.torso.matrixWorld),cb=ch.clone().applyMatrix4(bc.torso.matrixWorld);if(cb.x-ca.x<.27){bc.root.position.x+=.27-(cb.x-ca.x);bc.root.updateMatrixWorld(true);}}; // dada gak nempel/tembus
-  const rz0=oc.torso.rotation.z; // A miring dikit ke samping nyamperin B biar bibir ketemu
-  S.fr=thFit(r=>{oc.torso.rotation.z=rz0+r;oc.root.updateMatrixWorld(true);placeB();},()=>thW(bc.anc.mouth,_v2).x-thW(oc.anc.mouth,_v3).x-.035,S.fr??.15,(S.fr??.15)+.05,0,.5);thW(oc.anc.vag,T);tgt=T.clone();
-  // B gerak halus: posisi diredam (low-pass) biar gak ikut kejedot-jedot hentakan A
-  if(!S.bP)S.bP=bc.root.position.clone();else S.bP.lerp(bc.root.position,.18);bc.root.position.copy(S.bP);bc.root.updateMatrixWorld(true);
+  // A miring dikit ke samping (konstan, gak di-fit per frame → gak loncat) + noleh ke B
+  oc.torso.rotation.z+=.2;oc.root.updateMatrixWorld(true);thW(oc.anc.vag,T);tgt=T.clone();
+  // B berlutut di SAMPING (sisi +x), badan hadap samping ke A; condong ngikut tinggi bibir A (diredam), napas/goyang pelan
+  const om=thW(oc.anc.mouth,new THREE.Vector3()),ch=new THREE.Vector3(0,.3,0),br=Math.sin(t*1.25),br2=Math.sin(t*.7+.6);
+  const setBk=u=>{thPose(bc,{x:.5,y:0,ry:-PI2,rx:u,...kneelUp(bc,u,PI2+.15),a:[[-.3,.4],[-.3,-.4]],e:[-1.4,-1.4],t:[.03*br,.05*br2,.035*br2],h:[.1+.04*br,.12*Math.sin(t*.9),.05*br2]});thGround(bc);};
+  const uFit=thFit(setBk,()=>thW(bc.anc.mouth,_v2).y-om.y,S.fb??.3,(S.fb??.3)+.05,-.3,.9);S.fb=uFit;
+  S.fbS=S.fbS==null?uFit:S.fbS+(uFit-S.fbS)*.25;setBk(S.fbS);
+  // geser horizontal biar bibir ketemu, tapi dada gak nempel/tembus
+  {thW(bc.anc.mouth,_v2);let dx=om.x+.035-_v2.x,dz=om.z-_v2.z;bc.root.position.x+=dx;bc.root.position.z+=dz;bc.root.updateMatrixWorld(true);
+   const ca=ch.clone().applyMatrix4(oc.torso.matrixWorld),cb=ch.clone().applyMatrix4(bc.torso.matrixWorld);if(cb.x-ca.x<.27){bc.root.position.x+=.27-(cb.x-ca.x);bc.root.updateMatrixWorld(true);}}
+  // posisi B diredam (low-pass) → gak kejedot-jedot ikut hentakan A
+  if(!S.bP)S.bP=bc.root.position.clone();else S.bP.lerp(bc.root.position,.25);bc.root.position.copy(S.bP);bc.root.updateMatrixWorld(true);
   thAkimbo(oc);thAkimbo(bc); // tangan kedua cewek di pinggang, lengan menyamping
   thHandTo(hc,1,thW(bc.anc.butL,new THREE.Vector3()));}
  else if(S.kind==='t_oral'){ // 👯 Han berlutut tegak hadap layar (tangan di pinggang, menyamping), dua cewek berlutut duduk di tumit di depannya, oral gantian — yang nunggu DIAM
   const turn=Math.floor(ph/(Math.PI*2*3))%2,act=turn?bc:oc,other=act===oc?bc:oc;
-  if(S.oTurn!==turn){if(S.oTurn!=null){oc.snap=thSnap(oc);bc.snap=thSnap(bc);S.blend=now;}S.oTurn=turn;S.oPos=null;}
+  if(S.oTurn!==turn){if(S.oTurn!=null){oc.snap=S.ls?S.ls[0]:thSnap(oc);bc.snap=S.ls?S.ls[1]:thSnap(bc);S.blend=now;}S.oTurn=turn;S.oPos=null;}
   thPose(hc,{y:.25,ry:ryS,rx:-.05,...kneelUp(hc,-.05),a:[[-.3,.4],[-.3,-.4]],e:[-1.4,-1.4],h:[.45,0,0]});thGround(hc);
   const Tp=thW(hc.pen,new THREE.Vector3()),dz=.05+.065*(1-p);
-  const kneelSit=(c,i,a,h)=>{thPose(c,{x:i?.13:-.13,y:-.35,ry:c===act?(i?-.12:.12):(i?-.55:.55),rx:a,l:[[-a-.25,-.15],[-a-.25,.15]],k:[2.3,2.3],a:[[-1.1,.2],[-1.1,-.2]],e:[-.7,-.7],h:[h,0,i?.25:-.25]});thGround(c);};
-  kneelSit(other,other===oc?0:1,.45,-.15);
-  const ai=act===oc?0:1;S.fa=thFit(u=>{kneelSit(act,ai,u,-.15);thStick(act,act.anc.mouth,Tp,off.set(0,0,-dz),false);},()=>thW(act.anc.mouth,_v2).y-Tp.y,S.fa??.5,(S.fa??.5)+.05,-.3,1.3);
+  // berlutut duduk di tumit: betis rebah DATAR di kasur (gak keangkat/melayang), th = seberapa dalam duduk ke tumit, a = condong badan
+  const kneelSit=(c,i,a,h,th)=>{thPose(c,{x:i?.13:-.13,y:-.35,ry:c===act?(i?-.12:.12):(i?-.55:.55),rx:a,l:[[-th-a,-.15],[-th-a,.15]],k:[th+PI2,th+PI2],a:[[a*.6,.15],[a*.6,-.15]],e:[0,0],h:[h,0,i?.25:-.25]});thGround(c);};
+  kneelSit(other,other===oc?0:1,.18,-.12,1.2); // yang nunggu: duduk tegak di tumit, diam
+  const ai=act===oc?0:1,stk=()=>thStick(act,act.anc.mouth,Tp,off.set(0,0,-dz),false),em=()=>thW(act.anc.mouth,_v2).y-Tp.y;
+  S.fa=thFit(a=>{kneelSit(act,ai,a,-.2,1.2);stk();},em,S.fa??1.0,(S.fa??1.0)+.05,.3,1.7); // duduk di tumit tetap, cuma condong badan yang di-fit (1 solusi, gak loncat)
+  kneelSit(act,ai,S.fa,-.2,1.2);stk();act.head.rotation.x=-.2-.1*p;act.root.updateMatrixWorld(true); // kepala ikut ngangguk dikit
   // yang nunggu: di samping, ada jarak (gak nempel/tembus), posisinya dikunci sekali per giliran → diam, gak ikut goyang
   if(!S.oPos){const sd=other===oc?-1:1,at=thW(act.torso,new THREE.Vector3()),ot=thW(other.torso,new THREE.Vector3());other.root.position.x+=at.x+sd*.46-ot.x;other.root.position.z+=at.z+.1-ot.z;other.root.updateMatrixWorld(true);
    const ah=thW(act.head,new THREE.Vector3()),oh=thW(other.head,new THREE.Vector3());const gap=sd*(oh.x-ah.x);if(gap<.32){other.root.position.x+=sd*(.32-gap);other.root.updateMatrixWorld(true);}thGround(other);S.oPos=other.root.position.clone();}
   other.root.position.copy(S.oPos);other.root.updateMatrixWorld(true);
   thW(act.anc.mouth,T);tgt=T;ins=.045;
+  [oc,bc].forEach(c=>[0,1].forEach(i=>{c.legs[i].updateWorldMatrix(true,false);thHandTo(c,i,new THREE.Vector3(i?.03:-.03,-c.dim.thigh*.6,.08).applyMatrix4(c.legs[i].matrixWorld));})); // tangan cewek di paha sendiri
   thAkimbo(hc);} // Han: tangan di pinggang, lengan menyamping
  else if(S.kind==='squat'){ // 🐸 jongkok di atas Han hadap layar: telapak di kasur, variasi: naik-turun dalam ↔ goyang muter pinggul (nyambung halus); tangan di lutut sendiri; Han lengan terlentang ke samping
   thPose(hc,supine(hc,-.05));thGround(hc);const P0=thW(hc.pen,new THREE.Vector3()),top=thTopW(hc);
@@ -2340,7 +2346,8 @@ function thSceneTick(now){const S=POV.scene,han=actors.han;if(!S||!han)return;co
   thAkimbo(bc);} // cewek atas: tangan di pinggang sendiri, lengan menyamping
  thPenAim(hc,tgt?tgt.clone():null,ins);
  // transisi halus
- if(S.blend){const k=(now-S.blend)/600;[hc,...cast.map(a=>a.c)].forEach(c=>thBlend(c,k));if(k>=1)S.blend=0;}
+ if(S.blend){const k=(now-S.blend)/600;[hc,...cast.map(a=>a.c)].forEach(c=>thBlend(c,k));if(S.kind==='t_oral'&&k<1)cast.forEach(a=>thGround(a.c));if(k>=1)S.blend=0;}
+ if(S.kind==='t_oral')S.ls=[oc,bc].map(thSnap); // pose terakhir yang beneran ke-render → transisi gantian mulus (gak loncat) // pas transisi gantian tetep napak kasur
  if(peak){const k=1+Math.abs(Math.sin((S.pulse-now)/1200*Math.PI*6))*.03;oc.root.scale.set(k,k,k);}}
 /* 🎯 Fokus bioskop pas Mode sex: lantai/ruangan/luar gedung lain disembunyiin + aktor lain dipause (biar ringan) */
 function thFocus(on){const r=ROOMS.find(x=>x.cinema);if(!r)return;const fi=r.f,g=FLOORS[fi];
@@ -2358,7 +2365,7 @@ function thFocus(on){const r=ROOMS.find(x=>x.cinema);if(!r)return;const fi=r.f,g
  TH.focus={hid};}
 const thPaused=ac=>!!(POV.scene&&TH.focus&&ac.id!=='han'&&!ac.cinemaDate);
 /* 🎯 solver kecil (secant): cari 1 parameter pose biar err()=0 — dipakai biar mulut/memek pas di tinggi kontol tanpa melayang */
-function thFit(set,err,x0,x1,lo,hi){set(x0);let e0=err();set(x1);let e1=err();
+function thFit(set,err,x0,x1,lo,hi){x0=clampN(x0,lo,hi);x1=clampN(x1,lo,hi);if(Math.abs(x1-x0)<1e-3)x1=x0+(x0+.05<=hi?.05:-.05);set(x0);let e0=err();set(x1);let e1=err();
  for(let i=0;i<5&&Math.abs(e1)>.004;i++){const d=e1-e0;if(Math.abs(d)<1e-6)break;const x2=clampN(x1-e1*(x1-x0)/d,lo,hi);x0=x1;e0=e1;x1=x2;set(x1);e1=err();}return x1;}
 /* lengan "IK" 2-ruas sederhana: arahin bahu→tangan ke target dunia, siku nekuk sesuai jarak (gak bisa melar) */
 /* pegang pantat dari LUAR/samping (bukan lewat badan) biar lengan Han gak tembus */
