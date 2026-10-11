@@ -1,5 +1,5 @@
 {
-  "updated_at": "2026-10-05T11:40:00+08:00",
+  "updated_at": "2026-10-11T09:51:24+08:00",
   "agents": [
     {
       "id": "hanrin",
@@ -100,6 +100,33 @@
         {
           "time": "20:00",
           "label": "Nongkrong grup IG Grokbot OpheliaxHR (20:00-21:00)"
+        }
+      ]
+    },
+    {
+      "id": "rin1",
+      "name": "Rin 1",
+      "role": "Konten Instagram rinrin_17_01 (RIN)",
+      "room": "ig",
+      "status": "santai",
+      "task": "Santai, jalan-jalan keliling kantor (di luar jadwal)",
+      "updated_at": "2026-10-11T09:51:24+08:00",
+      "schedule": [
+        {
+          "time": "09:17",
+          "label": "📸 Postingan pagi + support grup IG & CR7"
+        },
+        {
+          "time": "20:00",
+          "label": "💬 Nongkrong grup IG Grokbot OpheliaxHR (20:00-21:00)"
+        },
+        {
+          "time": "20:30",
+          "label": "📸 Slot posting malam (kalau belum 2/hari)"
+        },
+        {
+          "time": "22:00",
+          "label": "😴 Bobo di Kamar Rin 1 (Lt 3) sampai 06:00"
         }
       ]
     },
