@@ -697,7 +697,7 @@ function lift(r){const o=r.f*DY;box(30.3,.25+o,0,1.6,1.6,2.4,0xcfd8ff);box(30.45
    Kunci: kode dicek pakai SHA-256 (yang disimpan cuma hash-nya, bukan kodenya). Ganti kode: lihat README. */
 const TH_SALT='kantor-ai-bioskop:',TH_HASH='33fd05f2730af5a504f44819feb9f2f790eefd15f4fea0cfc5a4d398dbaa13e7';
 const TH_REPO='17hrprimary/kantor-ai',TH_DIR='theater',TH_EXT=/\.(mp4|webm|m4v|mov|ogv|ogg|mkv)$/i;
-const TH={screen:null,mat:null,idle:null,idleImg:null,idleLoading:false,vtex:null,beam:null,light:null,video:null,list:[],cur:-1,unlocked:false,open:false,loaded:false,autoNext:true};
+const TH={screen:null,mat:null,idle:null,idleImg:null,idleLoading:false,vtex:null,beam:null,light:null,neons:[],video:null,list:[],cur:-1,unlocked:false,open:false,loaded:false,autoNext:true};
 const TH_IDLE_IMG=TH_DIR+'/idle-ophelia.png';
 function thIdleTex(lines){const c=document.createElement('canvas');c.width=1280;c.height=720;const g=c.getContext('2d');
  const gr=g.createLinearGradient(0,0,0,720);gr.addColorStop(0,'#1b1226');gr.addColorStop(1,'#3a1530');g.fillStyle=gr;g.fillRect(0,0,1280,720);
@@ -740,6 +740,33 @@ function cinemaRoom(r){P=FLOORS[r.f];const X=r.x,Y=r.y,sw=7.2,sh=12.8,cx=X+r.w/2
   box(bx+.05,by+.05,.5,1.2,.45,.03,0xd23a6e); // selimut terlipat di kaki ranjang
   box(bx+.2,by+1.5,.5,.9,.36,.1,0xffffff);box(bx,by+1.95,0,1.3,.1,.9,0x3a2430);} // bantal + headboard
  TH.light=new THREE.PointLight(0xffc9a0,2.2,18);TH.light.position.set(tx(cx),2.6,tz(Y+8));P.add(TH.light);
+ // 🌑 dinding hitam + atap khusus Bioskop (Lt4) — ruangan terasa tertutup; atap di atas area kursi biar layar portrait tetap kelihatan
+ {const wallH=3.9,thk=.2,darkC=0x0a0810,ceilC=0x07060c;
+  // utara: panel kiri/kanan layar (tengah sudah dinding layar hitam)
+  box(X+thk,Y+thk,0,cx-4.6-(X+thk),thk,wallH,darkC,{shadow:false});
+  box(cx+4.6,Y+thk,0,(X+r.w-thk)-(cx+4.6),thk,wallH,darkC,{shadow:false});
+  box(X+thk,Y+r.d-thk*2,0,r.w-2*thk,thk,wallH,darkC,{shadow:false}); // selatan
+  box(X+thk,Y+thk,0,thk,r.d-2*thk,wallH,darkC,{shadow:false}); // barat
+  // timur: gap pintu ke Tangga Lt4 (~y 3.2–6.6)
+  box(X+r.w-2*thk,Y+thk,0,thk,3.0,wallH,darkC,{shadow:false});
+  box(X+r.w-2*thk,Y+6.6,0,thk,r.d-6.6-thk,wallH,darkC,{shadow:false});
+  // atap gelap di atas kursi (mulai di belakang bidang layar)
+  box(X+thk,Y+1.4,wallH-.1,r.w-2*thk,r.d-1.4-thk,.14,ceilC,{shadow:false});
+  // trim atap / cornice gelap di sekeliling
+  box(X+thk,Y+1.4,wallH-.22,r.w-2*thk,.12,.12,0x1a1224,{shadow:false});
+  box(X+thk,Y+r.d-thk*2-.12,wallH-.22,r.w-2*thk,.12,.12,0x1a1224,{shadow:false});}
+ // 🌈 neon RGB di 4 sudut ruangan (glow + PointLight, warna di-cycle thNeonTick)
+ TH.neons=[];
+ {const neonH=3.35,nr=.045;
+  [[X+.55,Y+.55],[X+r.w-.55,Y+.55],[X+.55,Y+r.d-.55],[X+r.w-.55,Y+r.d-.55]].forEach(([nx,ny],i)=>{
+   const matN=new THREE.MeshStandardMaterial({color:0xff0088,emissive:0xff0088,emissiveIntensity:3.2,roughness:.25,metalness:.15,toneMapped:false});
+   const tube=mesh(new THREE.CylinderGeometry(nr,nr,neonH,12),matN,P,false);tube.position.set(tx(nx),neonH/2+.06,tz(ny));
+   // base + cap kecil
+   box(nx-.1,ny-.1,0,.2,.2,.08,0x16101c,{shadow:false});
+   const cap=mesh(new THREE.SphereGeometry(nr*1.35,10,8),matN,P,false);cap.position.set(tx(nx),neonH+.04,tz(ny));
+   const pl=new THREE.PointLight(0xff0088,1.15,8.5);pl.position.set(tx(nx),1.55,tz(ny));P.add(pl);
+   TH.neons.push({mat:matN,light:pl,phase:i*.25});
+  });}
  plant(X+.7,Y+r.d-.7,1,0x5fae6a);plant(X+24.2,Y+r.d-.7,1,0x5fae6a);}
 /* SHA-256 (cadangan kalau crypto.subtle gak ada, mis. dibuka via http biasa) */
 function thSha256Fallback(str){const K=[],H=[];let n=2,c=0;const isP=v=>{for(let i=2;i*i<=v;i++)if(v%i===0)return false;return true;};
@@ -2325,6 +2352,12 @@ function ensureFarForest(){ // opsional / WIP — default gak dipanggil (hemat l
  P=P0;ENV.farBuilt=true;
 }
 
+function thNeonTick(now){ // 🌈 cycle warna neon sudut Bioskop
+ if(!TH.neons||!TH.neons.length)return;
+ const t=now*0.00035;
+ if(!TH._neonC)TH._neonC=new THREE.Color();
+ TH.neons.forEach(n=>{const h=(t+n.phase)%1;TH._neonC.setHSL(h,.95,.55);n.mat.color.copy(TH._neonC);n.mat.emissive.copy(TH._neonC);if(n.light)n.light.color.copy(TH._neonC);});
+}
 function envCinemaMode(){
  // Lt 4 fokus, di dalam Bioskop (POV), panel bioskop terbuka, atau preview #bioskop
  if(typeof floorMode!=='undefined'&&String(floorMode)==='3')return true;
@@ -2386,7 +2419,7 @@ function loop(now){
  OUTER_WALLS.forEach(w=>{if(!w.g.parent.visible||w.priv)return;tmpV.copy(camera.position).sub(wp(w.g));const facing=tmpV.dot(w.n)>0;const th=facing?.35:w.h;
   const cur=w.w.scale.y+(th-w.w.scale.y)*Math.min(1,dt*8);w.w.scale.y=cur;w.w.position.y=cur/2;w.cap.position.y=cur+.03;});
  const far=camera.position.distanceTo(controls.target)>(stage.clientWidth<700?34:50);labBox.classList.toggle('far',far);
- brainTick(now);updateActors(now,dt);if(POV.scene)thSceneTick(now);if(POV.on)povCamera(dt);placePop();
+ brainTick(now);updateActors(now,dt);if(POV.scene)thSceneTick(now);thNeonTick(now);if(POV.on)povCamera(dt);placePop();
  envTick(now,dt);
  renderer.render(scene,camera);labelR.render(scene,camera);
  requestAnimationFrame(loop);
