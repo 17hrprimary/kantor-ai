@@ -177,7 +177,7 @@ body.pov.touch .povpad{display:block}
 .povbtns button.st.dis{opacity:.4}
 .povbtns button.x{grid-column:span 2;width:auto;min-height:36px;font-size:12px;flex-direction:row;gap:4px}
 .povbtns button.go{background:linear-gradient(180deg,#ff9cc7,#f2559a);color:#fff;border-color:#fff}
-.mobbar{display:none;position:absolute;left:50%;bottom:148px;transform:translateX(-50%);z-index:9;width:min(360px,calc(100% - 20px));gap:6px;flex-wrap:wrap;justify-content:center;pointer-events:none}
+.mobbar{display:none;position:absolute;left:50%;bottom:8px;transform:translateX(-50%);z-index:9;width:min(420px,calc(100% - 160px));gap:5px;flex-wrap:wrap;justify-content:center;pointer-events:none}
 body.pov.touch .mobbar,body.pov .mobbar.show{display:flex}
 .mobbar button{pointer-events:auto;border:2px solid #ffd2e4;background:rgba(255,255,255,.95);color:#d6457f;font:inherit;font-size:11.5px;font-weight:900;border-radius:12px;padding:8px 10px;cursor:pointer;box-shadow:0 3px 0 #ffe0ec;touch-action:manipulation;white-space:nowrap}
 .mobbar button.on{background:linear-gradient(180deg,#6aa8f5,#3c7fd6);color:#fff;border-color:#fff}
@@ -199,7 +199,7 @@ body.pov.touch .mobbar,body.pov .mobbar.show{display:flex}
  .stick{width:110px;height:110px;left:10px;bottom:12px}
  .povbtns{right:8px;bottom:12px;grid-template-columns:repeat(2,58px)}
  .povbtns button{width:58px;min-height:46px}
- .mobbar{bottom:132px}
+ .mobbar{bottom:6px;width:min(360px,calc(100% - 140px))}
 }
 body.touch .povhint .kbd{display:none}body.touch .povhint .tch{display:inline}
 </style>
@@ -697,14 +697,14 @@ function thIdleTex(lines){const c=document.createElement('canvas');c.width=1280;
  g.font='bold 46px "Segoe UI",system-ui,sans-serif';g.fillStyle='#fff';lines.forEach((t,i)=>g.fillText(t,640,380+i*70));
  const t=new THREE.CanvasTexture(c);t.colorSpace=THREE.SRGBColorSpace;return t;}
 function thSetIdle(lines){if(!TH.mat)return;if(TH.idle)TH.idle.dispose();TH.idle=thIdleTex(lines);if(!TH.playing){TH.mat.map=TH.idle;TH.mat.needsUpdate=true;}}
-function cinemaRoom(r){P=FLOORS[r.f];const X=r.x,Y=r.y,sw=12.8,sh=7.2,cx=X+r.w/2;
- box(cx-7.4,Y+.02,0,14.8,.22,sh+1.25,0x140e18); // dinding layar (hitam)
+function cinemaRoom(r){P=FLOORS[r.f];const X=r.x,Y=r.y,sw=7.2,sh=12.8,cx=X+r.w/2; // layar portrait 9:16 kayak HP
+ box(cx-4.6,Y+.02,0,9.2,.22,sh+1.25,0x140e18); // dinding layar (hitam)
  TH.mat=new THREE.MeshBasicMaterial({color:0xffffff,toneMapped:false});
  TH.screen=mesh(new THREE.PlaneGeometry(sw,sh),TH.mat,P,false);TH.screen.position.set(tx(cx),.7+sh/2,tz(Y+.25));
  thSetIdle(TH.unlocked?['🔓 Kebuka! Pilih film di panel 🎬','Selamat nonton, Papa 🍿']:['🔒 Masukkan kode kunci di 🔐 Konsol','Mode POV: jalan ke sini, tekan T / tombol 🎬']);
- box(cx-7.9,Y+.15,0,1.0,.4,sh+1.25,0x9a1b2e);box(cx+6.9,Y+.15,0,1.0,.4,sh+1.25,0x9a1b2e); // gorden
- box(cx-7.9,Y+.15,sh+.85,15.8,.45,.45,0x7d1424); // valance
- box(cx-7,Y+.25,0,14,1.0,.22,0x2a1c26); // panggung kecil
+ box(cx-5.1,Y+.15,0,1.0,.4,sh+1.25,0x9a1b2e);box(cx+4.1,Y+.15,0,1.0,.4,sh+1.25,0x9a1b2e); // gorden
+ box(cx-5.1,Y+.15,sh+.85,10.2,.45,.45,0x7d1424); // valance
+ box(cx-4.5,Y+.25,0,9,1.0,.22,0x2a1c26); // panggung kecil
  for(let row=0;row<4;row++){const yy=Y+4.4+row*2.0;
   [[X+3.0,X+10.6],[X+14.4,X+22.0]].forEach(([a,b])=>{for(let x=a;x<=b+1e-6;x+=1.15){
    box(x-.42,yy-.32,0,.84,.72,.42,0xb3122e);box(x-.42,yy+.3,0,.84,.16,.72,0x8a0e22);box(x-.48,yy-.3,0,.08,.6,.62,0x3a2a30);}});
