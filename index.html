@@ -1980,7 +1980,7 @@ const TH_TXT={kiss:{demo:'💋 Ciuman sambil pelukan',say:'Peluk aku erat sayang
  miss:{demo:'🛌 Misionaris',say:'Sini di atasku sayang… 💗',pov:'🛌 {A} telentang kaki terbuka, Han di atas bertumpu tangan & lutut'},
  spoon:{demo:'🥄 Spooning',say:'Peluk dari belakang sayang… 💞',pov:'🥄 Tiduran miring, Han meluk {A} dari belakang'},
  g_rear:{demo:'🏋️ Gending dari belakang',say:'Angkat aku sayang… pelan-pelan di belakang 💗',pov:'🏋️ Han berdiri, ngangkat {A} dari belakang, tangan di bawah kedua pahanya (anal)'},
- pile:{demo:'🔻 Piledriver',say:'Dari atas sayang… dalem banget 🔥',pov:'🔻 {A} rebah di bahu, pinggul keangkat; Han jongkok di atas, dorong ke bawah'},
+ pile:{demo:'🔻 Piledriver',say:'Dari atas sayang… dalem banget 🔥',pov:'🔻 {A} rebah di bahu, pinggul keangkat; Han jongkok di atas, hentak anal ke bawah'},
  press:{demo:'💥 Mating press',say:'Tekan aku sayang… 💞',pov:'💥 {A} telentang, kaki ditekuk ke dada; Han nindih dari atas, tangan di kasur'},
  prone:{demo:'🛏️ Prone bone',say:'Tindih aku dari belakang sayang… 💗',pov:'🛏️ {A} tengkurap rata; Han di atas punggungnya, tangan nopang di kasur'},
  stand:{demo:'🧍 Berdiri',say:'Dari belakang sambil berdiri sayang… 💗',pov:'🧍 {A} berdiri nunduk, tangan di kasur; Han berdiri di belakang'},
@@ -2387,22 +2387,26 @@ function thSceneTick(now){const S=POV.scene,han=actors.han;if(!S||!han)return;co
   S.fb=thFit(setR,()=>thW(bc.anc.vag,_v2).y-Mo.y,S.fb??.6,(S.fb??.6)+.05,-.2,1.5);thKeepOnBed(bc);
   thAkimbo(bc);} // cewek atas: tangan di pinggang sendiri, lengan menyamping
  else if(S.kind==='g_rear'){ // 🏋️ gending dari belakang (anal): Han berdiri di lantai depan kaki ranjang, ngangkat cewek (punggungnya ke dada Han), tangan Han di bawah kedua pahanya; variasi: angkat-jatuh ↔ goyang muter pelan
-  const top=thTopW(hc),fl=top-TH_BED.top,gm=wave(t/6.5),kb=.16+.1*p*(1-gm);
-  thPose(hc,{y:-1.62,ry:0,rx:-.1,l:[[-kb,-.16],[-kb,.16]],k:[2*kb,2*kb],a:[[-.6,.3],[-.6,-.3]],e:[-.8,-.8],h:[.12,.3*Math.sin(t*.35),0]});thGroundTo(hc,fl);
+  // Han aktif: jongkok dikit pas narik, lalu dorong pinggul ke depan-atas (lutut lurus, badan condong ke belakang) → nghentak badan cewek; mode goyang: pinggul muter
+  const top=thTopW(hc),fl=top-TH_BED.top,gm=wave(t/6.5),pI=1-(1-p)*(1-p),kb=.1+(.3-.12*gm)*(1-pI),sH=(.06+.02*gm)*pI,rxH=-.05-(.15-.05*gm)*pI,sw=.08*gm*Math.sin(ph);
+  const lx=-kb+sH/.9-rxH;
+  thPose(hc,{y:-1.62,ry:0,rx:rxH,l:[[lx,-.16],[lx,.16]],k:[2*kb,2*kb],a:[[-.6,.3],[-.6,-.3]],e:[-.8,-.8],t:[.05*p,sw,.04*gm*Math.cos(ph)],h:[.12-.1*p,.25*Math.sin(t*.35),0]});
+  hc.root.position.z+=sH;hc.root.updateMatrixWorld(true);thGroundTo(hc,fl);
   hc.torso.updateWorldMatrix(true,false);const P0=thW(hc.pen,new THREE.Vector3()),fw=new THREE.Vector3(0,0,1).transformDirection(hc.torso.matrixWorld).setY(0).normalize();
-  const want=(.015+.1*(1-p))*(1-gm)+(.02+.035*(1-p))*gm;
+  const want=(.015+.055*(1-q))*(1-gm)+(.015+.03*(1-p))*gm;
   thPose(oc,{y:-1.4,ry:0,rx:-.08+.04*q,l:[[-1.75,-.62],[-1.75,.62]],k:[1.45+.15*q,1.45+.15*q],a:[[-2.6,.4],[-2.6,-.4]],e:[-1.5,-1.5],t:[.03*gm*Math.cos(ph),.12*gm*Math.sin(ph),.05*gm*Math.cos(ph)],h:[-.05,-.35,.05*Math.sin(ph*.5)]});
-  thStick(oc,oc.anc.anus,P0.clone().addScaledVector(fw,.035),off.set(0,want,0),true);thW(oc.anc.anus,T);tgt=T;S.dripSrc=oc.anc.anus;
+  thStick(oc,oc.anc.anus,P0.clone().addScaledVector(fw,.02),off.set(0,want,0),true);thW(oc.anc.anus,T);tgt=T;ins=.06;S.dripSrc=oc.anc.anus;
   // tangan Han di bawah kedua paha (dari luar), cewek tangannya ke belakang leher Han
   hc.torso.updateWorldMatrix(true,false);[0,1].forEach(i=>{const s2=i?1:-1;oc.legs[i].updateWorldMatrix(true,false);thHandPole(hc,i,new THREE.Vector3(0,-oc.dim.thigh*.55,-.115).applyMatrix4(oc.legs[i].matrixWorld),new THREE.Vector3(s2,-.4,-.2).transformDirection(hc.torso.matrixWorld));});
   oc.torso.updateWorldMatrix(true,false);[0,1].forEach(i=>{const s2=i?1:-1,H=thW(hc.head,new THREE.Vector3()).addScaledVector(fw,-.09);H.y-=.08;H.addScaledVector(new THREE.Vector3(1,0,0).transformDirection(hc.torso.matrixWorld),s2*.06);thHandPole(oc,i,H,new THREE.Vector3(s2,.6,.2).transformDirection(oc.torso.matrixWorld));});}
  else if(S.kind==='pile'){ // 🔻 piledriver: cewek rebah di bahu, pinggul keangkat, kaki ngangkang ke arah kepala; Han jongkok berdiri di atasnya (kaki di kiri-kanan badannya), dorong ke bawah; variasi: hentak dalam pelan ↔ cepat dangkal
-  const gm=wave(t/7),top=thTopW(oc),jq=wave(ph-.35);
-  thPose(oc,{y:.15,ry:Math.PI,rx:-PI2-1.0-.05*jq,l:[[-1.0,-.9],[-1.0,.9]],k:[.35,.35],a:[[0,0],[0,0]],e:[0,0],h:[.55,0,0]});thGround(oc);thKeepOnBed(oc);
+  // anal, hentakan: Han turun cepat (impact) lalu narik pelan; cewek ikut ritme — pinggul ketekan ke bawah, kaki ngepak, kepala keangguk
+  const gm=wave(t/7),top=thTopW(oc),pI=1-(1-p)*(1-p),jq=wave(ph-.3),jI=jq*jq*(3-2*jq);
+  thPose(oc,{y:.15,ry:Math.PI,rx:-PI2-1.05+.14*jI,l:[[-1.0+.08*jI,-.9-.1*jI],[-1.0+.08*jI,.9+.1*jI]],k:[.3+.3*jI,.3+.3*jI],a:[[0,0],[0,0]],e:[0,0],h:[.55-.12*jI,0,.04*Math.sin(ph*.5)]});thGround(oc);thKeepOnBed(oc);
   {oc.torso.updateWorldMatrix(true,false);const Hd=thW(oc.head,new THREE.Vector3());[0,1].forEach(i=>{const s2=i?1:-1,Q=new THREE.Vector3(s2*.3,0,0).transformDirection(oc.torso.matrixWorld).setY(0).normalize().multiplyScalar(.34).add(Hd);Q.y=top+.03;thHandPole(oc,i,Q,new THREE.Vector3(s2,.5,0).transformDirection(oc.torso.matrixWorld));});}
-  const V=thW(oc.anc.vag,new THREE.Vector3()),want=(.03+.12*(1-p))*(1-gm*.55);
-  const setP=u=>{thPose(hc,{y:.1,ry:0,rx:.3,l:[[-u,-.5],[-u,.5]],k:[2*u,2*u],a:[[-.8,.3],[-.8,-.3]],e:[-.4,-.4],h:[.45,0,0]});thGround(hc);thStick(hc,hc.pen,V,off.set(0,0,-.03),false);};
-  const f0=S.fa??.9;S.fa=thFit(setP,()=>thW(hc.pen,_v2).y-V.y-want,f0,f0+.05,Math.max(.1,f0-.4),Math.min(1.45,f0+.4));tgt=V;S.dripSrc=null;
+  const V=thW(oc.anc.anus,new THREE.Vector3()),want=(.02+.075*(1-pI))*(1-gm*.45);
+  const setP=u=>{thPose(hc,{y:.1,ry:0,rx:.26+.14*pI,t:[.06*pI,0,0],l:[[-u,-.5],[-u,.5]],k:[2*u,2*u],a:[[-.8,.3],[-.8,-.3]],e:[-.4,-.4],h:[.45-.15*pI,0,0]});thGround(hc);thStick(hc,hc.pen,V,off.set(0,0,-.03),false);};
+  const f0=S.fa??.9;S.fa=thFit(setP,()=>thW(hc.pen,_v2).y-V.y-want,f0,f0+.05,Math.max(.1,f0-.4),Math.min(1.45,f0+.4));tgt=V;ins=.06;S.dripSrc=oc.anc.anus;
   // tangan Han pegang betis/kaki cewek (ngebuka kaki)
   hc.torso.updateWorldMatrix(true,false);[0,1].forEach(i=>{const s2=i?1:-1;oc.knees[i].updateWorldMatrix(true,false);thHandPole(hc,i,new THREE.Vector3(0,-oc.dim.shin*.35,.05).applyMatrix4(oc.knees[i].matrixWorld),new THREE.Vector3(s2,-.2,-.3).transformDirection(hc.torso.matrixWorld));});}
  else if(S.kind==='press'){ // 💥 mating press: cewek telentang, paha ditekuk ke dada, kaki ke atas; Han nindih miring curam, kaki lurus ke belakang (jari kaki di kasur), tangan napak di kasur samping bahunya; variasi: tumbuk dalam ↔ goyang muter
