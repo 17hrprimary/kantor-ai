@@ -115,6 +115,12 @@ aside{display:flex;flex-direction:column;gap:10px;overflow:auto;min-height:0}
 .loading{position:absolute;inset:0;display:grid;place-items:center;font-weight:800;color:#d6457f;z-index:4}
 body.noinfo main{grid-template-columns:1fr}
 body.noinfo aside{display:none}
+/* tombol mengambang buat buka lagi panel kanan (Waktu WITA) */
+.infofloat{display:none;position:fixed;right:12px;top:72px;z-index:30;border:2px solid #ffd2e4;background:rgba(255,255,255,.96);color:#d6457f;font:inherit;font-weight:800;font-size:12px;border-radius:12px;padding:8px 12px;cursor:pointer;box-shadow:0 3px 0 #ffe0ec,0 8px 18px rgba(214,69,127,.18)}
+.infofloat:active{transform:translateY(2px);box-shadow:0 1px 0 #ffe0ec}
+body.noinfo .infofloat{display:block}
+body.fs .infofloat{top:14px}
+@media(max-width:900px){.infofloat{top:58px;right:8px;font-size:11px;padding:7px 10px}}
 @media(max-width:900px){
  body{display:block}
  main{grid-template-columns:1fr;padding:10px}
@@ -208,7 +214,8 @@ body.touch .povhint .kbd{display:none}body.touch .povhint .tch{display:inline}
 <header>
   <div class="logo"><div class="ic">🏢</div><div><h1>Kantor AI by Han HQ</h1><div class="sub">Kantor 3D · drag buat putar, scroll/pinch buat zoom</div></div></div>
   <div class="chips" id="chips"></div>
-  <button class="btn ghost" id="infoToggle" title="Sembunyikan/tampilkan panel info">🕒 Info ▸</button>
+  <button class="btn ghost" id="infoToggle" title="Sembunyikan/tampilkan panel kanan (Waktu WITA / kontrol)">🕒 Info ▸</button>
+  <button class="btn ghost" id="btnFullscreen" title="Fullscreen browser (F11)">⛶ Fullscreen</button>
   <button class="btn" id="btnKerja">💪 Suruh Balik Kerja</button>
 </header>
 <main>
@@ -303,6 +310,7 @@ body.touch .povhint .kbd{display:none}body.touch .povhint .tch{display:inline}
     </div>
     <div class="card"><h2>📝 Log kantor</h2><div class="log" id="log"></div></div>
   </aside>
+  <button type="button" class="infofloat" id="infoFloat" title="Tampilkan panel kanan (Waktu WITA)">🕒 Panel</button>
 </main>
 <script src="chat.js"></script>
 <script type="module">
@@ -1572,10 +1580,18 @@ function placePop(){
  $('pop').style.left=x+'px';$('pop').style.top=y+'px';
 }
 // panel jadwal toggle
-const it=$('infoToggle');
-function setInfo(show){document.body.classList.toggle('noinfo',!show);it.textContent=show?'🕒 Info ▸':'🕒 Info ◂';try{localStorage.setItem('kantor-info',show?'1':'0')}catch(e){}requestAnimationFrame(resize);}
+const it=$('infoToggle'),infoFloat=$('infoFloat');
+function setInfo(show){document.body.classList.toggle('noinfo',!show);it.textContent=show?'🕒 Info ▸':'🕒 Info ◂';it.title=show?'Sembunyikan panel kanan (Waktu WITA / kontrol)':'Tampilkan panel kanan (Waktu WITA / kontrol)';if(infoFloat)infoFloat.setAttribute('aria-hidden',show?'true':'false');try{localStorage.setItem('kantor-info',show?'1':'0')}catch(e){}requestAnimationFrame(resize);}
 it.onclick=()=>setInfo(document.body.classList.contains('noinfo'));
+if(infoFloat)infoFloat.onclick=()=>setInfo(true);
 setInfo(!location.hash.includes('noinfo')&&(()=>{try{return localStorage.getItem('kantor-info')!=='0'}catch(e){return true}})());
+/* ⛶ Fullscreen browser (seluruh halaman, bukan cuma video) */
+const btnFS=$('btnFullscreen');
+function fsEl(){return document.fullscreenElement||document.webkitFullscreenElement||null;}
+function fsUI(){const on=!!fsEl();document.body.classList.toggle('fs',on);if(btnFS){btnFS.textContent=on?'⛶ Keluar FS':'⛶ Fullscreen';btnFS.classList.toggle('on',on);btnFS.title=on?'Keluar fullscreen browser':'Fullscreen browser (seluruh halaman)';}}
+function toggleBrowserFS(){const cur=fsEl();if(cur){const ex=document.exitFullscreen||document.webkitExitFullscreen;if(ex)ex.call(document);}else{const el=document.documentElement;const rq=el.requestFullscreen||el.webkitRequestFullscreen;if(rq)rq.call(el).catch(()=>{});}}
+if(btnFS)btnFS.onclick=toggleBrowserFS;
+document.addEventListener('fullscreenchange',fsUI);document.addEventListener('webkitfullscreenchange',fsUI);fsUI();
 const jp=$('jPanel'),jt=$('jToggle');
 function setJP(open){viewShiftTarget=open&&stage.clientWidth>700?(jp.offsetWidth+20)/2:0;jp.classList.toggle('hide',!open);jt.classList.toggle('open',open);jt.textContent=open?'✕ Tutup jadwal':'📅 Jadwal per Karakter';}
 setJP(stage.clientWidth>700&&!location.hash.includes('nojadwal'));
