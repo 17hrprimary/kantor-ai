@@ -1967,7 +1967,7 @@ const TH_ACTS=[
  {id:'puncak',label:'✨ Climax FX / Efek puncak',gated:true,run:()=>thPeakFX()},
  {id:'desah',get label(){return TH.moanOff?'🔇 Suara desah: OFF':'🔊 Suara desah: ON';},gated:true,run:()=>{TH.moanOff=!TH.moanOff;thActRender();thActSt(TH.moanOff?'🔇 Suara desah dimatiin':'🔊 Suara desah nyala (lebih sering & keras)');if(!TH.moanOff)thMoan(.6);}},
  {id:'kasur',label:'🛏️ Nonton di kasur',run:()=>thBedToggle()},
- {id:'glbtest',get label(){return TH.glb&&TH.glb.on?'🧪 Tes model GLB: ON (Cowgirl)':'🧪 Tes model GLB (Cowgirl, lag test)';},gated:true,run:()=>thGlbToggle()},
+ {id:'glbtest',get label(){return TH.glb&&TH.glb.on?'🧪 Model GLB halus: ON':'🧪 Model GLB halus (tes, semua pose)';},gated:true,run:()=>thGlbToggle()},
  {id:'selesai',label:'🚶 Selesai',run:()=>thDateEnd()},
 ];
 function thActRender(){const el=$('thAct');el.innerHTML='';const n=thP().length;TH_ACTS.forEach(a=>{const b=document.createElement('button');b.type='button';b.className='thb';b.dataset.act=a.id;b.textContent=a.label;
@@ -2066,7 +2066,7 @@ function thHumanBuild(c,id){const L=lookOf(id||'ophelia1'),male=id==='han',D=mal
    // 🍆 kontol proporsional (panjang max ±15 cm); pivot di pangkal, diarahkan otomatis ke target tiap frame
    {const pg=new THREE.Group();pg.position.set(0,-.055,.105);g.add(pg);c.pen=pg;
     nu(M(cap(.019,.16),SK,pg,0,0,.09)).rotation.x=PI2;nu(M(sph(.023),sm(0xc96a7a),pg,0,0,.185,1,1,1.2));
-    [-1,1].forEach(s=>nu(M(sph(.026),SK,g,.02*s,-.085,.085)));}
+    [-1,1].forEach(s=>{nu(M(sph(.026),SK,g,.02*s,-.085,.085)).userData.gen=1;});}
   }else{
    thTorsoLathe(g,M,PN,SH,[[-.12,0],[-.11,.065],[-.08,.12],[-.04,.156],[0,.168],[.05,.157],[.1,.124],[.15,.1],[.2,.108],[.26,.127],[.32,.137],[.38,.14],[.425,.13],[.46,.09],[.49,.045]]); // 💃 jam pasir: pinggul lebar → pinggang ramping → badan 1 bentuk mulus (pinggul lebar→pinggang ramping→rusuk→bahu)
    // 🍑 pantat bulat realistis: dua bulatan di bawah pinggang, nonjol ke belakang, ada belahan
@@ -2557,7 +2557,7 @@ function thSceneTick(now){const S=POV.scene,han=actors.han;if(!S||!han)return;co
  if(peak){const k=1+Math.abs(Math.sin((S.pulse-now)/1200*Math.PI*6))*.03;oc.root.scale.set(k,k,k);}
  thAnRing(cast.map(a=>a.c),[hc,hc2]);
  if(S.kind!=='bedwatch')thReact(S,now,cast,p);
- [hc,...cast.map(a=>a.c),...(hc2?[hc2]:[])].forEach(c=>thSoft(c,now));thDripTick(S,now);thGlbTick(S,oc);}
+ [hc,...cast.map(a=>a.c),...(hc2?[hc2]:[])].forEach(c=>thSoft(c,now));thDripTick(S,now);thGlbTick(S,oc,hc);}
 /* 🎯 Fokus bioskop pas Mode sex: lantai/ruangan/luar gedung lain disembunyiin + aktor lain dipause (biar ringan) */
 function thFocus(on){const r=ROOMS.find(x=>x.cinema);if(!r)return;const fi=r.f,g=FLOORS[fi];thKeyLight(on,g);
  if(!on){if(!TH.focus)return;TH.focus.hid.forEach(o=>o.visible=true);TH.focus=null;layoutFloors();return;}
@@ -2657,50 +2657,84 @@ function thAnRing(ws,men){ws.forEach(w=>{const rg=w&&w.anRing;if(!rg)return;cons
  rg.position.x+=(cx-rg.position.x)*f;rg.position.y+=(cy-rg.position.y)*f;rg.position.z+=(pz-rg.position.z)*f;rg.rotation.z+=(rz-rg.rotation.z)*f;
  rg.scale.x+=(sx-rg.scale.x)*f;rg.scale.y+=(sy-rg.scale.y)*f;rg.scale.z=1;});}
 function thAnRingReset(c){const rg=c&&c.anRing;if(!rg)return;rg.position.copy(rg.userData.rest);rg.rotation.set(0,0,0);rg.scale.set(1,1,1);rg.userData.dep=undefined;}
-/* 🧪 TES LAG: model GLB (Quaternius "Animated Woman", CC0, ~338 KB) gantiin badan cewek di 1 pose aja (Cowgirl).
-   Tulang GLB diarahin ngikut rig bawaan tiap frame (retarget arah ruas + sumbu depan). Dimuat malas (lazy) pas tombol dipencet. */
-TH.glb={on:false,loading:false,model:null,fps:{n:0,t0:0,v:0}};const TH_GLB_POSE='cowgirl';
+/* 🧪 TES model GLB halus (Quaternius "Universal Base Characters" Superhero, CC0, ±13k segitiga, rig humanoid UE):
+   cewek (rambut panjang + kacamata) gantiin badan Ophelia, cowok atletis gantiin badan Han — di SEMUA pose pas tombol ON (mulai Cowgirl).
+   Kulit bugil: tekstur dalaman dihapus + puting/areola, memek (labia+klit), anus dilukis di tekstur; kontol+biji pakai mesh rig bawaan (ngarah otomatis),
+   anus elastis rig ikut tampil pas pose anal. Tulang GLB diarahin ngikut rig bawaan tiap frame (retarget arah ruas + sumbu depan). Dimuat malas (lazy). */
+TH.glb={on:false,loading:false,M:{},fps:{n:0,t0:0,v:0}};const TH_GLB_POSE='cowgirl';
+const TH_GLB_FILES={w:'./models/ubc_woman.glb',m:'./models/ubc_man.glb'};
+// titik penting (koordinat bind-pose model, meter) → ditempel ke tulang pelvis
+const TH_GLB_PTS={w:{vag:[0,.886,.02],anus:[0,.876,-.062]},m:{pen:[0,.925,.08]}};
 async function thGlbToggle(){const G=TH.glb;if(!TH.unlocked){thGatePrompt();return;}if(!TH.sexMode){thActSt('🔒 Nyalain Mode privat dulu');return;}
- G.on=!G.on;thActRender();if(!G.on){thGlbHide();thActSt('🧪 Tes GLB mati — balik ke badan bawaan');return;}
- if(!G.model&&!G.loading){G.loading=true;thActSt('🧪 Muat model GLB…');try{const {GLTFLoader}=await import('./vendor/GLTFLoader.js');const t0=performance.now();
-   const gl=await new GLTFLoader().loadAsync('./models/woman_casual.glb');G.loadMs=Math.round(performance.now()-t0);thGlbSetup(gl.scene);}catch(e){G.on=false;G.loading=false;thActRender();thActSt('⚠️ Gagal muat GLB: '+e.message);return;}G.loading=false;}
- if(!G.on)return;thIntim(TH_GLB_POSE);thActSt('🧪 Tes GLB ON (Cowgirl) — model dimuat '+(G.loadMs??0)+' ms · FPS tampil di atas');}
-function thGlbSetup(root){const G=TH.glb,B={};root.traverse(o=>{if(o.isBone)B[o.name]=o;if(o.isMesh){o.castShadow=true;o.frustumCulled=false;const m=o.material;
-  if(m&&/^(White|Grey|Orange)$/.test(m.name)){o.material=m.clone();o.material.color.set(0xf0c8b0);} // baju → warna kulit (tes)
-  if(o.material)o.material.side=THREE.FrontSide;}});
+ G.on=!G.on;thActRender();if(!G.on){thGlbHide();thActSt('🧪 Model GLB mati — balik ke badan bawaan');return;}
+ if(!G.M.w&&!G.loading){G.loading=true;thActSt('🧪 Muat model GLB…');try{const {GLTFLoader}=await import('./vendor/GLTFLoader.js');const t0=performance.now(),ld=new GLTFLoader();
+   const [gw,gm]=await Promise.all([ld.loadAsync(TH_GLB_FILES.w),ld.loadAsync(TH_GLB_FILES.m)]);G.loadMs=Math.round(performance.now()-t0);G.M.w=thGlbSetup(gw.scene,'w');G.M.m=thGlbSetup(gm.scene,'m');}
+  catch(e){G.on=false;G.loading=false;G.M={};thActRender();thActSt('⚠️ Gagal muat GLB: '+e.message);return;}G.loading=false;}
+ if(!G.on)return;if(!POV.scene)thIntim(TH_GLB_POSE);thActSt('🧪 Model GLB halus ON (semua pose) — dimuat '+(G.loadMs??0)+' ms · FPS tampil di atas');}
+function thGlbGlasses(head,box){ // 👓 kacamata prosedural nempel di tulang kepala (posisi dari bola mata model)
+ const g=new THREE.Group(),mt=new THREE.MeshStandardMaterial({color:0x1a1a1f,roughness:.35,metalness:.6}),gl=new THREE.MeshPhysicalMaterial({color:0xffffff,roughness:.05,metalness:0,transmission:.9,transparent:true,opacity:.18});
+ const cx=(box.max.x-box.min.x)/4+.004,cy=(box.max.y+box.min.y)/2,fz=box.max.z+.014,r=.019;
+ [-1,1].forEach(s=>{const rim=new THREE.Mesh(new THREE.TorusGeometry(r,.0016,6,28),mt);rim.scale.y=.78;rim.position.set(s*(cx+.003),cy,fz);g.add(rim);
+  const ln=new THREE.Mesh(new THREE.CircleGeometry(r,24),gl);ln.scale.y=.78;ln.position.copy(rim.position);g.add(ln);
+  const tm=new THREE.Mesh(new THREE.BoxGeometry(.0025,.0025,.105),mt);tm.position.set(s*(cx+r+.006),cy+.004,fz-.052);tm.rotation.y=-s*.06;g.add(tm);});
+ const br=new THREE.Mesh(new THREE.TorusGeometry(.007,.0014,5,12,Math.PI),mt);br.position.set(0,cy+.003,fz+.002);g.add(br);
+ g.traverse(o=>{if(o.isMesh){o.castShadow=false;o.frustumCulled=false;}});head.updateMatrixWorld(true);const inv=head.matrixWorld.clone().invert();g.applyMatrix4(inv);head.add(g);return g;}
+function thGlbSetup(root,kind){const B={};let sk=null,eyes=null;root.traverse(o=>{if(o.isBone)B[o.name]=o;if(o.isMesh){o.castShadow=true;o.receiveShadow=true;o.frustumCulled=false;if(o.isSkinnedMesh&&!sk)sk=o.skeleton;
+  const m=o.material;if(m){m.side=THREE.FrontSide;if(/Hair/.test(m.name)&&/Hair/.test(o.name)){o.material=m.clone();o.material.color.set(kind==='w'?0x2b1810:0x15110e);o.material.side=THREE.DoubleSide;}
+   if(/Hair/.test(m.name)&&!/Hair/.test(o.name)){o.material=m.clone();o.material.color.set(kind==='w'?0x3a2418:0x1d1712);} // alis
+   if(/Superhero/.test(m.name)){m.roughness=.52;m.envMapIntensity=.6;}}
+  if(/^Eyes/.test(o.name))eyes=o;}});
  root.position.set(0,0,0);root.rotation.set(0,0,0);root.scale.setScalar(1);root.updateMatrixWorld(true);
- {let sk=null;root.traverse(o=>{if(o.isSkinnedMesh&&!sk)sk=o.skeleton;});if(sk)sk.pose();root.updateMatrixWorld(true);} // balik ke bind pose (T-pose) dulu
- const P=n=>B[n].getWorldPosition(new THREE.Vector3()),Q=n=>B[n].getWorldQuaternion(new THREE.Quaternion()),F=new THREE.Vector3(0,0,1);
- const legL=P('UpperLegL').distanceTo(P('LowerLegL'))+P('LowerLegL').distanceTo(P('FootL'));
+ if(sk)sk.pose();root.updateMatrixWorld(true); // balik ke bind pose (T-pose) dulu
+ const P=n=>B[n].getWorldPosition(new THREE.Vector3()),Q=n=>B[n].getWorldQuaternion(new THREE.Quaternion()),F=new THREE.Vector3(0,0,1),up=new THREE.Vector3(0,1,0);
  const basis=(pr,se)=>{const y=pr.clone().normalize(),z=se.clone().addScaledVector(y,-se.dot(y));if(z.lengthSq()<1e-6)z.set(1,0,0).addScaledVector(y,-y.x);z.normalize();const x=new THREE.Vector3().crossVectors(y,z);return new THREE.Quaternion().setFromRotationMatrix(new THREE.Matrix4().makeBasis(x,y,z));};
- const off=(n,pr)=>basis(pr,F).invert().multiply(Q(n)); // offset: basis(arah ruas, depan) → rotasi dunia tulang
- const up=new THREE.Vector3(0,1,0);
- G.map={Body:off('Body',up),Chest:off('Chest',up),Head:off('Head',up),
-  UpperArmL:off('UpperArmL',P('LowerArmL').sub(P('UpperArmL'))),LowerArmL:off('LowerArmL',P('WristL').sub(P('LowerArmL'))),
-  UpperArmR:off('UpperArmR',P('LowerArmR').sub(P('UpperArmR'))),LowerArmR:off('LowerArmR',P('WristR').sub(P('LowerArmR'))),
-  UpperLegL:off('UpperLegL',P('LowerLegL').sub(P('UpperLegL'))),LowerLegL:off('LowerLegL',P('FootL').sub(P('LowerLegL'))),
-  UpperLegR:off('UpperLegR',P('LowerLegR').sub(P('UpperLegR'))),LowerLegR:off('LowerLegR',P('FootR').sub(P('LowerLegR')))};
- G.rest={Abdomen:B.Abdomen.quaternion.clone(),Torso:B.Torso.quaternion.clone()};G.legL=legL;G.B=B;G.basis=basis;G.model=root;root.visible=false;}
-const _gq=new THREE.Quaternion(),_gq2=new THREE.Quaternion(),_gp=new THREE.Vector3(),_gv=new THREE.Vector3(),_gz=new THREE.Vector3(),_gy=new THREE.Vector3();
-function thGlbHide(){const G=TH.glb;if(G.model)G.model.visible=false;const o=G.hidFor;if(o){o.root.visible=true;G.hidFor=null;}}
-function thGlbTick(S,oc){const G=TH.glb;if(!G.on||!G.model||!S||S.kind!==TH_GLB_POSE||!oc){thGlbHide();return;}const B=G.B,m=G.model,c=oc;
- if(m.parent!==c.root.parent){c.root.parent.add(m);}if(G.hidFor!==c){thGlbHide();G.hidFor=c;}c.root.visible=false;m.visible=true;
- const fps=G.fps,now=performance.now();fps.n++;if(now-fps.t0>1000){fps.v=Math.round(fps.n*1000/(now-fps.t0));fps.n=0;fps.t0=now;POV.msg='🧪 Tes GLB · '+fps.v+' FPS';POV.msgUntil=now+1500;POV.zoneKey='';}
+ const off=(n,pr)=>basis(pr,F).invert().multiply(Q(n)),seg=(a,b)=>P(b).sub(P(a));
+ const map={pelvis:off('pelvis',up),spine_03:off('spine_03',up),Head:off('Head',up)};
+ ['l','r'].forEach(s=>{map['upperarm_'+s]=off('upperarm_'+s,seg('upperarm_'+s,'lowerarm_'+s));map['lowerarm_'+s]=off('lowerarm_'+s,seg('lowerarm_'+s,'hand_'+s));
+  map['thigh_'+s]=off('thigh_'+s,seg('thigh_'+s,'calf_'+s));map['calf_'+s]=off('calf_'+s,seg('calf_'+s,'foot_'+s));});
+ const legL=P('thigh_l').distanceTo(P('calf_l'))+P('calf_l').distanceTo(P('foot_l'));
+ const rest={};['spine_01','spine_02','neck_01','clavicle_l','clavicle_r'].forEach(n=>rest[n]=B[n].quaternion.clone());
+ const pts={};Object.entries(TH_GLB_PTS[kind]).forEach(([k,v])=>{pts[k]=B.pelvis.worldToLocal(new THREE.Vector3(...v));});
+ let glasses=null;if(kind==='w'&&eyes){eyes.geometry.computeBoundingBox();const bx=eyes.geometry.boundingBox.clone().applyMatrix4(eyes.matrixWorld);glasses=thGlbGlasses(B.Head,bx);}
+ root.visible=false;return {root,B,map,rest,legL,basis,pts,kind,glasses};}
+const _gq2=new THREE.Quaternion(),_gp=new THREE.Vector3(),_gv=new THREE.Vector3(),_gz=new THREE.Vector3(),_gy=new THREE.Vector3();
+// sembunyiin mesh rig bawaan lewat layer (bukan .visible → gak bentrok sama thNudeSync), kecuali bagian yang dipertahanin (kontol/biji/anus elastis)
+function thGlbMask(c,on,keep){const key=on?'1'+keep.map(k=>k.uuid).join():'0';if(c._glbMask===key)return;c._glbMask=key;
+ c.root.traverse(o=>{if(!o.isMesh)return;let k=!on||!!o.userData.gen&&keep.length>0;if(on&&!k){let p=o;while(p&&p!==c.root){if(keep.includes(p)){k=true;break;}p=p.parent;}}o.layers.set(k?0:31);});}
+function thGlbHide(){const G=TH.glb;['w','m'].forEach(k=>{const D=G.M[k];if(D){D.root.visible=false;if(D.for){thGlbMask(D.for,false,[]);if(D.skc){D.skc.forEach(([m,c])=>m.color.copy(c));D.skc=null;}D.for=null;}}});}
+function thGlbTick(S,oc,hc){const G=TH.glb;if(!G.on||!G.M.w||!S){thGlbHide();return;}
+ const fps=G.fps,now=performance.now();fps.n++;if(now-fps.t0>1000){fps.v=Math.round(fps.n*1000/(now-fps.t0));fps.n=0;fps.t0=now;POV.msg='🧪 Model GLB · '+fps.v+' FPS';POV.msgUntil=now+1500;POV.zoneKey='';}
+ let anal=!!oc&&!!oc.anc&&(S.dripSrc===oc.anc.anus||S.dripSrc===oc.anc.anusO),vag=!!oc&&!!oc.anc&&S.dripSrc===oc.anc.vag;
+ if(oc&&oc.anc&&hc&&hc.pen&&!anal&&!vag){hc.root.updateMatrixWorld(true);oc.root.updateMatrixWorld(true);const tip=hc.pen.localToWorld(_gv.set(0,0,.15)),dv=tip.distanceTo(oc.anc.vag.getWorldPosition(_gp)),da=tip.distanceTo(oc.anc.anus.getWorldPosition(_gp));
+  if(!S._glbHole&&Math.min(dv,da)<.13)S._glbHole=dv<=da?'v':'a';if(S._glbHole==='v')vag=true;else if(S._glbHole==='a')anal=true;} // pose tanpa dripSrc: cek ujung kontol deket memek/anus (sekali per adegan, biar gak loncat)
+ [['w',oc],['m',hc]].forEach(([k,c])=>{const D=G.M[k];if(!D)return;if(!c||!c.root||!c.root.parent){if(D.for)thGlbHide();return;}
+  if(D.for&&D.for!==c){thGlbMask(D.for,false,[]);D.for=null;}D.for=c;
+  const keep=k==='m'?(c.pen?[c.pen]:[]):(anal&&c.anRing?[c.anRing]:[]);thGlbMask(c,true,keep);
+  if(k==='m'&&c.pen&&!D.skc){const ms=new Set();c.pen.traverse(o=>{if(o.isMesh&&o.material&&o.material.color&&!o.material.color.equals(new THREE.Color(0xc96a7a)))ms.add(o.material);});
+   D.skc=[...ms].map(m=>[m,m.color.clone()]);ms.forEach(m=>m.color.setRGB(.4,.17,.085));} // warna kulit kontol ≈ kulit model GLB
+  c.root.updateMatrixWorld(true);const pin=k==='w'?(anal?['anus',c.anc.anusO.getWorldPosition(new THREE.Vector3())]:vag?['vag',c.anc.vag.parent.localToWorld(new THREE.Vector3(0,-.062,.085))]:null):(c.pen?['pen',c.pen.getWorldPosition(new THREE.Vector3())]:null);
+  let line=null;if(k==='w'&&pin&&hc&&hc.pen){const a=hc.pen.getWorldPosition(new THREE.Vector3()),b=hc.pen.localToWorld(new THREE.Vector3(0,0,.2));line=[a,b];}
+  thGlbPose(D,c,pin,line);});}
+function thGlbPose(D,c,pin,line){const B=D.B,m=D.root;
+ if(m.parent!==c.root.parent)c.root.parent.add(m);m.visible=true;
  c.root.updateMatrixWorld(true);const W=o=>o.getWorldPosition(new THREE.Vector3()),Z=o=>_gz.set(0,0,1).transformDirection(o.matrixWorld).clone(),Yd=o=>_gy.set(0,1,0).transformDirection(o.matrixWorld).clone();
- const sideL=c.legs[0].position.x>0?0:1,sideR=1-sideL; // index rig bawaan buat sisi KIRI karakter (x+ pas hadap +z)
- m.scale.setScalar(((c.dim.thigh+c.dim.shin))/G.legL);m.rotation.set(0,0,0);m.position.set(0,0,0);m.updateMatrixWorld(true);
+ const iL=c.legs[0].position.x>0?0:1,iR=1-iL; // index rig bawaan buat sisi KIRI karakter (x+ pas hadap +z)
+ m.scale.setScalar((c.dim.thigh+c.dim.shin)/D.legL*(c.root.scale.x||1));m.rotation.set(0,0,0);m.position.set(0,0,0);m.updateMatrixWorld(true);
  const setW=(n,qW)=>{const b=B[n];b.parent.getWorldQuaternion(_gq2);b.quaternion.copy(_gq2.invert().multiply(qW));b.updateMatrixWorld(true);};
- const aim=(n,pr,se)=>setW(n,G.basis(pr,se).multiply(G.map[n]));
- aim('Body',Yd(c.body),Z(c.body)); // Body = induk Hips + pangkal paha di rig Quaternius
- const qC=G.basis(Yd(c.torso),Z(c.torso)).multiply(G.map.Chest);
- B.Abdomen.quaternion.copy(G.rest.Abdomen);B.Torso.quaternion.copy(G.rest.Torso);B.Body.updateMatrixWorld(true);
- setW('Chest',qC);aim('Head',Yd(c.head),Z(c.head));
+ const aim=(n,pr,se)=>setW(n,D.basis(pr,se).multiply(D.map[n]));
+ aim('pelvis',Yd(c.body),Z(c.body));
+ Object.entries(D.rest).forEach(([n,q])=>B[n].quaternion.copy(q));B.pelvis.updateMatrixWorld(true);
+ aim('spine_03',Yd(c.torso),Z(c.torso));aim('Head',Yd(c.head),Z(c.head));
  const wr=i=>new THREE.Vector3(0,-c.dim.fore,0).applyMatrix4(c.elbows[i].matrixWorld);
- [['L',sideL],['R',sideR]].forEach(([s,i])=>{aim('UpperArm'+s,W(c.elbows[i]).sub(W(c.arms[i])),Z(c.arms[i]));aim('LowerArm'+s,wr(i).sub(W(c.elbows[i])),Z(c.elbows[i]));
-  aim('UpperLeg'+s,W(c.knees[i]).sub(W(c.legs[i])),Z(c.legs[i]));aim('LowerLeg'+s,W(c.ankles[i]).sub(W(c.knees[i])),Z(c.knees[i]));});
- // tempel: tengah pangkal paha GLB = tengah pangkal paha rig bawaan
- m.updateMatrixWorld(true);const gm=W(B.UpperLegL).add(W(B.UpperLegR)).multiplyScalar(.5),rm=W(c.legs[0]).add(W(c.legs[1])).multiplyScalar(.5);
- m.parent.worldToLocal(_gp.copy(rm));m.parent.worldToLocal(_gv.copy(gm));m.position.add(_gp.sub(_gv));m.updateMatrixWorld(true);}
+ [['l',iL],['r',iR]].forEach(([s,i])=>{aim('upperarm_'+s,W(c.elbows[i]).sub(W(c.arms[i])),Z(c.arms[i]));aim('lowerarm_'+s,wr(i).sub(W(c.elbows[i])),Z(c.elbows[i]));
+  aim('thigh_'+s,W(c.knees[i]).sub(W(c.legs[i])),Z(c.legs[i]));aim('calf_'+s,W(c.ankles[i]).sub(W(c.knees[i])),Z(c.knees[i]));});
+ // tempel: titik kelamin GLB = titik kelamin rig (biar penetrasi pas di memek/anus/pangkal kontol), selain itu tengah pangkal paha
+ m.updateMatrixWorld(true);let gm,rm;
+ if(pin){gm=B.pelvis.localToWorld(D.pts[pin[0]].clone());rm=pin[1];}
+ else{gm=W(B.thigh_l).add(W(B.thigh_r)).multiplyScalar(.5);rm=W(c.legs[0]).add(W(c.legs[1])).multiplyScalar(.5);}
+ m.parent.worldToLocal(_gp.copy(rm));m.parent.worldToLocal(_gv.copy(gm));m.position.add(_gp.sub(_gv));m.updateMatrixWorld(true);
+ if(line){const g2=B.pelvis.localToWorld(D.pts[pin[0]].clone()),[a,b]=line,d=b.clone().sub(a),t=g2.clone().sub(a).dot(d)/d.lengthSq(),cp=a.clone().addScaledVector(d,t); // geser dikit biar memek/anus pas di garis batang
+  if(cp.distanceTo(g2)<.12){m.parent.worldToLocal(_gp.copy(cp));m.parent.worldToLocal(_gv.copy(g2));m.position.add(_gp.sub(_gv));m.updateMatrixWorld(true);}}}
 const TH_DRIP={pool:[]};
 function thDripTick(S,now){const src=S.dripSrc;const dt=S.dLt?clampN((now-S.dLt)/1000,.004,.05):.016;S.dLt=now;
  if(!TH_DRIP.mat){TH_DRIP.mat=new THREE.MeshPhysicalMaterial({color:0xf6f2ea,roughness:.1,metalness:0,clearcoat:1,clearcoatRoughness:.04,transmission:.15,thickness:.02,transparent:true,opacity:.95});TH_DRIP.geo=new THREE.SphereGeometry(.0115,12,10);}
