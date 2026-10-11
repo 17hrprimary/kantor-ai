@@ -1681,9 +1681,10 @@ void main(){float h=clamp(vP.y*3.2+.02,0.,1.);vec3 col=mix(bot,top,pow(h,.55));
  P=P0;envTick(performance.now(),0,true);
 }
 function forestRnd(seed){let s=seed>>>0;return()=>{s=(Math.imul(s,1664525)+1013904223)>>>0;return s/4294967296;};}
-function forestBlocked(x,y){ // kampus (kantor+taman+rumah), jalan raya+trotoar, jalan masuk
- if(x>-3&&x<64&&y>-3&&y<27)return true;
- if(y>ROAD.y0-2.4&&y<ROAD.y1+2.4)return true;
+function forestBlocked(x,y){ // kampus (kantor+taman+rumah), pondok, jalan raya+trotoar, jalan masuk — buffer tipis biar hutan nempel pagar
+ if(x>-1.2&&x<61.5&&y>-1.2&&y<24.8)return true; // kantor + taman depan/halaman + rumah
+ if(x>7.2&&x<14.8&&y>=24&&y<29.6)return true; // pondok taman
+ if(y>ROAD.y0-2.2&&y<ROAD.y1+2.2)return true;
  if(y>=24&&y<=ROAD.y0-1.4&&((x>21.2&&x<26.8)||(x>33.8&&x<38.8)))return true;
  return false;}
 function pineTree(x,y,s=1){ // pinus ramping buat variasi hutan
@@ -1696,45 +1697,37 @@ function wildFlower(x,y,s=1){const cols=[0xff9cc7,0xffd23f,0xc79bff,0xffffff,0xf
  cyl(x,y,0,.03*s,.28*s,0x5a9a4a,5);ball(x,y,.32*s,.1*s,cols[Math.abs(Math.floor(x*13+y*17))%cols.length],0);}
 function tallGrass(x,y,s=1){const c=0x6fb24a;for(let i=0;i<3;i++){const a=(i-1)*.12,m=mesh(new THREE.ConeGeometry(.04*s,.55*s,4),mat(c));m.position.set(tx(x+a), .28*s,tz(y+(i%2?-.05:.05)*s));m.rotation.z=a*.8;m.castShadow=false;}}
 function buildForest(){ // ditempatkan saat P=ENV.g di dalam buildEnv
- const rnd=forestRnd(20261011),pts={oak:[],pine:[],bush:[],flower:[],grass:[]};
- const place=(key,n,x0,x1,y0,y1,minD)=>{const goal=pts[key].length+n;let tries=0;while(pts[key].length<goal&&tries<n*100){tries++;const x=x0+rnd()*(x1-x0),y=y0+rnd()*(y1-y0);if(forestBlocked(x,y))continue;let ok=true;const arr=pts[key];for(let k=0;k<arr.length;k++){const dx=arr[k].x-x,dy=arr[k].y-y;if(dx*dx+dy*dy<minD*minD){ok=false;break;}}if(!ok)continue;arr.push({x,y,s:.7+rnd()*1.1});}}
- // 🌲 CINCIN RAPAT di perimeter kampus (kelihatan dari kamera Han / langit / zoom) — nempel pagar, tetap di luar gedung/jalan
- // barat kantor (x≈-12..-3.1, sepanjang sisi + ke trotoar)
- place('oak',42,-12.5,-3.15,-5,30.5,1.85);place('pine',22,-13.5,-3.2,-6,30.8,2.3);place('bush',55,-13,-3.1,-5,30.5,.85);
- place('flower',40,-12.5,-3.1,-4,30.5,.55);place('grass',48,-12.5,-3.1,-4,30.5,.42);
- // timur rumah (x≈64..78, sepanjang sisi + ke trotoar)
- place('oak',42,64.1,78,-5,30.5,1.85);place('pine',22,64.2,80,-6,30.8,2.3);place('bush',55,64.1,78,-5,30.5,.85);
- place('flower',40,64.1,78,-4,30.5,.55);place('grass',48,64.1,78,-4,30.5,.42);
- // utara kampus (belakang kantor/rumah)
- place('oak',48,-5,65,-14,-3.15,1.8);place('pine',24,-6,66,-15,-3.2,2.25);place('bush',60,-5,65,-13,-3.1,.8);
- place('flower',45,-5,65,-12,-3.1,.55);place('grass',55,-5,65,-12,-3.1,.4);
- // sudut NW / NE biar gak bolong
- place('oak',18,-14,-3.2,-14,-3.2,1.7);place('oak',18,64.1,80,-14,-3.2,1.7);
- place('pine',10,-15,-3.3,-15,-3.3,2.2);place('pine',10,64.2,82,-15,-3.3,2.2);
- place('bush',24,-14,-3.1,-14,-3.1,.75);place('bush',24,64.1,80,-14,-3.1,.75);
- // fringe Taman Depan → trotoar (strip y 27..29.6, hindari jalan masuk paving)
- place('bush',36,-3,21,26.5,29.7,.95);place('bush',22,27,33.5,26.5,29.7,.95);place('bush',36,39,64,26.5,29.7,.95);
- place('oak',16,-3,20,27.0,29.55,1.75);place('oak',16,39.5,63.5,27.0,29.55,1.75);
- place('pine',8,-2.5,19,27.1,29.5,2.15);place('pine',8,40.5,63,27.1,29.5,2.15);
- place('flower',28,-3,21,26.4,29.85,.55);place('flower',18,27,33.5,26.4,29.85,.55);place('flower',28,39,64,26.4,29.85,.55);
- place('grass',40,-3,64,26.4,29.85,.38);
- // seberang jalan (tepi utara hutan selatan, nempel ROAD.y1+2.4 ≈ 40.4) — kelihatan dari sudut Han
- place('oak',55,-20,90,40.5,56,1.9);place('pine',30,-22,92,40.6,58,2.35);place('bush',70,-20,90,40.5,58,.8);
- place('flower',50,-18,88,40.5,56,.55);place('grass',60,-18,88,40.5,56,.4);
- // cincin medium (sedikit lebih jauh, isi kekosongan)
- place('oak',36,-28,-12.5,-20,32,2.2);place('oak',36,78,105,-20,32,2.2);place('oak',30,-12,78,-28,-14,2.15);
- place('pine',20,-30,-13,-22,34,2.7);place('pine',20,80,110,-22,34,2.7);place('pine',16,-14,80,-32,-14,2.6);
- place('bush',50,-30,110,-28,34,.95);place('flower',55,-30,110,-28,34,.6);place('grass',65,-30,110,-28,34,.48);
- // hutan lebar di sekeliling (background jauh)
- place('oak',50,-110,-28,-70,70,2.6);place('oak',50,105,180,-70,70,2.6);place('oak',36,-28,105,-70,-28,2.5);place('oak',45,-110,180,56,130,2.8);
- place('pine',30,-110,-28,-70,70,3.2);place('pine',30,105,180,-70,70,3.2);place('pine',18,-28,105,-70,-28,3.0);place('pine',24,-110,180,58,135,3.4);
- place('bush',80,-110,180,-70,135,1.05);place('flower',90,-110,180,-70,135,.65);place('grass',110,-110,180,-70,135,.5);
- place('oak',35,-110,180,56,95,2.5);place('pine',20,-110,180,58,100,3.1);place('bush',40,-110,180,56,100,1.0);
+ const rnd=forestRnd(20261012),pts={oak:[],pine:[],bush:[],flower:[],grass:[]};
+ const place=(key,n,x0,x1,y0,y1,minD,s0=.85,s1=1.55)=>{const goal=pts[key].length+n;let tries=0;while(pts[key].length<goal&&tries<n*120){tries++;const x=x0+rnd()*(x1-x0),y=y0+rnd()*(y1-y0);if(forestBlocked(x,y))continue;let ok=true;const arr=pts[key];for(let k=0;k<arr.length;k++){const dx=arr[k].x-x,dy=arr[k].y-y;if(dx*dx+dy*dy<minD*minD){ok=false;break;}}if(!ok)continue;arr.push({x,y,s:s0+rnd()*(s1-s0)});}}
+ // 🌲 CINCIN RAPAT + BESAR nempel perimeter (kelihatan jelas dari sudut Han / langit / zoom)
+ place('oak',55,-10,-1.25,-2,31,1.45,1.15,1.85);place('pine',28,-11,-1.3,-3,31.2,1.9,1.1,1.7);place('bush',70,-10.5,-1.25,-2,31,.7,.9,1.4);
+ place('flower',50,-10,-1.25,-1.5,31,.48,.8,1.3);place('grass',60,-10,-1.25,-1.5,31,.38,.8,1.3);
+ place('oak',55,61.6,74,-2,31,1.45,1.15,1.85);place('pine',28,61.7,76,-3,31.2,1.9,1.1,1.7);place('bush',70,61.6,74,-2,31,.7,.9,1.4);
+ place('flower',50,61.6,74,-1.5,31,.48,.8,1.3);place('grass',60,61.6,74,-1.5,31,.38,.8,1.3);
+ place('oak',60,-2,62,-11,-1.25,1.4,1.15,1.85);place('pine',30,-3,63,-12,-1.3,1.85,1.1,1.7);place('bush',75,-2,62,-10,-1.25,.65,.9,1.4);
+ place('flower',55,-2,62,-9,-1.25,.48,.8,1.3);place('grass',65,-2,62,-9,-1.25,.36,.8,1.3);
+ place('oak',22,-11,-1.3,-11,-1.3,1.35,1.2,1.9);place('oak',22,61.6,76,-11,-1.3,1.35,1.2,1.9);
+ place('pine',12,-12,-1.35,-12,-1.35,1.8,1.15,1.75);place('pine',12,61.7,78,-12,-1.35,1.8,1.15,1.75);
+ place('bush',30,-11,-1.25,-11,-1.25,.6,.95,1.45);place('bush',30,61.6,76,-11,-1.25,.6,.95,1.45);
+ place('bush',55,-1.2,21,24.9,29.9,.55,.95,1.5);place('bush',30,27,33.5,24.9,29.9,.55,.95,1.5);place('bush',55,39,61.5,24.9,29.9,.55,.95,1.5);
+ place('oak',28,-1.2,20.5,25.2,29.7,1.25,1.25,2.0);place('oak',28,39.2,61.3,25.2,29.7,1.25,1.25,2.0);
+ place('pine',14,-1,19.5,25.3,29.6,1.7,1.2,1.85);place('pine',14,40,61,25.3,29.6,1.7,1.2,1.85);
+ place('flower',40,-1.2,21,24.9,30,.42,.85,1.35);place('flower',22,27,33.5,24.9,30,.42,.85,1.35);place('flower',40,39,61.5,24.9,30,.42,.85,1.35);
+ place('grass',55,-1.2,61.5,24.9,30,.32,.85,1.35);
+ place('oak',70,-18,88,40.3,54,1.5,1.2,1.95);place('pine',38,-20,90,40.4,56,1.95,1.15,1.8);place('bush',90,-18,88,40.3,56,.6,.95,1.45);
+ place('flower',60,-16,86,40.3,54,.45,.85,1.3);place('grass',70,-16,86,40.3,54,.34,.85,1.3);
+ place('oak',40,-26,-10,-18,33,2.0,1.0,1.6);place('oak',40,74,108,-18,33,2.0,1.0,1.6);place('oak',34,-10,74,-26,-11,1.95,1.0,1.6);
+ place('pine',22,-28,-10.5,-20,35,2.5,1.0,1.55);place('pine',22,76,112,-20,35,2.5,1.0,1.55);place('pine',18,-12,76,-30,-11,2.4,1.0,1.55);
+ place('bush',55,-28,112,-26,35,.9,.8,1.3);place('flower',60,-28,112,-26,35,.58,.75,1.2);place('grass',70,-28,112,-26,35,.45,.75,1.2);
+ place('oak',48,-110,-26,-70,70,2.6,.9,1.5);place('oak',48,108,180,-70,70,2.6,.9,1.5);place('oak',34,-26,108,-70,-26,2.5,.9,1.5);place('oak',42,-110,180,54,130,2.8,.9,1.5);
+ place('pine',28,-110,-26,-70,70,3.2,.9,1.45);place('pine',28,108,180,-70,70,3.2,.9,1.45);place('pine',16,-26,108,-70,-26,3.0,.9,1.45);place('pine',22,-110,180,56,135,3.4,.9,1.45);
+ place('bush',75,-110,180,-70,135,1.05,.75,1.25);place('flower',85,-110,180,-70,135,.65,.7,1.15);place('grass',100,-110,180,-70,135,.5,.7,1.15);
+ place('oak',32,-110,180,54,95,2.5,.9,1.5);place('pine',18,-110,180,56,100,3.1,.9,1.45);place('bush',38,-110,180,54,100,1.0,.75,1.25);
  pts.oak.forEach(p=>tree(p.x,p.y,p.s));
  pts.pine.forEach(p=>pineTree(p.x,p.y,p.s*.95));
- pts.bush.forEach(p=>bushWild(p.x,p.y,.8+p.s*.4));
- pts.flower.forEach(p=>wildFlower(p.x,p.y,.9+p.s*.45));
- pts.grass.forEach(p=>tallGrass(p.x,p.y,.85+p.s*.55));
+ pts.bush.forEach(p=>bushWild(p.x,p.y,.95+p.s*.5));
+ pts.flower.forEach(p=>wildFlower(p.x,p.y,1.0+p.s*.5));
+ pts.grass.forEach(p=>tallGrass(p.x,p.y,.95+p.s*.55));
 }
 
 let envLastAmb=0;
@@ -1803,9 +1796,9 @@ bindQualityUI();applyQuality(qualityMode,false);
 requestAnimationFrame(loop);
 // opsi URL buat preview: #zoom, #kerja, #pop=lia
 const hs=location.hash;
-const PREV={langit:['taman-depan',[26,2.5,34]],atas:['taman-halaman',[0,62,8]],hutan:['taman-depan',[48,18,52]],pondok:['pondok-taman',[0.8,4.2,-4]],kamarlove:['kamar-love',[3,8,-7.5]],lux:['kamar-hanrin',[3,8,-7.5]],tvroom:['lounge',[4,6.5,8]],school:['school',[4,8.5,-10.5]],close:['ig',[1.5,2.6,5.5]],zoom:['ig',[7,8.5,10]]};
+const PREV={langit:['taman-depan',[26,2.5,34]],atas:['taman-halaman',[0,62,8]],hutan:['taman-depan',[48,18,52]],dekat:['taman-depan',[18,14,28]],pondok:['pondok-taman',[0.8,4.2,-4]],kamarlove:['kamar-love',[3,8,-7.5]],lux:['kamar-hanrin',[3,8,-7.5]],tvroom:['lounge',[4,6.5,8]],school:['school',[4,8.5,-10.5]],close:['ig',[1.5,2.6,5.5]],zoom:['ig',[7,8.5,10]]};
 const pv=Object.keys(PREV).find(k=>hs.includes(k));
-if(pv){const [rid,off]=PREV[pv],r=ROOMS.find(x=>x.id===rid);setFloor(r.f,false);const t=FLOORS[r.f].localToWorld(new THREE.Vector3(tx(r.x+r.w/2),.5,tz(r.y+r.d/2)));camera.position.copy(t.clone().add(new THREE.Vector3(...off)));controls.target.copy(t);if(pv==='langit')controls.target.y+=5;if(pv==='atas'){controls.target.set(tx(30),0,tz(12));camera.position.set(tx(30),62,tz(12)+8);}if(pv==='hutan')controls.target.y+=1;}
+if(pv){const [rid,off]=PREV[pv],r=ROOMS.find(x=>x.id===rid);setFloor(r.f,false);const t=FLOORS[r.f].localToWorld(new THREE.Vector3(tx(r.x+r.w/2),.5,tz(r.y+r.d/2)));camera.position.copy(t.clone().add(new THREE.Vector3(...off)));controls.target.copy(t);if(pv==='langit')controls.target.y+=5;if(pv==='atas'){controls.target.set(tx(30),0,tz(12));camera.position.set(tx(30),62,tz(12)+8);}if(pv==='hutan')controls.target.y+=1;if(pv==='dekat'){controls.target.set(tx(30),1.5,tz(14));camera.position.set(tx(42),18,tz(46));controls.target.y+=2;}}
 if(hs.includes('povpad'))document.body.classList.add('touch');
 if(hs.includes('pov'))setTimeout(()=>{if(hs.includes('povfp'))POV.fpPref=true;povEnter();},500);
 if(hs.includes('kerja'))setTimeout(()=>$('btnKerja').click(),300);
