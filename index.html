@@ -2417,15 +2417,15 @@ function thSceneTick(now){const S=POV.scene,han=actors.han;if(!S||!han)return;co
   thPose(oc,{y:.45,ry:Math.PI,rx:-PI2+.1+.04*jq,l:[[-2.05-.06*jq,-.55],[-2.05-.06*jq,.55]],k:[.55,.55],a:[[-2.8,.35],[-2.8,-.35]],e:[-.9,-.9],h:[.3-.1*jq,0,.05*Math.sin(ph*.5)]});thGround(oc);thKeepOnBed(oc);
   {oc.root.position.z+=(tz(TH_BED.y+1)-tz(TH_BED.y))*.03*jq;oc.root.updateMatrixWorld(true);} // kehentak ke arah bantal
   const V=thW(oc.anc.vag,new THREE.Vector3()),top=thTopW(oc),d=(.045+.1*(1-p))*(1-gm*.5),gx=.025*gm*Math.sin(ph*.5);
-  const r=1.4+.05*gm+.03*p,setR=v=>{thPose(hc,{y:-.3,ry:0,rx:r,l:[[v,-.2],[v,.2]],k:[.2,.2],a:[[-r,.2],[-r,-.2]],e:[0,0],h:[-.15,.55,0]});thStick(hc,hc.pen,V,off.set(gx,d*.75+.07,-d*.6-.04),true);};
+  const r=1.28+.05*gm+.03*p,setR=v=>{thPose(hc,{y:-.3,ry:0,rx:r,l:[[v,-.2],[v,.2]],k:[.2,.2],a:[[-r,.2],[-r,-.2]],e:[0,0],h:[-.15,.55,0]});thStick(hc,hc.pen,V,off.set(gx,d*.6+.02,-d*.45-.02),true);};
   const f0=S.fa??-.3;S.fa=thFit(setR,()=>thLowLegs(hc)-top-.01,f0,f0-.04,Math.max(-1.3,f0-.3),Math.min(.5,f0+.3));tgt=V;S.dripSrc=oc.anc.vag;
   hc.torso.updateWorldMatrix(true,false);oc.torso.updateWorldMatrix(true,false);[0,1].forEach(i=>{const s2=i?1:-1,Q=thW(oc.knees[1-i],new THREE.Vector3()).add(new THREE.Vector3(s2,0,-.3).transformDirection(hc.torso.matrixWorld).multiplyScalar(.068));thHandPole(hc,i,Q,new THREE.Vector3(s2,.2,-.3).transformDirection(hc.torso.matrixWorld));});
   [0,1].forEach(i=>{const s2=i?1:-1,Q=new THREE.Vector3(s2*.22,.62,-.02).applyMatrix4(oc.torso.matrixWorld);Q.y=top+.03;thHandPole(oc,i,Q,new THREE.Vector3(s2,.3,-.4).transformDirection(oc.torso.matrixWorld));});} // tangan cewek ke atas kepala, di kasur
  else if(S.kind==='prone'){ // 🛏️ prone bone: cewek tengkurap rata (kepala ke bantal, noleh), Han nindih dari belakang, kaki lurus di luar kakinya, tangan nopang di kasur; variasi: dalam pelan ↔ cewek ngangkat pantat nyambut
   const gm=wave(t/6.5),arch=.07*gm*q;
   thPose(oc,{y:.15,ry:0,rx:PI2-.03-arch,l:[[arch,-.13],[arch,.13]],k:[.05,.05],a:[[-2.7,.55],[-2.7,-.55]],e:[-1.7,-1.7],h:[-.15,.95,0]});thGround(oc);thKeepOnBed(oc);
-  oc.torso.updateWorldMatrix(true,false);const V=thW(oc.anc.vag,new THREE.Vector3()),top=thTopW(oc),up=new THREE.Vector3(0,1,0).transformDirection(oc.torso.matrixWorld),dd=(.06+.085*(1-p))*(1-gm*.3);
-  const tgtP=V.clone().addScaledVector(up,-dd);tgtP.y+=.11;
+  oc.torso.updateWorldMatrix(true,false);const V=thW(oc.anc.vag,new THREE.Vector3()),top=thTopW(oc),up=new THREE.Vector3(0,1,0).transformDirection(oc.torso.matrixWorld),dd=(.03+.05*(1-p))*(1-gm*.3);
+  const tgtP=V.clone().addScaledVector(up,-dd);tgtP.y+=.07;
   const setB=v=>{const rx=PI2-.2;thPose(hc,{y:-.2,ry:0,rx,l:[[PI2-rx-v,-.3],[PI2-rx-v,.3]],k:[.05,.05],a:[[-1.3,.3],[-1.3,-.3]],e:[-.3,-.3],h:[-.5,0,0]});thStick(hc,hc.pen,tgtP,null,true);};
   const f0=S.fa??.2;S.fa=thFit(setB,()=>thLowLegs(hc)-top,f0,f0+.04,Math.max(-.3,f0-.25),Math.min(.7,f0+.25));tgt=V;S.dripSrc=oc.anc.vag;
   hc.torso.updateWorldMatrix(true,false);[0,1].forEach(i=>{const s2=i?1:-1,Q=new THREE.Vector3(s2*.36,.3,0).applyMatrix4(oc.torso.matrixWorld);Q.y=top+.03;thHandPole(hc,i,Q,new THREE.Vector3(s2,.2,-.3).transformDirection(hc.torso.matrixWorld));});
