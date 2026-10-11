@@ -141,6 +141,13 @@ body.noinfo aside{display:none}
 .therr{color:#ff9c9c;font-size:12px;font-weight:700;margin-top:6px;min-height:14px}
 .thnow{font-weight:800;font-size:12.5px;color:#ffe28a;margin-bottom:6px;word-break:break-word}
 .thctl{display:flex;gap:5px;flex-wrap:wrap}
+.thpriv{margin-top:4px;color:#ffc2dc;font-weight:800}
+#thSexFX{position:fixed;inset:0;pointer-events:none;z-index:8;opacity:0;transition:opacity .6s;overflow:hidden}
+#thSexFX.soft{opacity:1;background:radial-gradient(ellipse at center,rgba(0,0,0,0) 45%,rgba(120,20,60,.38) 100%)}
+#thSexFX.peak{opacity:1;animation:thPulse .8s ease-in-out 5}
+#thSexFX .ht{position:absolute;bottom:-40px;font-size:26px;animation:thRise 3.6s ease-out forwards;filter:drop-shadow(0 0 6px #ff7fb0)}
+@keyframes thPulse{0%,100%{box-shadow:inset 0 0 60px rgba(255,120,170,.25)}50%{box-shadow:inset 0 0 180px rgba(255,120,170,.75)}}
+@keyframes thRise{0%{transform:translateY(0) scale(.6);opacity:0}15%{opacity:1}100%{transform:translateY(-105vh) scale(1.3);opacity:0}}
 #thSeek{width:100%;margin-top:8px;accent-color:#f2559a}#thVol{width:80px;vertical-align:middle;accent-color:#f2559a}
 .thtime{display:flex;justify-content:space-between;align-items:center}
 .thlist{display:flex;flex-direction:column;gap:4px;max-height:190px;overflow:auto;margin-top:4px}
@@ -243,9 +250,10 @@ body.touch .povhint .kbd{display:none}body.touch .povhint .tch{display:inline}
       <input type="range" id="thSeek" min="0" max="1000" value="0"><div class="small thtime"><span id="thT">0:00 / 0:00</span><span>🔊 <input type="range" id="thVol" min="0" max="100" value="90"></span></div>
       <div class="sec">🎞️ Folder theater/ <span id="thCount"></span></div><div class="thlist" id="thList"><div class="small">Memuat daftar…</div></div>
       <div class="throw"><label class="thb thpick">📂 Putar dari folder komputer<input type="file" id="thPick" accept="video/*" webkitdirectory multiple hidden></label><button class="thb" id="thLockBtn" title="Kunci lagi">🔒 Kunci</button></div>
-      <div class="sec">💞 Interaksi Ophelia 1</div><div class="thctl" id="thAct"></div><div class="small" id="thActSt"></div>
+      <div class="sec">💞 Interaksi Ophelia 1</div><div class="thctl" id="thAct"></div><div class="small thpriv" id="thPrivSt" hidden>Mode privat aktif 💞</div><div class="small" id="thActSt"></div>
       <div class="small">Tips: duduk di kursi &amp; tekan tombol <b>👁️ POV</b> (1st person) biar layar bioskop full di depan mata. Di HP pakai tombol layar, bukan huruf keyboard.</div></div>
     </div>
+    <div id="thSexFX" aria-hidden="true"></div>
     <video id="thVideo" playsinline preload="metadata"></video>
     <div class="mobbar" id="mobBar" aria-label="Akses cepat HP">
       <button type="button" data-m="cinema" class="go" id="mobCinema" title="Ke Bioskop Lt 4 / buka panel">🎬 Bioskop</button>
@@ -1784,7 +1792,7 @@ async function thTry(){const c=$('thCode').value.trim();if(!c)return;const h=awa
   thSetIdle(['🔓 Kebuka! Pilih film di panel 🎬','Selamat nonton, Papa 🍿']);log('🎬 Bioskop Lt 4 dibuka 🔓');thLoadList();thUI();}
  else{$('thErr').textContent='❌ Kode salah, coba lagi';$('thCode').select();}}
 $('thGo').onclick=thTry;$('thCode').addEventListener('keydown',e=>{e.stopPropagation();if(e.key==='Enter')thTry();if(e.key==='Escape')thClose();});
-$('thLockBtn').onclick=()=>{TH.unlocked=false;try{sessionStorage.removeItem('thUnlock');}catch(_){}$('thStop').onclick();thSetIdle(['🔒 Masukkan kode kunci di 🔐 Konsol','Mode POV: jalan ke sini, tekan T / tombol 🎬']);thUI();};
+$('thLockBtn').onclick=()=>{TH.unlocked=false;if(typeof thSexSet==='function')thSexSet(false,false);try{sessionStorage.removeItem('thUnlock');}catch(_){}$('thStop').onclick();thSetIdle(['🔒 Masukkan kode kunci di 🔐 Konsol','Mode POV: jalan ke sini, tekan T / tombol 🎬']);thUI();};
 $('thX').onclick=()=>thClose();
 function thOpen(){if(!thInCinema()){POV.msg='🎬 Panel bioskop cuma bisa dibuka di dalam Bioskop Lt 4 — tekan tombol 🎬 Bioskop';POV.msgUntil=performance.now()+2500;POV.zoneKey='';return;}
  TH.open=true;$('thPanel').classList.add('on');POV.keys.clear();thUI();POV.zoneKey='';
@@ -1820,9 +1828,34 @@ const TH_SEATS={partner:[9.9,3*DY+8.4],han:[8.75,3*DY+8.4]}; // Baris C, dekat l
 const TH_ACTS=[
  {id:'bareng',label:'🍿 Nonton bareng',run:()=>thDateStart('ophelia1')},
  {id:'duduk',label:'💺 Han duduk di sebelah',run:()=>thHanSit()},
+ {id:'privat',label:'🔒 Mode privat',toggle:true,run:()=>thSexSet(!TH.sexMode,true)},
+ {id:'dekat',label:'💞 Close-up soft / Intim dekat',run:()=>thIntim('dekat')},
+ {id:'belakang',label:'🫂 Pose belakang / Intimate rear',run:()=>thIntim('belakang')},
+ {id:'puncak',label:'✨ Climax FX / Efek puncak',gated:true,run:()=>thPeakFX()},
  {id:'selesai',label:'🚶 Selesai',run:()=>thDateEnd('ophelia1')},
 ];
-function thActRender(){const el=$('thAct');el.innerHTML='';TH_ACTS.forEach(a=>{const b=document.createElement('button');b.className='thb';b.textContent=a.label;b.onclick=()=>a.run();el.appendChild(b);});}
+function thActRender(){const el=$('thAct');el.innerHTML='';TH_ACTS.forEach(a=>{const b=document.createElement('button');b.type='button';b.className='thb';b.dataset.act=a.id;b.textContent=a.label;
+ if(a.gated)b.hidden=!TH.sexMode;if(a.toggle&&TH.sexMode){b.classList.add('on');b.textContent='🔓 Mode privat ON';}
+ b.onclick=()=>a.run();el.appendChild(b);});const ps=$('thPrivSt');if(ps)ps.hidden=!TH.sexMode;}
+/* 💞 Mode privat (sexMode): label aman, efek visual saja (vignette / hati / glow), non-eksplisit */
+TH.sexMode=false;try{TH.sexMode=sessionStorage.getItem('thSexMode')==='1';}catch(_){}
+const thFX=()=>$('thSexFX');let thFXT=0;
+function thSexSet(on,announce){TH.sexMode=!!on;try{sessionStorage.setItem('thSexMode',TH.sexMode?'1':'0');}catch(_){}
+ const fx=thFX();if(fx){if(TH.sexMode)fx.classList.add('soft');else{fx.classList.remove('soft','peak');fx.innerHTML='';}}
+ $('thPanel').classList.toggle('priv',TH.sexMode);thActRender();
+ if(announce){thActSt(TH.sexMode?'💞 Mode privat aktif — lampu bioskop diredupin':'🔒 Mode privat OFF');if(typeof log==='function')log(TH.sexMode?'💞 Mode privat Bioskop ON':'🔒 Mode privat Bioskop OFF');}}
+function thIntim(kind){const ac=actors.ophelia1;
+ if(!ac||!ac.cinemaDate){thActSt('🍿 Ajak Ophelia dulu (🍿 Nonton bareng)');return;}
+ const t=kind==='dekat'?{demo:'💞 Intim dekat sama Han',say:'Sini sayang, deketan… 💞',pov:'💞 Ophelia nyender deket banget, kepala di bahu Han'}
+  :{demo:'🫂 Peluk dari belakang',say:'Aku peluk dari belakang ya sayang 🫂',pov:'🫂 Ophelia meluk Han dari belakang, hangat banget'};
+ ac.demo=t.demo;ac.sayText=t.say;ac.sayUntil=performance.now()+7000;POV.msg=t.pov;POV.msgUntil=performance.now()+4000;POV.zoneKey='';
+ const fx=thFX();if(fx){fx.classList.add('soft');clearTimeout(thFXT);if(!TH.sexMode)thFXT=setTimeout(()=>fx.classList.remove('soft'),6000);}
+ thActSt(t.demo);}
+function thPeakFX(){if(!TH.sexMode){thActSt('🔒 Nyalain Mode privat dulu');return;}const fx=thFX();if(!fx)return;
+ fx.classList.add('soft');fx.classList.remove('peak');void fx.offsetWidth;fx.classList.add('peak');
+ for(let i=0;i<26;i++){const h=document.createElement('span');h.className='ht';h.textContent=['💗','💖','💕','✨','💞'][i%5];h.style.left=(Math.random()*96)+'%';h.style.animationDelay=(Math.random()*1.2)+'s';fx.appendChild(h);}
+ const ac=actors.ophelia1;if(ac&&ac.cinemaDate){ac.sayText='💖✨';ac.sayUntil=performance.now()+4000;}
+ thActSt('✨ Efek puncak 💖');setTimeout(()=>{fx.classList.remove('peak');fx.querySelectorAll('.ht').forEach(e=>e.remove());},4200);}
 const thActSt=t=>{$('thActSt').textContent=t||'';};
 function thDateStart(id){const ac=actors[id];if(!ac){thActSt('⚠️ '+id+' belum ada di denah');return;}
  if(ac.cinemaDate){thActSt('🍿 '+nameOf(id)+' udah di bioskop');return;}
@@ -1834,7 +1867,9 @@ function thDateStart(id){const ac=actors[id];if(!ac){thActSt('⚠️ '+id+' belu
 function thDateEnd(id){const ac=actors[id];if(!ac||!ac.cinemaDate){thActSt('');return;}ac.cinemaDate=false;ac.demo=null;goHome(ac,null);thActSt('👋 '+nameOf(id)+' balik ke rutinitas');}
 function thHanSit(){const ac=actors.han;if(!POV.on||!ac)return;const st=TH_SEATS.han;ac.pos={x:st[0],y:st[1]};POV.yaw=Math.PI;ac.c.root.rotation.y=POV.yaw;
  POV.fpPref=true;POV.look=-.08;POV.snap=true;povButtons();onFloor(ac,ac.pos.y);ac.c.root.position.set(tx(st[0]),0,tz(st[1]));thClose();}
-thActRender();// keyboard
+thActRender();if(TH.sexMode&&TH.unlocked)thSexSet(true,false);else if(TH.sexMode)thSexSet(false,false);
+setInterval(()=>{const fx=$('thSexFX');if(fx)fx.style.visibility=(TH.unlocked&&thInCinema())?'visible':'hidden';},700); // efek privat cuma di dalam Bioskop
+// keyboard
 const POV_KEYS={KeyW:'f',ArrowUp:'f',KeyS:'b',ArrowDown:'b',KeyA:'l',ArrowLeft:'l',KeyD:'r',ArrowRight:'r',KeyQ:'tl',KeyE:'tr',ShiftLeft:'run',ShiftRight:'run'};
 const povTyping=e=>{const t=e.target;return !!t&&(t.tagName==='INPUT'||t.tagName==='TEXTAREA'||t.tagName==='SELECT'||t.isContentEditable);};
 window.addEventListener('keydown',e=>{if(TH.open&&e.code==='Escape'){e.preventDefault();thClose();return;}if(!POV.on||povTyping(e)||e.ctrlKey||e.metaKey||e.altKey)return;const c=e.code;
