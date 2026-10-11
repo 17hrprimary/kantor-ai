@@ -1982,7 +1982,7 @@ const TH_TXT={kiss:{demo:'💋 Ciuman sambil pelukan',say:'Peluk aku erat sayang
  spoon:{demo:'🥄 Spooning',say:'Peluk dari belakang sayang… 💞',pov:'🥄 Tiduran miring, Han meluk {A} dari belakang'},
  g_rear:{demo:'🏋️ Gending dari belakang',say:'Angkat aku sayang… pelan-pelan di belakang 💗',pov:'🏋️ Han berdiri, ngangkat {A} dari belakang, tangan di bawah kedua pahanya (anal)'},
  pile:{demo:'🔻 Piledriver',say:'Dari atas sayang… dalem banget 🔥',pov:'🔻 {A} rebah di bahu, pinggul keangkat; Han jongkok di atas, hentak anal ke bawah'},
- press:{demo:'💥 Mating press',say:'Tekan aku sayang… 💞',pov:'💥 {A} telentang, kaki ditekuk ke dada; Han nindih dari atas, tangan di kasur'},
+ press:{demo:'💥 Mating press',say:'Tekan aku sayang… 💞',pov:'💥 {A} telentang, kaki ditekuk ke dada sambil megangin pahanya sendiri; Han nindih dari atas'},
  prone:{demo:'🛏️ Prone bone',say:'Tindih aku dari belakang sayang… 💗',pov:'🛏️ {A} tengkurap rata; Han di atas punggungnya, tangan nopang di kasur'},
  stand:{demo:'🧍 Berdiri',say:'Dari belakang sambil berdiri sayang… 💗',pov:'🧍 {A} berdiri nunduk, tangan di kasur; Han berdiri di belakang'},
  lap:{demo:'💃 Lap dance',say:'Duduk aja sayang, aku yang goyang 💃',pov:'💃 Han duduk di pinggir ranjang, {A} duduk di pangkuannya goyang'},
@@ -2414,13 +2414,15 @@ function thSceneTick(now){const S=POV.scene,han=actors.han;if(!S||!han)return;co
    thHandPole(hc,i,Q,new THREE.Vector3(s2,-.5,-.2).transformDirection(hc.torso.matrixWorld));});}
  else if(S.kind==='press'){ // 💥 mating press: cewek telentang, paha ditekuk ke dada, kaki ke atas; Han nindih miring curam, kaki lurus ke belakang (jari kaki di kasur), tangan napak di kasur samping bahunya; variasi: tumbuk dalam ↔ goyang muter
   const gm=wave(t/6),jq=wave(ph-.35);
-  thPose(oc,{y:.45,ry:Math.PI,rx:-PI2+.1+.04*jq,l:[[-2.05-.06*jq,-.55],[-2.05-.06*jq,.55]],k:[.55,.55],a:[[-2.8,.35],[-2.8,-.35]],e:[-.9,-.9],h:[.3-.1*jq,0,.05*Math.sin(ph*.5)]});thGround(oc);thKeepOnBed(oc);
+  thPose(oc,{y:.45,ry:Math.PI,rx:-PI2+.1+.04*jq,l:[[-2.05-.06*jq,-.55],[-2.05-.06*jq,.55]],k:[.55,.55],a:[[-.8,.35],[-.8,-.35]],e:[-.9,-.9],h:[.3-.1*jq,0,.05*Math.sin(ph*.5)]});thGround(oc);thKeepOnBed(oc);
   {oc.root.position.z+=(tz(TH_BED.y+1)-tz(TH_BED.y))*.03*jq;oc.root.updateMatrixWorld(true);} // kehentak ke arah bantal
   const V=thW(oc.anc.vag,new THREE.Vector3()),top=thTopW(oc),d=(.045+.1*(1-p))*(1-gm*.5),gx=.025*gm*Math.sin(ph*.5);
   const r=1.28+.05*gm+.03*p,setR=v=>{thPose(hc,{y:-.3,ry:0,rx:r,l:[[v,-.2],[v,.2]],k:[.2,.2],a:[[-r,.2],[-r,-.2]],e:[0,0],h:[-.15,.55,0]});thStick(hc,hc.pen,V,off.set(gx,d*.6+.02,-d*.45-.02),true);};
   const f0=S.fa??-.3;S.fa=thFit(setR,()=>thLowLegs(hc)-top-.01,f0,f0-.04,Math.max(-1.3,f0-.3),Math.min(.5,f0+.3));tgt=V;S.dripSrc=oc.anc.vag;
   hc.torso.updateWorldMatrix(true,false);oc.torso.updateWorldMatrix(true,false);[0,1].forEach(i=>{const s2=i?1:-1,Q=thW(oc.knees[1-i],new THREE.Vector3()).add(new THREE.Vector3(s2,0,-.3).transformDirection(hc.torso.matrixWorld).multiplyScalar(.068));thHandPole(hc,i,Q,new THREE.Vector3(s2,.2,-.3).transformDirection(hc.torso.matrixWorld));});
-  [0,1].forEach(i=>{const s2=i?1:-1,Q=new THREE.Vector3(s2*.22,.62,-.02).applyMatrix4(oc.torso.matrixWorld);Q.y=top+.03;thHandPole(oc,i,Q,new THREE.Vector3(s2,.3,-.4).transformDirection(oc.torso.matrixWorld));});} // tangan cewek ke atas kepala, di kasur
+  {const Cn=thW(oc.torso,new THREE.Vector3());[0,1].forEach(i=>{oc.legs[i].updateWorldMatrix(true,false); /* tangan cewek megang paha sendiri (sisi luar, tengah paha), siku ke samping */
+   const Lp=thW(oc.legs[i],new THREE.Vector3()),M=new THREE.Vector3(0,-oc.dim.thigh*(.5+.04*jq),0).applyMatrix4(oc.legs[i].matrixWorld),ax=M.clone().sub(Lp).normalize(),out=Lp.clone().sub(Cn);out.addScaledVector(ax,-out.dot(ax)).normalize();
+   const Q=M.addScaledVector(out,.085);thHandPole(oc,i,Q,out.clone().add(new THREE.Vector3(0,-.3,0)).normalize());});}}
  else if(S.kind==='prone'){ // 🛏️ prone bone: cewek tengkurap rata (kepala ke bantal, noleh), Han nindih dari belakang, kaki lurus di luar kakinya, tangan nopang di kasur; variasi: dalam pelan ↔ cewek ngangkat pantat nyambut
   const gm=wave(t/6.5),arch=.07*gm*q;
   thPose(oc,{y:.15,ry:0,rx:PI2-.03-arch,l:[[arch,-.13],[arch,.13]],k:[.05,.05],a:[[-2.7,.55],[-2.7,-.55]],e:[-1.7,-1.7],h:[-.15,.95,0]});thGround(oc);thKeepOnBed(oc);
