@@ -31,24 +31,30 @@ main{flex:1;display:grid;grid-template-columns:1fr 270px;gap:12px;padding:12px 1
 #labels{position:absolute;inset:0;pointer-events:none;z-index:2;overflow:hidden}
 .ctrl{position:absolute;left:10px;top:10px;display:flex;flex-direction:column;gap:6px;z-index:5}
 .ctrl button{width:36px;height:36px;border-radius:12px;border:2px solid #ffd2e4;background:#fff;color:#d6457f;font-size:17px;font-weight:800;cursor:pointer;box-shadow:0 3px 0 #ffe0ec}
-.floors{position:absolute;left:10px;top:300px;display:flex;flex-direction:column;gap:5px;z-index:5}
-.shownr{position:absolute;left:10px;top:228px;z-index:5;min-width:58px;height:30px;border-radius:11px;border:2px solid #ffd2e4;background:#fff;color:#d6457f;font:inherit;font-size:11px;font-weight:800;cursor:pointer;box-shadow:0 3px 0 #ffe0ec;padding:0 8px;white-space:nowrap}
+.floors{position:absolute;left:54px;top:118px;display:flex;flex-direction:column;gap:5px;z-index:5}
+.shownr{position:absolute;left:54px;top:46px;z-index:5;min-width:58px;height:30px;border-radius:11px;border:2px solid #ffd2e4;background:#fff;color:#d6457f;font:inherit;font-size:11px;font-weight:800;cursor:pointer;box-shadow:0 3px 0 #ffe0ec;padding:0 8px;white-space:nowrap}
 .shownr.on{background:linear-gradient(180deg,#6ad39a,#3cae6e);color:#fff;border-color:#fff;box-shadow:0 3px 0 #2a8a55}
-@media(max-width:900px){.shownr{top:224px;font-size:10px;min-width:52px;height:28px}.portmini{top:188px}.gedmini{top:254px;font-size:10px;min-width:52px;height:28px}.floors{top:292px}}
+@media(max-width:900px){.shownr{font-size:10px;min-width:52px;height:28px}.gedmini{font-size:10px;min-width:52px;height:28px}}
 /* 🏙️ Gedung luar (eksterior) */
-.gedmini{position:absolute;left:10px;top:264px;z-index:5;min-width:58px;height:30px;border-radius:11px;border:2px solid #ffd2e4;background:#fff;color:#d6457f;font:inherit;font-size:11px;font-weight:800;cursor:pointer;box-shadow:0 3px 0 #ffe0ec;padding:0 8px;white-space:nowrap}
+.gedmini{position:absolute;left:54px;top:82px;z-index:5;min-width:58px;height:30px;border-radius:11px;border:2px solid #ffd2e4;background:#fff;color:#d6457f;font:inherit;font-size:11px;font-weight:800;cursor:pointer;box-shadow:0 3px 0 #ffe0ec;padding:0 8px;white-space:nowrap}
 .gedmini.on{background:linear-gradient(180deg,#5d6b86,#2f3a52);color:#fff;border-color:#fff;box-shadow:0 3px 0 #1d2536}
 /* 🌆 Tombol Kota: dipindah ke pojok kanan bawah layar (gak nempel tombol Gedung lagi biar gak nutupin) */
 #btnKota{left:auto;top:auto;right:12px;bottom:12px;height:34px;min-width:64px;font-size:12px;touch-action:manipulation}
 #btnKota.on{background:linear-gradient(180deg,#f0a35e,#c86b3a);box-shadow:0 3px 0 #8f4520}
-@media(min-width:901px){.jp:not(.hide)~#btnKota{right:272px}.jp:not(.hide)~.hint{max-width:calc(100% - 370px)}} /* PC + panel jadwal kebuka: geser ke kiri panel */
+@media(min-width:901px){.jp:not(.hide)~#btnKota{right:272px}.jp:not(.hide)~.blstack{max-width:calc(100% - 370px)}} /* PC + panel jadwal kebuka: geser ke kiri panel */
 body.pov.touch #btnKota{bottom:284px} /* POV HP: di atas tombol POV kanan bawah */
 @media(max-width:900px){#btnKota{top:auto;right:10px;bottom:10px;height:36px;min-width:64px;font-size:12px}body.pov.touch #btnKota{bottom:272px}}
-.gcredit{display:none;position:absolute;left:12px;bottom:38px;z-index:5;font-size:10px;color:#5a4a66;background:rgba(255,255,255,.85);padding:3px 9px;border-radius:999px}
+/* 🧹 kredit gedung + tulisan petunjuk ditumpuk rapi dalam 1 wadah kiri bawah (dulu dua-duanya absolute, numpuk di HP pas petunjuk jadi 3 baris) */
+.blstack{position:absolute;left:12px;bottom:10px;max-width:calc(100% - 110px);display:flex;flex-direction:column;align-items:flex-start;gap:5px;z-index:5;pointer-events:none}
+.blstack>*{pointer-events:auto}
+.gcredit{display:none;font-size:10px;color:#5a4a66;background:rgba(255,255,255,.85);padding:3px 9px;border-radius:999px}
 .gcredit a{color:#d6457f}
 .gcredit.show{display:block}
-.portmini{position:absolute;left:10px;top:192px;z-index:5;min-width:58px;height:30px;border-radius:11px;border:2px solid #ffd2e4;background:#fff;color:#d6457f;font:inherit;font-size:11px;font-weight:800;cursor:pointer;box-shadow:0 3px 0 #ffe0ec;padding:0 8px;white-space:nowrap}
+.portmini{position:absolute;left:54px;top:10px;z-index:5;min-width:58px;height:30px;border-radius:11px;border:2px solid #ffd2e4;background:#fff;color:#d6457f;font:inherit;font-size:11px;font-weight:800;cursor:pointer;box-shadow:0 3px 0 #ffe0ec;padding:0 8px;white-space:nowrap}
 .portmini.on{background:linear-gradient(180deg,#7eb6ff,#4a7fd6);color:#fff;border-color:#fff;box-shadow:0 3px 0 #2a5fa8}
+/* 🧹 Rapiin kolom kiri: dulu Port/Fokus nimpa tombol ⌂ & 🎮 POV (kolom kontrol habis di 256px). Sekarang Port/Fokus/Gedung/lantai jadi kolom ke-2 di sebelah kanan kolom kontrol, biar gak tumpang tindih & gak nabrak tulisan petunjuk/kredit di bawah. Mode POV: kolom kontrol & lantai disembunyiin, jadi Port/Fokus/Gedung balik ke kiri, di bawah tombol 🎮 & tulisan petunjuk POV */
+body.pov .portmini{left:10px;top:188px}body.pov .shownr{left:10px;top:224px}body.pov .gedmini:not(#btnKota){left:10px;top:260px}
+@media(max-width:900px){.portmini{top:10px}.shownr{top:44px}.gedmini{top:78px}.floors{top:116px}body.pov .portmini{top:188px}body.pov .shownr{top:222px}body.pov .gedmini:not(#btnKota){top:256px}}
 body.portrait .stage{height:min(82vh,780px);min-height:520px}
 body.portrait .hint{display:none}
 body.portrait #gl{clip-path:inset(0 6% 0 6%)}
@@ -63,7 +69,7 @@ body.portrait #gl{clip-path:inset(0 6% 0 6%)}
 .floors button{min-width:58px;height:30px;border-radius:11px;border:2px solid #ffd2e4;background:#fff;color:#d6457f;font:inherit;font-size:11.5px;font-weight:800;cursor:pointer;box-shadow:0 3px 0 #ffe0ec;padding:0 8px}
 .floors button.on{background:linear-gradient(180deg,#ff7eb6,#f2559a);color:#fff;border-color:#fff}
 .fsign{background:#5a3a52;color:#fff;font-weight:900;font-size:13px;padding:4px 12px;border-radius:10px;border:2px solid #fff;white-space:nowrap;box-shadow:0 3px 8px rgba(0,0,0,.18)}
-.hint{position:absolute;left:12px;bottom:10px;max-width:calc(100% - 110px);font-size:11px;color:#a37a95;background:rgba(255,255,255,.85);padding:4px 10px;border-radius:999px;z-index:5}
+.hint{max-width:100%;font-size:11px;color:#a37a95;background:rgba(255,255,255,.85);padding:4px 10px;border-radius:999px}
 .hint a{color:#d6457f}
 /* label 3D */
 .ntag{pointer-events:auto;cursor:pointer;display:flex;flex-direction:column;align-items:center;transform:translateY(-6px)}
@@ -141,10 +147,10 @@ body.fs .infofloat{top:14px}
  header{padding:8px 10px;gap:8px}.sub{display:none}h1{font-size:17px}
  .chips{order:3;flex-basis:100%}
  .btn{margin-left:auto}
- .jp{width:min(250px,80%)}
- .floors{top:292px}.floors button{min-width:52px;height:28px;font-size:10.5px;padding:0 6px}.fsign{font-size:11px;padding:3px 9px}
- .ntag .n{font-size:10px;padding:1px 7px}.rsign{font-size:10px}.hint{font-size:9.5px}
- .jtoggle.open{right:calc(min(250px,80%) + 18px)}
+ .jp{width:min(250px,max(200px,calc(100% - 140px)))} /* 🧹 HP: panel jadwal sedikit lebih sempit biar gak nutupin kolom tombol kiri */
+ .floors button{min-width:52px;height:28px;font-size:10.5px;padding:0 6px}.fsign{font-size:11px;padding:3px 9px}
+ .ntag .n{font-size:10px;padding:1px 7px}.rsign{font-size:10px}.hint{font-size:9.5px;border-radius:12px;line-height:1.45}
+ .jtoggle.open{right:calc(min(250px,max(200px,calc(100% - 140px))) + 18px);top:290px} /* 🧹 HP: tombol tutup jadwal turun ke bawah kolom tombol, biar gak nutupin ＋ & 📱 Port */
 }
 
 /* 🎬 Bioskop Lt 4 */
@@ -211,7 +217,7 @@ body.pov.touch .mobbar,body.pov .mobbar.show{display:flex}
  body.pov .povpad{display:block}
  body.pov .mobbar{display:flex} /* HP: bar akses cepat cuma di POV */
  .povhint .kbd{display:none}.povhint .tch{display:inline}
- .povhint{max-width:calc(100% - 70px);font-size:10.5px;padding:5px 10px;top:8px}
+ .povhint{max-width:calc(100% - 120px);font-size:10.5px;padding:5px 10px;top:8px} /* 🧹 lebih sempit biar gak nimpa tombol 🎮 */
  .thpanel{right:8px;top:8px;left:8px;width:auto;max-height:min(62vh,520px);padding:10px}
  .thctl .thb{min-height:40px;padding:8px 10px;font-size:13px}
  #thCode{font-size:18px;min-height:44px}
@@ -246,14 +252,16 @@ body.touch .povhint .kbd{display:none}body.touch .povhint .tch{display:inline}
     </div>
     <button type="button" class="portmini" id="btnPortraitMini" title="Mode Portrait: framing HP fokus kampus/kantor, ambience jauh di-crop. Show Near tetap ada.">📱 Port</button>
     <button type="button" class="gedmini on" id="btnGedung" title="Gedung Kantor 2 + jembatan kaca dari Lobi Lt 3: bangunan terpisah di belakang Taman Halaman. Klik buat nyalain/matiin.">🏙️ Gedung</button>
-    <div class="gcredit" id="gCredit">🏙️ Gedung: <a href="https://poly.pizza/m/KRT3e3kgEb" target="_blank" rel="noopener">“Office” by SoyMaria</a> · Poly Pizza · <a href="https://creativecommons.org/licenses/by/3.0/" target="_blank" rel="noopener">CC-BY 3.0</a></div>
     <button type="button" class="shownr" id="btnShowNearMini" title="Show Near: suasana sekitar (hutan dekat + jalan). OFF = Fokus Kantor biar gak lag.">🏢 Fokus</button>
     <div class="floors" id="floors"><button data-f="all" class="on">🏢 Semua</button><button data-f="3" title="Bioskop — sekarang di dalam Gedung Kantor 2 (lantai 2, sejajar jembatan kaca)">Lt 4 🎬</button><button data-f="2">Lt 3 🛏️</button><button data-f="1">Lt 2 🛋️</button><button data-f="0">Lt 1 💼</button></div>
     <button class="jtoggle" id="jToggle">📅 Jadwal per Karakter</button>
     <div class="jp" id="jPanel"><h3>📅 Jadwal per Karakter</h3><div class="list" id="jList"></div></div>
     <button type="button" class="gedmini kota on" id="btnKota" title="Kota latar: gedung-gedung hiasan di kejauhan (ringan). Klik buat nyalain/matiin.">🌆 Kota</button>
     <div class="pop" id="pop"></div>
+    <div class="blstack">
+    <div class="gcredit" id="gCredit">🏙️ Gedung: <a href="https://poly.pizza/m/KRT3e3kgEb" target="_blank" rel="noopener">“Office” by SoyMaria</a> · Poly Pizza · <a href="https://creativecommons.org/licenses/by/3.0/" target="_blank" rel="noopener">CC-BY 3.0</a></div>
     <div class="hint">Drag: putar · klik kanan/2 jari: geser · scroll/pinch: zoom · klik karakter buat detail · <a href="index-iso.html">isometrik</a> · <a href="index-2d.html">2D</a> · gedung: <a href="https://poly.pizza/m/KRT3e3kgEb" target="_blank" rel="noopener">“Office” by SoyMaria</a> (<a href="https://creativecommons.org/licenses/by/3.0/" target="_blank" rel="noopener">CC-BY 3.0</a>) · Maya: modifikasi warna/tekstur dari <a href="https://github.com/microsoft/Microsoft-Rocketbox" target="_blank" rel="noopener">“Female_Adult_03” — Microsoft Rocketbox</a> (© 2020 Microsoft, <a href="https://github.com/microsoft/Microsoft-Rocketbox/blob/master/LICENSE.md" target="_blank" rel="noopener">MIT</a>)</div>
+    </div>
     <div class="povhint" id="povHint"><b>🎮 Mode POV Han</b> <span class="kbd">· <span class="kb">W</span><span class="kb">A</span><span class="kb">S</span><span class="kb">D</span> / <span class="kb">↑↓←→</span> jalan · <span class="kb">Q</span><span class="kb">E</span> / drag mouse: putar · <span class="kb">Shift</span> lari · <span class="kb">V</span> 1st/3rd person · scroll: jarak kamera · <span class="kb">Esc</span> keluar</span><span class="tch">· stick kiri: jalan · tombol kanan: Naik/Turun/Bioskop/POV · bar tengah: Akses cepat</span><div class="povst" id="povStair"></div></div>
 
     <div class="thpanel" id="thPanel">
