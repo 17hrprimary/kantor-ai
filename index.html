@@ -250,7 +250,7 @@ body.touch .povhint .kbd{display:none}body.touch .povhint .tch{display:inline}
     <button class="jtoggle" id="jToggle">📅 Jadwal per Karakter</button>
     <div class="jp" id="jPanel"><h3>📅 Jadwal per Karakter</h3><div class="list" id="jList"></div></div>
     <div class="pop" id="pop"></div>
-    <div class="hint">Drag: putar · klik kanan/2 jari: geser · scroll/pinch: zoom · klik karakter buat detail · <a href="index-iso.html">isometrik</a> · <a href="index-2d.html">2D</a> · gedung: <a href="https://poly.pizza/m/KRT3e3kgEb" target="_blank" rel="noopener">“Office” by SoyMaria</a> (<a href="https://creativecommons.org/licenses/by/3.0/" target="_blank" rel="noopener">CC-BY 3.0</a>) · tes karakter: <a href="https://poly.pizza/m/jpKRgGDxhk" target="_blank" rel="noopener">“Woman Casual” by Quaternius</a> (<a href="https://creativecommons.org/publicdomain/zero/1.0/" target="_blank" rel="noopener">CC0</a>)</div>
+    <div class="hint">Drag: putar · klik kanan/2 jari: geser · scroll/pinch: zoom · klik karakter buat detail · <a href="index-iso.html">isometrik</a> · <a href="index-2d.html">2D</a> · gedung: <a href="https://poly.pizza/m/KRT3e3kgEb" target="_blank" rel="noopener">“Office” by SoyMaria</a> (<a href="https://creativecommons.org/licenses/by/3.0/" target="_blank" rel="noopener">CC-BY 3.0</a>) · tes karakter: <a href="https://github.com/microsoft/Microsoft-Rocketbox" target="_blank" rel="noopener">“Female_Adult_03” — Microsoft Rocketbox</a> (<a href="https://github.com/microsoft/Microsoft-Rocketbox/blob/master/LICENSE.md" target="_blank" rel="noopener">MIT</a>)</div>
     <div class="povhint" id="povHint"><b>🎮 Mode POV Han</b> <span class="kbd">· <span class="kb">W</span><span class="kb">A</span><span class="kb">S</span><span class="kb">D</span> / <span class="kb">↑↓←→</span> jalan · <span class="kb">Q</span><span class="kb">E</span> / drag mouse: putar · <span class="kb">Shift</span> lari · <span class="kb">V</span> 1st/3rd person · scroll: jarak kamera · <span class="kb">Esc</span> keluar</span><span class="tch">· stick kiri: jalan · tombol kanan: Naik/Turun/Bioskop/POV · bar tengah: Akses cepat</span><div class="povst" id="povStair"></div></div>
 
     <div class="thpanel" id="thPanel">
@@ -3300,16 +3300,18 @@ function ensureBridge(){if(SHELL.bridge)return;const B=BRIDGE,g=new THREE.Group(
  // 2 pasang tiang penyangga ramping di tengah bentang
  [.36,.68].forEach(t=>{const z=Zn+L*t;[X0+.35,X1-.35].forEach(x=>add(colM,x,(Y-.36-.32)/2,z,.3,Y-.36+.32,.3,true));add(colM,cx,Y-.5,z,Wd-.4,.25,.3);});
  SHELL.g.add(g);SHELL.bridge=g;g.visible=SHELL.on&&topFloor()>=2;}
-/* ================= 🧪 Karakter tes: wanita Asia (GLB, rig + animasi Idle/Walk) =================
-   Model: "Woman Casual" by Quaternius — Poly Pizza https://poly.pizza/m/jpKRgGDxhk — CC0 / Public Domain (https://creativecommons.org/publicdomain/zero/1.0/)
-   Dikecilin: 9 animasi lain dibuang (sisa Idle + Walk), dedup/prune/resample, mesh dikuantisasi (KHR_mesh_quantization) → models/tes-wanita-asia.glb (±186 KB, 2.776 segitiga).
-   Cuma hiasan tes: jalan bolak-balik di sisi timur Taman Depan (antara air mancur & lampu taman), gak ikut brain/agents/chat, gak nyentuh karakter lain.
-   Dimuat belakangan (setelah kantor kebuka) biar loading awal gak ketambahan. */
-const TESCHAR={root:null,mixer:null,act:{},state:'idle',t:0,dir:1,x:19.4,loading:false,X0:19.4,X1:24.4,Y:20.95,H:1.25,SPEED:.9};
+/* ================= 🧪 Karakter tes: wanita Asia — manusia 3D realistis (GLB, rig + animasi Idle/Walk) =================
+   Model: "Female_Adult_03" dari Microsoft Rocketbox Avatar Library — https://github.com/microsoft/Microsoft-Rocketbox — MIT License (© 2020 Microsoft, teks lisensi: models/LICENSE-Microsoft-Rocketbox.md)
+   Animasi: f_idle_breathe_01 (Idle) + f_walk_neutral (Walk, in-place) dari library yang sama (rig Bip01 sama persis).
+   Dikonversi FBX → GLB di Blender: tekstur kulit/baju/rambut asli (TGA 2048) dikecilin → webp (wajah 2048, badan/rambut/normal 1024), atribut tak terpakai dibuang,
+   animasi di-resample, mesh dikuantisasi (KHR_mesh_quantization, tanpa decoder tambahan) → models/tes-wanita-asia-realistis.glb (±1,1 MB, 9.208 segitiga, 80 tulang).
+   Rambut/bulu mata pakai alpha MASK (gak perlu sorting transparan). Cuma hiasan tes: jalan bolak-balik di sisi timur Taman Depan (antara air mancur & lampu taman),
+   gak ikut brain/agents/chat, gak nyentuh karakter lain. Dimuat belakangan (setelah kantor kebuka) biar loading awal gak ketambahan. */
+const TESCHAR={follow:false,root:null,mixer:null,act:{},state:'idle',t:0,dir:1,x:19.4,loading:false,X0:19.4,X1:24.4,Y:20.95,H:1.25,SPEED:.9};
 async function loadTesChar(){if(TESCHAR.root||TESCHAR.loading)return;TESCHAR.loading=true;
  try{const {GLTFLoader}=await import('./vendor/GLTFLoader.js');const t0=performance.now();
-  const gl=await new GLTFLoader().loadAsync('./models/tes-wanita-asia.glb');const m=gl.scene;
-  m.traverse(o=>{if(o.isMesh){o.castShadow=true;o.receiveShadow=false;o.frustumCulled=false;if(o.material){o.material.roughness=.85;o.material.metalness=0;}}});
+  const gl=await new GLTFLoader().loadAsync('./models/tes-wanita-asia-realistis.glb');const m=gl.scene;
+  m.traverse(o=>{if(o.isMesh){o.castShadow=true;o.receiveShadow=false;o.frustumCulled=false;if(o.material){o.material.metalness=0;if(o.material.map)o.material.map.anisotropy=4;}}});
   const bb=new THREE.Box3().setFromObject(m),h=bb.max.y-bb.min.y||1;m.scale.setScalar(TESCHAR.H/h);m.position.y=-bb.min.y*TESCHAR.H/h;
   const root=new THREE.Group();root.name='tes-wanita-asia';root.add(m);
   const g=ROOMS.find(r=>r.id==='taman-depan');const F=FLOORS[g?g.f:0];F.add(root);
@@ -3318,8 +3320,8 @@ async function loadTesChar(){if(TESCHAR.root||TESCHAR.loading)return;TESCHAR.loa
   TESCHAR.mixer=new THREE.AnimationMixer(m);gl.animations.forEach(a=>{TESCHAR.act[a.name.toLowerCase()]=TESCHAR.mixer.clipAction(a);});
   (TESCHAR.act.idle||Object.values(TESCHAR.act)[0])?.play();TESCHAR.root=root;
   console.log('🧪 karakter tes dimuat',Math.round(performance.now()-t0)+' ms');
-  window.__tesChar=()=>{const b=new THREE.Box3().setFromObject(root),r=stage.getBoundingClientRect(),xs=[],ys=[];for(const x of[b.min.x,b.max.x])for(const y of[b.min.y,b.max.y])for(const z of[b.min.z,b.max.z]){const v=new THREE.Vector3(x,y,z).project(camera);xs.push((v.x+1)/2*r.width+r.left);ys.push((1-v.y)/2*r.height+r.top);}
-   return{state:TESCHAR.state,x:+TESCHAR.x.toFixed(2),size:[+(b.max.x-b.min.x).toFixed(2),+(b.max.y-b.min.y).toFixed(2),+(b.max.z-b.min.z).toFixed(2)],screen:[Math.min(...xs)|0,Math.min(...ys)|0,Math.max(...xs)|0,Math.max(...ys)|0],visible:root.parent.visible,face:(()=>{let e=null,ey=-1e9;root.traverse(o=>{if(o.isMesh&&/shoe|eye/i.test(o.material.name)){const c=new THREE.Box3().setFromObject(o).getCenter(new THREE.Vector3());if(c.y>ey){ey=c.y;e=c;}}});const h=new THREE.Box3().setFromObject(root).getCenter(new THREE.Vector3());return e?[+(e.x-h.x).toFixed(2),+(e.z-h.z).toFixed(2),+root.rotation.y.toFixed(2)]:null;})()};}; // debug ringan buat cek posisi di layar
+  window.__tesChar=()=>{const b=new THREE.Box3().setFromObject(root,true),r=stage.getBoundingClientRect(),xs=[],ys=[];for(const x of[b.min.x,b.max.x])for(const y of[b.min.y,b.max.y])for(const z of[b.min.z,b.max.z]){const v=new THREE.Vector3(x,y,z).project(camera);xs.push((v.x+1)/2*r.width+r.left);ys.push((1-v.y)/2*r.height+r.top);}
+   return{state:TESCHAR.state,x:+TESCHAR.x.toFixed(2),size:[+(b.max.x-b.min.x).toFixed(2),+(b.max.y-b.min.y).toFixed(2),+(b.max.z-b.min.z).toFixed(2)],screen:[Math.min(...xs)|0,Math.min(...ys)|0,Math.max(...xs)|0,Math.max(...ys)|0],visible:root.parent.visible,face:(()=>{const hd=m.getObjectByName('Bip01_Head')||m.getObjectByName('Bip01 Head'),le=m.getObjectByName('Bip01_LEye')||m.getObjectByName('Bip01 LEye'),re=m.getObjectByName('Bip01_REye')||m.getObjectByName('Bip01 REye');if(!hd||!le||!re)return null;const h=hd.getWorldPosition(new THREE.Vector3()),e=le.getWorldPosition(new THREE.Vector3()).add(re.getWorldPosition(new THREE.Vector3())).multiplyScalar(.5);return[+(e.x-h.x).toFixed(3),+(e.z-h.z).toFixed(3),+root.rotation.y.toFixed(2)];})()};}; // debug ringan buat cek posisi di layar
  }catch(e){console.warn('karakter tes gagal dimuat',e);}finally{TESCHAR.loading=false;}}
 function tesCharTick(dt){const T=TESCHAR;if(!T.root||!T.mixer)return;if(!T.root.parent||!T.root.parent.visible)return;
  T.t+=dt;
@@ -3327,7 +3329,9 @@ function tesCharTick(dt){const T=TESCHAR;if(!T.root||!T.mixer)return;if(!T.root.
  else if(T.state==='walk'){T.x+=T.dir*T.SPEED*dt;const end=T.dir>0?T.X1:T.X0;
   if((T.dir>0&&T.x>=end)||(T.dir<0&&T.x<=end)){T.x=end;T.dir*=-1;T.state='idle';T.t=0;T.act.idle&&T.act.walk&&T.act.idle.reset().play().crossFadeFrom(T.act.walk,.35,false);T.root.rotation.y=0;}
   T.root.position.x=tx(T.x);}
- T.mixer.update(dt);}
+ T.mixer.update(dt);
+ if(T.follow){const p=T.root.getWorldPosition(new THREE.Vector3()),dx=p.x-controls.target.x,dz=p.z-controls.target.z;controls.target.x+=dx;controls.target.z+=dz;camera.position.x+=dx;camera.position.z+=dz;} // #tesdekat: kamera ngikutin karakter
+}
 /* ================= 🌆 Kota latar (hiasan, gak bisa dimasukin) =================
    Ratusan kotak low-poly + 1 tekstur jendela 2D dari canvas (dipakai bareng), semua digabung jadi 2 mesh (ring dekat + ring jauh) = 2 draw call.
    Tanpa model GLB, tanpa bayangan, MeshLambertMaterial (murah). Susunan acak tapi seed tetap (sama tiap dibuka). Jendela nyala pas malam (emissiveMap). */
@@ -3446,7 +3450,8 @@ const hs=location.hash;
 const PREV={bioskop:['bioskop',[0,5.5,9]],langit:['taman-depan',[26,2.5,34]],atas:['taman-halaman',[0,62,8]],hutan:['taman-depan',[48,18,52]],dekat:['taman-depan',[18,14,28]],pondok:['pondok-taman',[0.8,4.2,-4]],kamarlove:['kamar-love',[3,8,-7.5]],lux:['kamar-hanrin',[3,8,-7.5]],tvroom:['lounge',[4,6.5,8]],lab:['lab',[4,8.5,-10.5]],close:['ig',[1.5,2.6,5.5]],zoom:['ig',[7,8.5,10]]};
 const pv=Object.keys(PREV).find(k=>hs.includes(k));
 if(pv){const [rid,off]=PREV[pv],r=ROOMS.find(x=>x.id===rid);setFloor(r.f,false);const t=FLOORS[r.f].localToWorld(new THREE.Vector3(tx(r.x+r.w/2),.5,tz(r.y+r.d/2)));camera.position.copy(t.clone().add(new THREE.Vector3(...off)));controls.target.copy(t);if(pv==='langit')controls.target.y+=5;if(pv==='atas'){controls.target.set(tx(30),0,tz(12));camera.position.set(tx(30),62,tz(12)+8);}if(pv==='hutan')controls.target.y+=1;if(pv==='dekat'){controls.target.set(tx(30),1.5,tz(14));camera.position.set(tx(42),18,tz(46));controls.target.y+=2;}}
-if(hs.includes('tesasia')){setFloor(0,false);const t=FLOORS[0].localToWorld(new THREE.Vector3(tx(21.9),.7,tz(20.95)));controls.target.copy(t);camera.position.copy(t.clone().add(new THREE.Vector3(.6,3.4,11)));controls.update&&controls.update();} // preview: karakter tes wanita Asia di Taman Depan
+if(hs.includes('tesdekat')){setFloor(0,false);controls.minDistance=2;TESCHAR.follow=true;controls.addEventListener('start',()=>{TESCHAR.follow=false;});document.addEventListener('click',e=>{if(e.target.closest('button'))TESCHAR.follow=false;});const t=FLOORS[0].localToWorld(new THREE.Vector3(tx(21.9),.75,tz(20.95)));controls.target.copy(t);camera.position.copy(t.clone().add(new THREE.Vector3(.3,.45,2.9)));controls.update&&controls.update();} // preview dekat (zoom): karakter tes wanita Asia realistis
+else if(hs.includes('tesasia')){setFloor(0,false);const t=FLOORS[0].localToWorld(new THREE.Vector3(tx(21.9),.7,tz(20.95)));controls.target.copy(t);camera.position.copy(t.clone().add(new THREE.Vector3(.6,3.4,11)));controls.update&&controls.update();} // preview: karakter tes wanita Asia di Taman Depan
 if(hs.includes('jembatan')){controls.target.set(tx(32),8,tz(-14));camera.position.set(tx(84),58,tz(56));controls.update&&controls.update();} // preview: jembatan kaca + kota latar
 if(hs.includes('povpad'))document.body.classList.add('touch');
 if(hs.includes('pov'))setTimeout(()=>{if(hs.includes('povfp'))POV.fpPref=true;povEnter();},500);
