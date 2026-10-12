@@ -3248,6 +3248,7 @@ function envTick(now,dt,force){
  ENV.stars.material.opacity=k.star;
  const cAmt=envCinemaMode()?0:.9*(1-k.star*.85);if(ENV.cloudMat)ENV.cloudMat.opacity=cAmt;if(ENV.skyU.cloud)ENV.skyU.cloud.value=cAmt; // awan off di bioskop; selain itu jelas siang, redup malam
  const dark=clampN((1.05-k.hemi)/.6,0,1); // 0 siang, 1 malam
+ ENV.dark=dark;
  ENV.lampMats.forEach(m=>m.emissiveIntensity=dark*2.2);ENV.head.emissiveIntensity=.2+dark*2.4;ENV.tail.emissiveIntensity=.2+dark*1.6;
  const [ic,nm]=suasana(h),el2=document.getElementById('suasana');if(el2)el2.textContent=ic+' Suasana '+nm+(JAM_OVR!=null?' (preview jam '+hmTxt(Math.round(h*60))+')':'');
 }
@@ -3306,24 +3307,27 @@ function ensureBridge(){if(SHELL.bridge)return;const B=BRIDGE,g=new THREE.Group(
    Basis model: "Female_Adult_03" dari Microsoft Rocketbox Avatar Library — https://github.com/microsoft/Microsoft-Rocketbox — MIT License (© 2020 Microsoft, teks lisensi: models/LICENSE-Microsoft-Rocketbox.md)
    Animasi: f_idle_breathe_01 (Idle) + f_walk_neutral (Walk, in-place) dari library yang sama (rig Bip01 sama persis).
    Dikonversi FBX → GLB di Blender: tekstur kulit/baju/rambut asli (TGA 2048) dikecilin → webp (wajah 2048, badan/rambut/normal 1024), atribut tak terpakai dibuang,
-   animasi di-resample, mesh dikuantisasi (KHR_mesh_quantization, tanpa decoder tambahan) → models/maya.glb (±1,3 MB, 9.208 segitiga, 80 tulang; wajah 1536, sisanya 1024).
+   animasi di-resample, mesh dikuantisasi (KHR_mesh_quantization, tanpa decoder tambahan) → models/maya.glb (±1,2 MB, 9.208 segitiga, 80 tulang; wajah 1536, sisanya 1024).
+   Fix wajah gelap: kulit di tekstur kepala (dulu ±12% lebih gelap + bayangan bawaan) & badan disamain ke 1 warna kulit Maya (merata), normal map kepala/badan dibuang
+   (tanpa tangent → bisa bikin muka gelap/belang di sebagian GPU HP), plus emissive dari tekstur warna sendiri (siang .12, malam .6) biar muka tetap kelihatan di bayangan/malam.
    Rambut/bulu mata pakai alpha MASK (gak perlu sorting transparan). Hiasan: jalan bolak-balik di sisi timur Taman Depan (antara air mancur & lampu taman),
    gak ikut brain/agents/chat, gak nyentuh karakter lain. Dimuat belakangan (setelah kantor kebuka) biar loading awal gak ketambahan. */
-const TESCHAR={follow:false,root:null,mixer:null,act:{},state:'idle',t:0,dir:1,x:19.4,loading:false,X0:19.4,X1:24.4,Y:20.95,H:1.25,SPEED:.9};
+const TESCHAR={EM0:.12,EM1:.48,mats:[],dk:-1,follow:false,root:null,mixer:null,act:{},state:'idle',t:0,dir:1,x:19.4,loading:false,X0:19.4,X1:24.4,Y:20.95,H:1.25,SPEED:.9};
 async function loadTesChar(){if(TESCHAR.root||TESCHAR.loading)return;TESCHAR.loading=true;
  try{const {GLTFLoader}=await import('./vendor/GLTFLoader.js');const t0=performance.now();
   const gl=await new GLTFLoader().loadAsync('./models/maya.glb');const m=gl.scene;
-  m.traverse(o=>{if(o.isMesh){o.castShadow=true;o.receiveShadow=false;o.frustumCulled=false;if(o.material){o.material.metalness=0;if(o.material.map)o.material.map.anisotropy=4;}}});
+  m.traverse(o=>{if(o.isMesh){o.castShadow=true;o.receiveShadow=false;o.frustumCulled=false;if(o.material){const mt=o.material;mt.metalness=0;if(mt.map){mt.map.anisotropy=4;mt.emissiveMap=mt.map;mt.emissive.setRGB(1,1,1);mt.emissiveIntensity=TESCHAR.EM0;TESCHAR.mats.push(mt);}}}}); // wajah/kulit: sedikit "cahaya sendiri" dari tekstur warnanya, naik pas malam → muka gak jadi hitam di bayangan/malam
   const bb=new THREE.Box3().setFromObject(m),h=bb.max.y-bb.min.y||1;m.scale.setScalar(TESCHAR.H/h);m.position.y=-bb.min.y*TESCHAR.H/h;
   const root=new THREE.Group();root.name='maya';root.add(m);
   const g=ROOMS.find(r=>r.id==='taman-depan');const F=FLOORS[g?g.f:0];F.add(root);
-  root.position.set(tx(TESCHAR.x),0,tz(TESCHAR.Y));root.rotation.y=Math.PI/2;
+  root.position.set(tx(TESCHAR.x),0,tz(TESCHAR.Y));root.rotation.y=0; // diam pertama: hadap depan (kamera), bukan nyamping
   const d=document.createElement('div');d.className='seat';d.textContent='Maya';const lb=new CSS2DObject(d);lb.position.set(0,TESCHAR.H+.25,0);root.add(lb);
   TESCHAR.mixer=new THREE.AnimationMixer(m);gl.animations.forEach(a=>{TESCHAR.act[a.name.toLowerCase()]=TESCHAR.mixer.clipAction(a);});
   (TESCHAR.act.idle||Object.values(TESCHAR.act)[0])?.play();TESCHAR.root=root;
   console.log('🙋‍♀️ Maya dimuat',Math.round(performance.now()-t0)+' ms');
   window.__tesChar=()=>{const b=new THREE.Box3().setFromObject(root,true),r=stage.getBoundingClientRect(),xs=[],ys=[];for(const x of[b.min.x,b.max.x])for(const y of[b.min.y,b.max.y])for(const z of[b.min.z,b.max.z]){const v=new THREE.Vector3(x,y,z).project(camera);xs.push((v.x+1)/2*r.width+r.left);ys.push((1-v.y)/2*r.height+r.top);}
    return{state:TESCHAR.state,x:+TESCHAR.x.toFixed(2),size:[+(b.max.x-b.min.x).toFixed(2),+(b.max.y-b.min.y).toFixed(2),+(b.max.z-b.min.z).toFixed(2)],screen:[Math.min(...xs)|0,Math.min(...ys)|0,Math.max(...xs)|0,Math.max(...ys)|0],visible:root.parent.visible,face:(()=>{const hd=m.getObjectByName('Bip01_Head')||m.getObjectByName('Bip01 Head'),le=m.getObjectByName('Bip01_LEye')||m.getObjectByName('Bip01 LEye'),re=m.getObjectByName('Bip01_REye')||m.getObjectByName('Bip01 REye');if(!hd||!le||!re)return null;const h=hd.getWorldPosition(new THREE.Vector3()),e=le.getWorldPosition(new THREE.Vector3()).add(re.getWorldPosition(new THREE.Vector3())).multiplyScalar(.5);return[+(e.x-h.x).toFixed(3),+(e.z-h.z).toFixed(3),+root.rotation.y.toFixed(2)];})()};}; // debug ringan buat cek posisi di layar
+  window.__tesPts=()=>{const r=stage.getBoundingClientRect(),o={};['Head','Neck','L_Hand','R_Hand','LEye','REye','L_Forearm','R_Forearm'].forEach(n=>{const b=m.getObjectByName('Bip01_'+n)||m.getObjectByName('Bip01 '+n.replace('_',' '));if(!b)return;const v=b.getWorldPosition(new THREE.Vector3()).project(camera);o[n]=[Math.round((v.x+1)/2*r.width+r.left),Math.round((1-v.y)/2*r.height+r.top)];});return o;}; // debug: posisi tulang di layar (cek warna kulit)
  }catch(e){console.warn('karakter tes gagal dimuat',e);}finally{TESCHAR.loading=false;}}
 function tesCharTick(dt){const T=TESCHAR;if(!T.root||!T.mixer)return;if(!T.root.parent||!T.root.parent.visible)return;
  T.t+=dt;
@@ -3332,6 +3336,7 @@ function tesCharTick(dt){const T=TESCHAR;if(!T.root||!T.mixer)return;if(!T.root.
   if((T.dir>0&&T.x>=end)||(T.dir<0&&T.x<=end)){T.x=end;T.dir*=-1;T.state='idle';T.t=0;T.act.idle&&T.act.walk&&T.act.idle.reset().play().crossFadeFrom(T.act.walk,.35,false);T.root.rotation.y=0;}
   T.root.position.x=tx(T.x);}
  T.mixer.update(dt);
+ const dk=ENV.dark||0;if(Math.abs(dk-T.dk)>.01){T.dk=dk;T.mats.forEach(mt=>mt.emissiveIntensity=T.EM0+dk*T.EM1);} // siang .12, malam .6
  if(T.follow){const p=T.root.getWorldPosition(new THREE.Vector3()),dx=p.x-controls.target.x,dz=p.z-controls.target.z;controls.target.x+=dx;controls.target.z+=dz;camera.position.x+=dx;camera.position.z+=dz;} // #tesdekat: kamera ngikutin karakter
 }
 /* ================= 🌆 Kota latar (hiasan, gak bisa dimasukin) =================
