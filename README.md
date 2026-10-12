@@ -31,6 +31,10 @@ Tambah pesan: edit `chat.json` di GitHub web, tambahin objek baru di **akhir** a
 - Preview jam: tambah `#jam=21` (atau `#jam=7.5`) di URL. Sudut kamera: `#langit` (langit rendah), `#atas` (pandangan atas hutan), `#hutan` (lihat hutan seberang jalan). Bisa digabung: `#langit,jam=17.5`.
 
 ## 🎬 Bioskop Lt 4 (index.html)
+- 📦 **Pindah ke 🏙️ Gedung Kantor 2**: seluruh Lt 4 (Bioskop + ruang 🪜 Tangga & Lift-nya) dipindah **utuh** ke dalam Gedung Kantor 2, di lantai 2-nya (lantai = lantai jembatan kaca, 6,4 m). Yang digeser cuma posisi grup lantainya (`TH_SITE`), jadi isi, ukuran, koordinat logika, kunci kode, gerbang 18+, state & semua fitur Bioskop tetap sama. Jembatan kaca dari Lobi Lt 3 sekarang mendarat persis di area Tangga & Lift Bioskop.
+  - Bioskop 32×14 m gak muat di gedung lama (9,7×9,7 m), jadi **badan Gedung Kantor 2 dilebarin** jadi ±33,6×15 m (tinggi tetap ±23 m, muka selatan tetap di y=-20 → jembatan gak berubah). Jalan setapak dari kanopi belok ke timur nyambung ke jalur jembatan.
+  - Pas lihat Bioskop (tombol Lt 4, panel/fokus Bioskop, `#bioskop`, POV di Lt 4) kaca gedungnya disembunyiin biar isi Bioskop kelihatan, diganti "podium" lantai bawah + landing jembatan. Di 🏢 Semua Bioskop ada di dalam gedung (ketutup kaca).
+  - Bekas Lt 4 di kantor utama sekarang **🌤️ atap datar**: tapak sama kayak Lt 4 lama, pagar atap, rumah tangga/lift yang nutup ujung tangga Lt 3, 2 unit AC. Tangga/lift Lt 3 → **R** tetap naik ke Lt 4 (= Bioskop di Gedung Kantor 2).
 - Lantai 4: **🎬 Bioskop Han** — layar besar 16:9 di dinding utara, gorden merah, 4 baris kursi (A–D) dengan lorong tengah, proyektor di belakang, 🔐 Konsol Bioskop dekat pintu. Naik lewat tangga/lift dari Lobi Lantai 3.
 - **Kode kunci**: wajib dimasukkan sebelum bisa milih/putar film. Di kode cuma disimpan hash SHA-256-nya (`TH_HASH`, salt `kantor-ai-bioskop:`), bukan kodenya. Sekali kebuka, kebuka sampai tab ditutup atau klik 🔒 Kunci.
   - Ganti kode: buka situs, di Console browser jalankan `kantorBioskopHash('KODEBARU')`, salin hasilnya ke `TH_HASH` di `index.html`.

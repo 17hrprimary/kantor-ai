@@ -246,7 +246,7 @@ body.touch .povhint .kbd{display:none}body.touch .povhint .tch{display:inline}
     <button type="button" class="gedmini kota on" id="btnKota" title="Kota latar: gedung-gedung hiasan di kejauhan (ringan). Klik buat nyalain/matiin.">🌆 Kota</button>
     <div class="gcredit" id="gCredit">🏙️ Gedung: <a href="https://poly.pizza/m/KRT3e3kgEb" target="_blank" rel="noopener">“Office” by SoyMaria</a> · Poly Pizza · <a href="https://creativecommons.org/licenses/by/3.0/" target="_blank" rel="noopener">CC-BY 3.0</a></div>
     <button type="button" class="shownr" id="btnShowNearMini" title="Show Near: suasana sekitar (hutan dekat + jalan). OFF = Fokus Kantor biar gak lag.">🏢 Fokus</button>
-    <div class="floors" id="floors"><button data-f="all" class="on">🏢 Semua</button><button data-f="3">Lt 4 🎬</button><button data-f="2">Lt 3 🛏️</button><button data-f="1">Lt 2 🛋️</button><button data-f="0">Lt 1 💼</button></div>
+    <div class="floors" id="floors"><button data-f="all" class="on">🏢 Semua</button><button data-f="3" title="Bioskop — sekarang di dalam Gedung Kantor 2 (lantai 2, sejajar jembatan kaca)">Lt 4 🎬</button><button data-f="2">Lt 3 🛏️</button><button data-f="1">Lt 2 🛋️</button><button data-f="0">Lt 1 💼</button></div>
     <button class="jtoggle" id="jToggle">📅 Jadwal per Karakter</button>
     <div class="jp" id="jPanel"><h3>📅 Jadwal per Karakter</h3><div class="list" id="jList"></div></div>
     <div class="pop" id="pop"></div>
@@ -276,7 +276,7 @@ body.touch .povhint .kbd{display:none}body.touch .povhint .tch{display:inline}
     <div id="thSexFX" aria-hidden="true"></div>
     <video id="thVideo" playsinline preload="metadata"></video>
     <div class="mobbar" id="mobBar" aria-label="Akses cepat HP">
-      <button type="button" data-m="cinema" class="go" id="mobCinema" title="Ke Bioskop Lt 4 / buka panel">🎬 Bioskop</button>
+      <button type="button" data-m="cinema" class="go" id="mobCinema" title="Ke Bioskop (Gedung Kantor 2) / buka panel">🎬 Bioskop</button>
       <button type="button" data-m="up" class="dis" id="mobUp" title="Naik lantai (di tangga/lift)">⬆️ Naik</button>
       <button type="button" data-m="down" class="dis" id="mobDown" title="Turun lantai (di tangga/lift)">⬇️ Turun</button>
       <button type="button" data-m="fp" id="mobFp" title="Ganti 1st / 3rd person">👁️ POV</button>
@@ -313,7 +313,7 @@ body.touch .povhint .kbd{display:none}body.touch .povhint .tch{display:inline}
       <div class="qrow"><button type="button" id="btnPortrait">📱 Mode Portrait</button></div>
       <div class="small" style="margin-top:6px" id="portHint">Mode <b>Portrait</b>: framing HP fokus kampus/kantor, ambience jauh di-crop biar gak mengganggu. <b>Show Near</b> tetap bisa dipakai terpisah.</div></div>
     <div class="card povcard"><h2>🎮 Mode POV Han</h2><button class="btn" id="btnPov" style="width:100%;white-space:normal">🎮 Mode POV Han</button><div class="small" style="margin-top:6px">Han jalan sendiri: <b>WASD/panah</b> jalan, <b>Q/E</b> atau drag mouse putar, <b>Shift</b> lari, <b>R/F</b> naik/turun di tangga/lift, <b>V</b> 1st/3rd person, <b>Esc</b> keluar. Di HP: stick + tombol berlabel (Naik/Turun/Akses/POV) — gak perlu keyboard.</div></div>
-    <div class="card"><h2>🎬 Bioskop Lt 4</h2><button class="btn" id="btnBioskop" style="width:100%;white-space:normal">🎮 Ke Bioskop (Mode POV)</button><div class="small" style="margin-top:6px">Film dari folder <b>theater/</b>. <b>Kode kunci wajib dulu</b> sebelum masuk Bioskop (POV/Lt 4). Tombol <b>🎬 Bioskop</b> / <b>Ke Bioskop</b> → papan angka → <b>🔓 Buka</b> → baru masuk + pilih film. Portrait &amp; Show Near tetap di kiri atas.</div></div>
+    <div class="card"><h2>🎬 Bioskop · Gedung Kantor 2</h2><button class="btn" id="btnBioskop" style="width:100%;white-space:normal">🎮 Ke Bioskop (Mode POV)</button><div class="small" style="margin-top:6px">Film dari folder <b>theater/</b>. <b>Kode kunci wajib dulu</b> sebelum masuk Bioskop (POV/Lt 4). Tombol <b>🎬 Bioskop</b> / <b>Ke Bioskop</b> → papan angka → <b>🔓 Buka</b> → baru masuk + pilih film. Portrait &amp; Show Near tetap di kiri atas.</div></div>
     <div class="card" id="chatCard"></div>
     <div class="card">
       <h2>📅 Jadwal hari ini</h2>
@@ -378,7 +378,11 @@ const LOVE_SCHEDULE=[
 /* ================= Denah (tile) ================= */
 const W=36,D=25; // pusat gambar (tile); tiap lantai punya band y sendiri (DY) di koordinat logika
 const DY=40,FH=3.2,NFLOOR=4;
-const FLOOR_NAMES=['Lantai 1 · Kantor 💼','Lantai 2 · Santai 🛋️','Lantai 3 · Kamar Tidur 🛏️','Lantai 4 · Bioskop 🎬'];
+const FLOOR_NAMES=['Lantai 1 · Kantor 💼','Lantai 2 · Santai 🛋️','Lantai 3 · Kamar Tidur 🛏️','Lantai 4 · Bioskop 🎬 (Gedung Kantor 2)'];
+// 🎬 Lt 4 (Bioskop + Tangga & Lift-nya) dipindah UTUH ke dalam 🏙️ Gedung Kantor 2: cuma posisi grup lantainya yang digeser (isi, ukuran, koordinat logika, data, kode kunci, gerbang 18+ gak berubah).
+// dx: geser ke timur (m) · oy: tepi utara Lt 4 di koordinat logika lantai 1 (m) · z: tinggi lantai = lantai jembatan kaca (2×FH = 6,4 m, lantai 2 Gedung Kantor 2)
+const TH_SITE={f:3,dx:4,oy:-34.5,z:2*FH};
+let ROOF4=null; // atap rapi di bekas Lt 4 kantor utama (dibikin di buildRoof4)
 const ROOMS=[
  {id:'ceo',name:'👑 Ruang CEO',x:0,y:0,w:9,d:8,c1:'#fde6c6',c2:'#f7d8ae',sign:'#f0a92a'},
  {id:'ig',name:'📸 Kantor IG',x:9,y:0,w:12,d:8,c1:'#ffe0ee',c2:'#ffcfe3',sign:'#f2559a'},
@@ -798,6 +802,20 @@ function thSha256Fallback(str){const K=[],H=[];let n=2,c=0;const isP=v=>{for(let
  return h.map(v=>(v>>>0).toString(16).padStart(8,'0')).join('');}
 async function thSha256(str){try{if(crypto&&crypto.subtle){const d=await crypto.subtle.digest('SHA-256',new TextEncoder().encode(str));return[...new Uint8Array(d)].map(x=>x.toString(16).padStart(2,'0')).join('');}}catch(_){}return thSha256Fallback(str);}
 window.kantorBioskopHash=c=>thSha256(TH_SALT+c).then(h=>{console.log('TH_HASH baru:',h);return h;}); // bantu ganti kode (lihat README)
+// 🌤️ Atap rapi di bekas Lt 4 kantor utama (Bioskop + Tangga/Lift-nya udah pindah utuh ke Gedung Kantor 2).
+// Tapaknya persis tapak lama Lt 4 (x 0–32, y 0–14, bentuk L), jadi tampilan Lt 3 dari atas di 🏢 Semua sama kayak dulu. Ada pagar atap + rumah tangga/lift yang nutup ujung tangga Lt 3.
+function buildRoof4(){const g=new THREE.Group();g.name='atap-bekas-lt4';g.position.set(0,3*FH,-3*DY);scene.add(g);const prevP=P;P=g;const o=3*DY,sl=FH-2.4;
+ const R=[[0,0,25,14],[25,0,7,9]];
+ R.forEach(([x,y,w,d])=>{box(x-.05,y-.05+o,-sl,w+.1,d+.1,sl,0xf3c6dc);box(x+.02,y+.02+o,0,w-.04,d-.04,.04,0xd3ccc4,{shadow:false});});
+ const pc=0xe9dff0,ph=.6,t=.2; // pagar atap keliling (bentuk L)
+ box(0,o,0,32,t,ph,pc);box(0,14-t+o,0,25,t,ph,pc);box(25,9-t+o,0,7,t,ph,pc);box(0,o,0,t,14,ph,pc);box(32-t,o,0,t,9,ph,pc);box(25-t,9+o,0,t,5,ph,pc);
+ // rumah tangga + lift (nutup tangga & lift dari Lt 3), pintu ke arah atap
+ box(26.9,.2+o,0,4.9,7.2,2.9,0xe9e1f5);box(26.8,.1+o,2.9,5.1,7.4,.16,0xd6457f);
+ box(26.86,3.6+o,0,.06,1.1,2.1,0x6a5a7a);box(26.84,4.9+o,1.1,.04,.18,.18,0xff7eb6);
+ // dua unit AC + panel kecil biar atapnya gak kosong melompong
+ [[6,3],[9,3]].forEach(([x,y])=>{box(x,y+o,0,1.4,.9,.75,0xb8bec8);box(x+.2,y-.02+o,.15,1,.02,.45,0x8a919c,{shadow:false});});
+ box(15,9.5+o,0,4,2.4,.12,0x2b3a55,{mo:{roughness:.3,metalness:.3}});
+ P=prevP;ROOF4=g;}
 function buildWorld(){
  ROOMS.forEach(r=>{P=FLOORS[r.f];
   const sl=r.f>0?FH-2.4:.35;box(r.x-.05,r.y-.05,-sl,r.w+.1,r.d+.1,sl,r.outdoor?0x9ccf7e:0xf3c6dc); // pelat lantai (outdoor: tanah berumput; lantai atas lebih tebal = plafon lantai bawahnya)
@@ -847,6 +865,7 @@ function buildWorld(){
  ROOMS.filter(r=>r.stairs).forEach(r=>{P=FLOORS[r.f];if(r.f<NFLOOR-1)stairsUp(r);if(r.f>0)stairsTop(r);lift(r);
   plant(r.x+.7,r.y+.8,1);if(r.w>12){sofa(r.x+2,r.y+5.6,3.2,0xc8a6ff,-1);plant(r.x+6.2,r.y+7.6,1.1);box(r.x+2.4,r.y+4.3,0,2.4,.8,.35,0xfff1d6);}});
  ROOMS.filter(r=>r.cinema).forEach(r=>cinemaRoom(r));
+ buildRoof4();
  ROOMS.filter(r=>r.hall).forEach(r=>{P=FLOORS[r.f];if(r.w>8)for(let x=r.x+3;x<r.x+r.w-1;x+=7)plant(x,r.y+1,.7,0x7fcf9a);});
 
  // ---- Ruang CEO
@@ -1543,9 +1562,11 @@ const topFloor=()=>floorMode==='all'?NFLOOR-1:+floorMode;
 const floorUnder=f=>f<topFloor(); // lantai ketutup lantai di atasnya
 function tagUnder(o,f){const u=floorUnder(f),el=o.element;if(o.userData.actorTag){el.style.opacity=u?'.45':'';}else if(!el.classList.contains('fsign'))el.style.visibility=u?'hidden':'';}
 function floorLabels(){FLOORS.forEach((g,f)=>g.traverse(o=>{if(o.isCSS2DObject)tagUnder(o,f);}));}
-function layoutFloors(){const top=topFloor();FLOORS.forEach((g,f)=>{g.visible=f<=top;g.position.set(0,f*FH,-f*DY);});scene.updateMatrixWorld(true);floorLabels();}
-function viewBox(){const b=new THREE.Box3();FLOORS.forEach((g,f)=>{if(!g.visible||(floorMode!=='all'&&floorUnder(f)))return;ROOMS.filter(r=>r.f===f).forEach(r=>{
- [[r.x,r.y],[r.x+r.w,r.y+r.d]].forEach(([x,y])=>b.expandByPoint(g.localToWorld(new THREE.Vector3(tx(x),0,tz(y)))));});});return b;}
+function layoutFloors(){const top=topFloor();FLOORS.forEach((g,f)=>{g.visible=f<=top;if(f===TH_SITE.f)g.position.set(TH_SITE.dx,TH_SITE.z,-f*DY+TH_SITE.oy);else g.position.set(0,f*FH,-f*DY);});
+ if(ROOF4)ROOF4.visible=top>=TH_SITE.f; // atap bekas Lt 4 kantor utama
+ scene.updateMatrixWorld(true);floorLabels();}
+function viewBox(){const b=new THREE.Box3();FLOORS.forEach((g,f)=>{if(!g.visible||(floorMode!=='all'&&floorUnder(f)))return;/* 🏢 Semua: framing kamera tetap persis kayak dulu (Lt 4 dihitung di posisi lamanya di atas kantor utama), walau Bioskop udah pindah ke Gedung Kantor 2 */const old4=floorMode==='all'&&f===TH_SITE.f;ROOMS.filter(r=>r.f===f).forEach(r=>{
+ [[r.x,r.y],[r.x+r.w,r.y+r.d]].forEach(([x,y])=>{const v=new THREE.Vector3(tx(x),0,tz(y));b.expandByPoint(old4?v.set(v.x,f*FH,v.z-f*DY):g.localToWorld(v));});});});return b;}
 function fitHome(){
  const asp=stage.clientWidth/stage.clientHeight,b=viewBox(),c=b.getCenter(new THREE.Vector3()),sz=b.getSize(new THREE.Vector3());
  const panel=!jp.classList.contains('hide')&&stage.clientWidth>700?1.22:1;
@@ -1725,7 +1746,7 @@ function povFloor(dir){const ac=actors.han;if(!POV.on||!ac)return;const z=povSta
  if(nf<0||nf>=NFLOOR){POV.msg=dir>0?'Udah lantai paling atas 🙂':'Udah lantai paling bawah 🙂';POV.msgUntil=performance.now()+1800;return;}
  const t=z==='lift'?[31.1,nf*DY+2.6]:[STAIR_FOOT[nf][0],STAIR_FOOT[nf][1]+.35];
  const q=povUnstick(...snapIn(t[0],t[1]));ac.pos={x:q[0],y:q[1]};
- ac.stairMsg=(dir>0?'Naik ':'Turun ')+(z==='lift'?'lift':'tangga')+' ke Lt '+(nf+1)+(z==='lift'?' 🛗':' 🪜');ac.stairUntil=performance.now()+1800;
+ ac.stairMsg=(dir>0?'Naik ':'Turun ')+(z==='lift'?'lift':'tangga')+' ke Lt '+(nf+1)+(nf===TH_SITE.f?' · 🎬 Gedung Kantor 2':'')+(z==='lift'?' 🛗':' 🪜');ac.stairUntil=performance.now()+1800;
  onFloor(ac,ac.pos.y);ac.c.root.position.set(tx(ac.pos.x),0,tz(ac.pos.y));setFloor(nf,false);POV.snap=true;POV.zoneKey='';
  log('🎮 Han '+ac.stairMsg);}
 function povState(ac,moving,now){ // status/tugas lokal Han + refresh UI pas berubah aja
@@ -1743,8 +1764,8 @@ function povZoneUI(ac,now){const z=povStairZone(ac),f=floorOfY(ac.pos.y),msg=POV
  const tb=document.querySelector('#povPad [data-a="th"]');
  if(tb){tb.classList.remove('dis');tb.classList.toggle('go',!cin||!TH.open);const lb=tb.querySelector('.lb');if(lb)lb.textContent=cin?(TH.open?'Tutup':'Panel'):'Akses';}
  if(!t&&z)t=touch
-  ?( (z==='lift'?'🛗 Di depan lift':'🪜 Di kaki tangga')+(f<NFLOOR-1?' · tekan <b>⬆️ Naik</b> ke Lt '+(f+2):'')+(f>0?' · tekan <b>⬇️ Turun</b> ke Lt '+f:'') )
-  :( (z==='lift'?'🛗 Di depan lift':'🪜 Di kaki tangga')+(f<NFLOOR-1?' · naik ke Lt '+(f+2)+': <span class="kb">R</span>/⬆️':'')+(f>0?' · turun ke Lt '+f+': <span class="kb">F</span>/⬇️':'') );
+  ?( (z==='lift'?'🛗 Di depan lift':'🪜 Di kaki tangga')+(f<NFLOOR-1?' · tekan <b>⬆️ Naik</b> ke Lt '+(f+2)+(f+1===TH_SITE.f?' (🎬 Bioskop · Gedung Kantor 2)':''):'')+(f>0?' · tekan <b>⬇️ Turun</b> ke Lt '+f:'') )
+  :( (z==='lift'?'🛗 Di depan lift':'🪜 Di kaki tangga')+(f<NFLOOR-1?' · naik ke Lt '+(f+2)+(f+1===TH_SITE.f?' (🎬 Gedung Kantor 2)':'')+': <span class="kb">R</span>/⬆️':'')+(f>0?' · turun ke Lt '+f+': <span class="kb">F</span>/⬇️':'') );
  const el=$('povStair');el.innerHTML=t;el.classList.toggle('on',!!t);
  const upDis=!z||f>=NFLOOR-1,dnDis=!z||f<=0;
  document.querySelectorAll('#povPad .st:not([data-a="th"])').forEach(b=>b.classList.toggle('dis',b.dataset.a==='up'?upDis:dnDis));
@@ -3003,10 +3024,10 @@ function bindPortraitUI(){
 }
 const ROAD={y0:32,y1:38,x0:-260,x1:320,cx0:-70,cx1:130}; // cx0..cx1 = rentang muter mobil (biar rame di sekitar kantor) // koordinat logika lantai 1 (depan gedung, di bawah Taman Depan / Pondok)
 // 🏙️ Gedung Kantor 2 (bangunan terpisah, di samping kantor utama) — koordinat logika lantai 1; model & tombolnya di bagian 🏙️ bawah
-const SHELL_POS={x:36.5,y:-24.85,s:2.4}; // pusat badan gedung + skala (badan model 4.04 m -> ±9.7 m, tinggi ±23 m). Jauh di belakang (utara) Taman Halaman (muka selatan gedung di y=-20 → 20 m dari dinding utara kantor), antara kantor & Rumah My Bini; kanopi ngadep jalan setapak taman (x≈36)
+const SHELL_POS={x:20,y:-27.5,s:2.4,sx:16.8/2.02,sz:7.5/2.02}; // [Bioskop pindah] badan gedung dilebarin (tinggi tetap ±23 m, s=2.4) biar Lt 4 Bioskop (32×14 m) muat utuh di dalamnya: badan x 3,2–36,8 · y -35…-20 (muka selatan tetap y=-20 → jembatan gak berubah). // pusat badan gedung + skala (badan model 4.04 m -> ±9.7 m, tinggi ±23 m). Jauh di belakang (utara) Taman Halaman (muka selatan gedung di y=-20 → 20 m dari dinding utara kantor), antara kantor & Rumah My Bini; kanopi ngadep jalan setapak taman (x≈36)
 // 🌉 Jembatan kaca (skybridge): Lobi Lantai 3 kantor utama (dinding utara y=0, x 33–36) → lantai 2 (baris jendela ke-2, ±5,7–10,9 m) Gedung Kantor 2. Lantai jembatan = lantai Lt 3 (2×FH = 6,4 m)
-const BRIDGE={x0:33,x1:36,yN:SHELL_POS.y+2.02*SHELL_POS.s-.25,yS:-.1,z:2*FH,h:2.65};
-function shellFootprint(){const h=2.02*SHELL_POS.s;return{x0:SHELL_POS.x-h,x1:SHELL_POS.x+h,y0:SHELL_POS.y-h,y1:SHELL_POS.y+3.12*SHELL_POS.s};}
+const BRIDGE={x0:33,x1:36,yN:SHELL_POS.y+2.02*SHELL_POS.sz-.25,yS:-.1,z:2*FH,h:2.65};
+function shellFootprint(){const hx=2.02*SHELL_POS.sx,hz=2.02*SHELL_POS.sz;return{x0:SHELL_POS.x-hx,x1:SHELL_POS.x+hx,y0:SHELL_POS.y-hz,y1:SHELL_POS.y+3.12*SHELL_POS.sz};}
 // keyframe suasana per jam (WITA): langit atas/bawah (sRGB), kekuatan cahaya, warna matahari/bulan
 const AMB=[
  {h:0,  top:'#070b24',bot:'#1a2246',hemi:.42,sun:.22,sc:'#9fb4ff',hs:'#8796cc',hg:'#2a2638',star:1},
@@ -3114,7 +3135,8 @@ function forestBlocked(x,y){ // kampus (kantor+taman+rumah), pondok, jalan raya+
  if(x>-1.2&&x<61.5&&y>-1.2&&y<24.8)return true; // kantor + taman depan/halaman + rumah
  if(x>7.2&&x<14.8&&y>=24&&y<29.6)return true; // pondok taman
  {const F=shellFootprint();if(x>F.x0-2.4&&x<F.x1+2.4&&y>F.y0-2.4&&y<F.y1+2.4)return true;} // 🏙️ Gedung Kantor 2 + halaman pavingnya
- if(x>BRIDGE.x0-3.2&&x<Math.max(BRIDGE.x1,SHELL_POS.x+.65)+3.2&&y>BRIDGE.yN-1&&y<0)return true; // 🌉 jalur di bawah jembatan + jalan setapak ke gedung (biar pohon gak nembus jembatan)
+ if(x>BRIDGE.x0-3.2&&x<BRIDGE.x1+4.4&&y>BRIDGE.yN-1&&y<0)return true; // 🌉 jalur di bawah jembatan + jalan setapak ke Taman Halaman (biar pohon gak nembus jembatan)
+ if(x>SHELL_POS.x-3.2&&x<BRIDGE.x1+4.4&&y>-13.6&&y<-5.8)return true; // jalan setapak dari kanopi Gedung Kantor 2 (belok ke timur, nyambung ke jalur jembatan)
  if(y>ROAD.y0-2.2&&y<ROAD.y1+2.2)return true;
  if(y>=24&&y<=ROAD.y0-1.4&&((x>21.2&&x<26.8)||(x>33.8&&x<38.8)))return true;
  return false;}
@@ -3243,7 +3265,7 @@ window.addEventListener('resize',resize);
    Berdiri SENDIRI di belakang (utara) Taman Halaman, antara kantor utama & Rumah My Bini, di luar pagar kampus. Pintu + kanopi ngadep selatan ke jalan setapak taman.
    Gak ngebungkus / nutupin kantor utama: kantor, label, karakter, lantai, POV & Bioskop gak diubah sama sekali. */
 // koordinat logika lantai 1 (sama kayak ROOMS): kantor utama mulai x=0, jadi gedung ini di x<0 (sisi barat), sejajar Taman Depan
-const SHELL={g:new THREE.Group(),model:null,on:true,loading:false};
+const SHELL={g:new THREE.Group(),model:null,podium:null,on:true,loading:false};
 scene.add(SHELL.g); // grup diatur fokus Bioskop (thFocus) kayak objek luar lainnya; model di dalamnya diatur tombol 🏙️ Gedung
 function loadShellOn(){try{return localStorage.getItem('kantorGedung')!=='0';}catch(_){return true;}}
 function shellBtn(){const b=document.getElementById('btnGedung');if(!b)return;b.classList.toggle('on',SHELL.on);
@@ -3327,17 +3349,33 @@ async function ensureShell(){if(SHELL.model||SHELL.loading)return;SHELL.loading=
  try{const {GLTFLoader}=await import('./vendor/GLTFLoader.js');
   const gl=await new GLTFLoader().loadAsync('./models/gedung-kantor.glb');const m=gl.scene,S=SHELL_POS.s,F=shellFootprint();
   // model: badan 4.04 × 9.75 × 4.04 (dasar y=0, pusat x/z=0), pintu + kanopi ngadep +z (= selatan / Taman Halaman)
-  m.scale.setScalar(S);m.position.set(tx(SHELL_POS.x),0,tz(SHELL_POS.y));
+  m.scale.set(SHELL_POS.sx,S,SHELL_POS.sz);m.position.set(tx(SHELL_POS.x),0,tz(SHELL_POS.y)); // badan dilebarin (x/z) biar Bioskop muat, tinggi tetap
   m.traverse(o=>{if(!o.isMesh)return;o.castShadow=true;o.receiveShadow=true;const mt=o.material;
    if(mt.name==='Material.002'&&!ENV.lampMats.includes(mt)){mt.emissive=new THREE.Color(0x9a7438);mt.emissiveIntensity=0;ENV.lampMats.push(mt);}}); // kaca jendela nyala dikit pas malam
   // halaman paving di bawah gedung, sampai pagar tanaman Taman Halaman
   const pave=mat(0xcfc2ad),pave2=mat(0xb9ab95),Gp=SHELL.g;
-  envBox(F.x0-1.2,F.y0-1.2,-.32,F.x1-F.x0+2.4,F.y1-F.y0+2.4,.3,pave,Gp); // halaman paving di sekeliling gedung
-  envBox(SHELL_POS.x-.65,F.y1+1.2,-.31,1.3,-.35-(F.y1+1.2),.3,pave2,Gp); // jalan setapak dari kanopi ke Taman Halaman (lewat di bawah jembatan), lurus sama jalan setapak taman
-  SHELL.g.add(m);SHELL.model=m;m.visible=SHELL.on;
+  envBox(F.x0-1.2,F.y0-.2,-.32,F.x1-F.x0+2.4,F.y1-F.y0+1.4,.3,pave,Gp); // halaman paving di sekeliling gedung
+  // jalan setapak: dari kanopi lurus ke selatan, belok ke timur, terus nyambung ke jalan setapak Taman Halaman (x≈36,5, lewat di bawah jembatan)
+  const PX=36.5;envBox(SHELL_POS.x-.65,F.y1+1.2,-.31,1.3,-9-(F.y1+1.2),.3,pave2,Gp);
+  envBox(SHELL_POS.x-.65,-10.3,-.31,PX+.65-(SHELL_POS.x-.65),1.3,.3,pave2,Gp);
+  envBox(PX-.65,-10.3,-.31,1.3,-.35+10.3,.3,pave2,Gp);
+  SHELL.g.add(m);SHELL.model=m;m.visible=SHELL.on&&!shellCinemaView();
  }catch(e){console.warn('gedung kantor 2',e);}
  SHELL.loading=false;}
+// 🎬 Bioskop sekarang di dalam Gedung Kantor 2: pas lagi lihat/ada di Bioskop (Lt 4, panel Bioskop, fokus, POV di Lt 4) badan kaca gedungnya disembunyiin biar isi Bioskop kelihatan,
+// diganti "podium" (lantai bawah gedung + landing jembatan) biar Bioskop gak ngambang. Podium juga nongol kalau 🏙️ Gedung dimatiin.
+function shellCinemaView(){return !!(TH.focus||POV.scene||envCinemaMode());}
+function ensurePodium(){if(SHELL.podium)return;const g=new THREE.Group();g.name='gedung2-podium';const F=shellFootprint(),hz=2.02*SHELL_POS.sz;
+ const y0=SHELL_POS.y-hz,y1=SHELL_POS.y+hz,top=TH_SITE.z-(FH-2.4); // sampai bawah pelat lantai Bioskop
+ const body=mat(0x454b56),band=mat(0x1f2a3a,{roughness:.3,metalness:.25}),rim=mat(0x2a2d33);
+ envBox(F.x0,y0,0,F.x1-F.x0,y1-y0,top,body,g,true); // badan lantai bawah
+ envBox(F.x0-.04,y0-.04,1.1,F.x1-F.x0+.08,y1-y0+.08,2.2,band,g); // pita kaca gelap lantai 1
+ envBox(F.x0-.06,y0-.06,top-.25,F.x1-F.x0+.12,y1-y0+.12,.25,rim,g); // lis atas
+ // landing jembatan: dari muka selatan gedung ke area Tangga & Lift Bioskop (lantai = lantai jembatan)
+ envBox(TH_SITE.dx+25,TH_SITE.oy+9,top,(BRIDGE.x1+.2)-(TH_SITE.dx+25),y1-(TH_SITE.oy+9),FH-2.4,mat(0xd9d2c7),g);
+ SHELL.g.add(g);SHELL.podium=g;}
 function shellTick(){
+ ensurePodium();{const cv=shellCinemaView();if(SHELL.model)SHELL.model.visible=SHELL.on&&!cv;SHELL.podium.visible=!(SHELL.model&&SHELL.model.visible);}
  // 🌉 jembatan cuma kelihatan kalau Lt 3 ikut tampil (Semua / Lt 3 / Lt 4), biar gak ngambang pas pilih Lt 1–2
  if(SHELL.bridge)SHELL.bridge.visible=SHELL.on&&topFloor()>=2;
  // 🌆 kota latar: mati pas fokus Bioskop; ring jauh di-crop di Mode Portrait
