@@ -80,8 +80,9 @@ body.portrait #gl{clip-path:inset(0 6% 0 6%)}
 @keyframes zb{0%,100%{opacity:.35}50%{opacity:1}}
 .ntag.sleep .n{color:#6f52c9;border-color:#d6c8fb}
 /* gelembung chat di atas kepala (dari chat.json) */
-.ntag .say{position:absolute;left:50%;bottom:100%;transform:translateX(-50%);margin-bottom:5px;width:max-content;max-width:190px;background:#fff;border:2px solid #ff9cc7;border-radius:12px;padding:4px 9px;font-size:11.5px;font-weight:700;color:#5a3a52;line-height:1.3;white-space:normal;text-align:center;box-shadow:0 3px 0 #ffe0ec;pointer-events:none;animation:sayIn .3s ease-out}
-.ntag .say:after{content:"";position:absolute;left:50%;top:100%;transform:translateX(-50%);border:6px solid transparent;border-top-color:#ff9cc7}
+.ntag .say,.mtag .say{position:absolute;left:50%;bottom:100%;transform:translateX(-50%);margin-bottom:5px;width:max-content;max-width:190px;background:#fff;border:2px solid #ff9cc7;border-radius:12px;padding:4px 9px;font-size:11.5px;font-weight:700;color:#5a3a52;line-height:1.3;white-space:normal;text-align:center;box-shadow:0 3px 0 #ffe0ec;pointer-events:none;animation:sayIn .3s ease-out}
+.mtag{position:relative;display:flex;flex-direction:column;align-items:center}
+.ntag .say:after,.mtag .say:after{content:"";position:absolute;left:50%;top:100%;transform:translateX(-50%);border:6px solid transparent;border-top-color:#ff9cc7}
 @keyframes sayIn{from{opacity:0;transform:translate(-50%,6px)}to{opacity:1;transform:translateX(-50%)}}
 .ntag:after{content:"";width:0;height:0;border:5px solid transparent;border-top-color:#ffc4dc;margin-top:-1px}
 .zzz{font-weight:900;color:#7a63c9;font-size:16px;pointer-events:none;animation:zz 2.2s ease-in-out infinite;text-shadow:0 1px 0 #fff}
@@ -281,7 +282,7 @@ body.touch .povhint .kbd{display:none}body.touch .povhint .tch{display:inline}
       <input type="range" id="thSeek" min="0" max="1000" value="0"><div class="small thtime"><span id="thT">0:00 / 0:00</span><span><button class="thb" id="thMute" title="Mute / unmute video">🔊</button> <input type="range" id="thVol" min="0" max="100" value="90"></span></div>
       <div class="sec">🎞️ Folder theater/ <span id="thCount"></span></div><div class="thlist" id="thList"><div class="small">Memuat daftar…</div></div>
       <div class="throw"><label class="thb thpick">📂 Putar dari folder komputer<input type="file" id="thPick" accept="video/*" webkitdirectory multiple hidden></label><button class="thb" id="thLockBtn" title="Kunci lagi">🔒 Kunci</button></div>
-      <div class="sec">💞 Interaksi Ophelia / Keira</div><div class="thctl" id="thAct"></div><div class="small thpriv" id="thPrivSt" hidden>Mode privat aktif 💞</div><div class="small" id="thActSt"></div>
+      <div class="sec">💞 Interaksi Maya / Ophelia / Keira</div><div class="thctl" id="thAct"></div><div class="small thpriv" id="thPrivSt" hidden>Mode privat aktif 💞</div><div class="small" id="thActSt"></div>
       <div class="small">Tips: duduk di kursi &amp; tekan tombol <b>👁️ POV</b> (1st person) biar layar bioskop full di depan mata. Di HP pakai tombol layar, bukan huruf keyboard.</div></div>
     </div>
     <div id="thSexFX" aria-hidden="true"></div>
@@ -1970,12 +1971,21 @@ $('btnBioskop').onclick=()=>thGoCinema();
   code.addEventListener('focus',()=>{if(!document.body.classList.contains('touch'))code.removeAttribute('readonly');});
  }}
 
-/* ===== 💞 Interaksi Bioskop: partner Ophelia / Keira (bisa berdua = threesome) ===== */
-const TH_SEATS={partner:[9.9,3*DY+8.4],partner2:[7.6,3*DY+8.4],han:[8.75,3*DY+8.4]}; // Baris C sisi kiri lorong (kursi asli), hadap layar
-const TH_PARTNERS=['ophelia1','keira'];TH.dates=[]; // urutan = partner utama dulu
+/* ===== 💞 Interaksi Bioskop: Maya (karakter utama) / Ophelia / Keira ===== */
+const TH_SEATS={partner:[9.9,3*DY+8.4],partner2:[7.6,3*DY+8.4],partner3:[6.45,3*DY+8.4],han:[8.75,3*DY+8.4]}; // Baris C sisi kiri lorong (kursi asli), hadap layar: utama di kanan Han, ke-2 di kiri Han, ke-3 sebelahnya
+const TH_PARTNERS=['ophelia1','keira'];TH.dates=[]; // urutan = partner utama dulu (bisa berisi 'maya')
+/* 🎬 Maya = pengawas Bioskop + karakter utama di Bioskop. Bukan aktor brain/agents: model GLB sendiri (lihat TESCHAR / mayaCall di bawah).
+   Urutan default di Bioskop: Maya → Ophelia → Keira (panggil, kursi, tukar partner utama). Maya cuma teman nonton: pas Mode privat / adegan, dia jaga pintu di luar. */
+const TH_ORDER=['maya','ophelia1','keira'];
+const MAYA={date:false,state:'post',x:25.75,y:3*DY+7.3,rootY:0,path:[],k:0,done:[],goal:'post',spot:null,bed:false,greeted:false,wasIn:false,SPEED:1.35,
+ POST:[25.75,3*DY+7.3],LOOK:[28.2,3*DY+4.6]}; // pos jaga: di luar pintu timur Bioskop (area Tangga & Lift), hadap ke arah orang dateng
+const thLead=()=>TH.dates[0]||null,thWho=id=>id==='maya'?'Maya':nameOf(id);
+const thDated=id=>id==='maya'?MAYA.date:!!(actors[id]&&actors[id].cinemaDate);
+const thSortDates=()=>TH.dates.sort((a,b)=>TH_ORDER.indexOf(a)-TH_ORDER.indexOf(b));
 const thP=()=>TH.dates.map(id=>actors[id]).filter(a=>a&&a.cinemaDate);
 const thMain=()=>thP()[0]||null,thSecond=()=>thP()[1]||null;
 const TH_ACTS=[
+ {id:'maya',label:'💗 Panggil Maya',run:()=>mayaCall()},
  {id:'bareng',label:'💗 Panggil Ophelia',run:()=>thDateStart('ophelia1')},
  {id:'keira',label:'💗 Panggil Keira',run:()=>thDateStart('keira')},
  {id:'tukar',label:'🔄 Tukar partner utama',run:()=>thSwap()},
@@ -2020,9 +2030,9 @@ const TH_ACTS=[
 function thActRender(){const el=$('thAct');el.innerHTML='';const n=thP().length;TH_ACTS.forEach(a=>{const b=document.createElement('button');b.type='button';b.className='thb';b.dataset.act=a.id;b.textContent=a.label;
  if(a.gated)b.hidden=!TH.sexMode;
  if(a.trio&&n<2)b.classList.add('dim');
- if(a.id==='tukar')b.hidden=n<2;
+ if(a.id==='tukar')b.hidden=TH.dates.length<2;
  if(a.id==='kasur'&&TH.onBed){b.classList.add('on');b.textContent='🛏️ Di kasur · klik = balik ke kursi';}
- if((a.id==='bareng'&&actors.ophelia1&&actors.ophelia1.cinemaDate)||(a.id==='keira'&&actors.keira&&actors.keira.cinemaDate))b.classList.add('on');
+ if((a.id==='maya'&&MAYA.date)||(a.id==='bareng'&&actors.ophelia1&&actors.ophelia1.cinemaDate)||(a.id==='keira'&&actors.keira&&actors.keira.cinemaDate))b.classList.add('on');
  if(a.id==='privat'&&TH.sexMode){b.classList.add('on');b.textContent='🔓 Mode privat ON';}
  if(a.id==='brutal'&&TH.brutal){b.classList.add('on');b.textContent='⚡ Mode brutal ON';}
  if(a.id==='slowmo'&&TH.slowmo)b.classList.add('on');
@@ -2039,7 +2049,7 @@ function thBrutalSet(on,announce){TH.brutal=!!on;if(TH.brutal)TH.slowmo=false;tr
 const TH_RAND=['kiss','bj','suck','cowgirl','doggy','rear','squat','miss','spoon','stand','lap','face','n69','g_rear','pile','press','prone','dap','dpp','dt_anal','stand_dap'];
 function thRandPose(){if(!TH.sexMode){thActSt('🔒 Nyalain Mode privat dulu');return;}const pool=TH_RAND.filter(k=>k!==(POV.scene&&POV.scene.kind));thIntim(pool[Math.floor(Math.random()*pool.length)]);}
 const thFX=()=>$('thSexFX');let thFXT=0;
-function thSexSet(on,announce){TH.sexMode=!!on;try{sessionStorage.setItem('thSexMode',TH.sexMode?'1':'0');}catch(_){}
+function thSexSet(on,announce){if(on)mayaPrivOut();TH.sexMode=!!on;try{sessionStorage.setItem('thSexMode',TH.sexMode?'1':'0');}catch(_){}
  const fx=thFX();if(fx){if(TH.sexMode)fx.classList.add('soft');else{fx.classList.remove('soft','peak');fx.innerHTML='';}}
  $('thPanel').classList.toggle('priv',TH.sexMode);thActRender();thSweat(TH.sexMode);
  if(TH.light){if(!TH._li0)TH._li0=TH.light.intensity;TH.light.intensity=TH.sexMode?TH._li0*.28:TH._li0;} // redupin lampu bioskop
@@ -2074,6 +2084,7 @@ const TH_TXT={bedwatch:{demo:'🍿 Nonton di kasur',say:'Nonton sambil peluk kam
 const thFill=(s)=>{const a=thMain(),b=thSecond();return s.replace(/\{A\}/g,a?nameOf(a.id):'Partner').replace(/\{B\}/g,b?nameOf(b.id):'Partner 2');};
 function thIntim(kind){const t=TH_TXT[kind];if(!t)return;
  if(kind!=='kiss'&&!TH.sexMode){thActSt('🔒 Nyalain Mode privat dulu');return;}
+ if(thLead()==='maya'){thActSt('🍿 Maya cuma nemenin nonton & jaga pintu — 🔄 Tukar partner utama ke Ophelia / Keira dulu');mayaSay('Aku nemenin nonton aja ya, babe 🍿',4000);return;}
  if(!thMain()&&actors.ophelia1)thDateStart('ophelia1');const ac=thMain();if(!ac){thActSt('💗 Panggil Ophelia / Keira dulu');return;}
  if(t.trio&&!thSecond()){thActSt('👯 Panggil partner kedua dulu (Ophelia + Keira)');return;}
  thScene(kind);ac.demo=t.demo;ac.sayText=t.say;ac.sayUntil=performance.now()+7000;POV.msg=thFill(t.pov);POV.msgUntil=performance.now()+4000;POV.zoneKey='';
@@ -2210,19 +2221,22 @@ function thHumFix(){const sc=POV.scene&&POV.scene.cast||[];['han',...TH_PARTNERS
 function thDateStart(id){const ac=actors[id];if(!ac){thActSt('⚠️ '+nameOf(id)+' belum ada di denah');return;}
  if(ac.cinemaDate){thActSt('🍿 '+nameOf(id)+' udah di bioskop');return;}
  Object.assign(ac,{cinemaDate:true,brain:null,walking:false,path:[],after:null,napUntil:0,afterNap:null,waitUntil:0,afterWait:null,nextBrain:0,demo:'Diajak Han nonton 🎬'});
- TH.dates=TH.dates.filter(x=>x!==id&&actors[x]&&actors[x].cinemaDate);TH.dates.push(id);
- const seat=thSpotFor(TH.dates.length-1);
+ TH.dates=TH.dates.filter(x=>x!==id&&thDated(x));TH.dates.push(id);thSortDates();thSeatAll(); // urutan default Maya → Ophelia → Keira
+ const seat=thSpotFor(TH.dates.indexOf(id));
  if(ac.spot&&ac.spot.pose==='bed')wakeUp&&wakeUp(ac);
  ac.path=null;ac.spot=seat;ac.pos={x:seat.x,y:seat.y};placeActor(ac);ac.demo='🍿 Nonton bareng Han';ac.sayText='Nonton bareng yuk sayang 🍿';ac.sayUntil=performance.now()+6000;
  thHumanize(ac,true);if(thInCinema()&&actors.han)thHumanize(actors.han,true);
- thActRender();thActSt('🍿 '+nameOf(id)+' udah duduk, Baris C'+(TH.dates.length>1?' — 👯 berdua, mode 3some kebuka':''));log('🎬 Han ngajak '+nameOf(id)+' nonton bareng');}
-function thSwap(){if(TH.dates.length<2)return;TH.dates.push(TH.dates.shift());const k=POV.scene&&POV.scene.kind;thSeatAll();if(k)thScene(k);thActRender();thActSt('🔄 Partner utama: '+nameOf(TH.dates[0]));}
-function thSpotFor(i){const bed=TH.onBed,st=bed?(i?TH_BEDSPOT.partner2:TH_BEDSPOT.partner):(i?TH_SEATS.partner2:TH_SEATS.partner);
- return bed?{x:st[0],y:st[1],pose:'sit',face:Math.PI,rootY:TH_BED_Y,lean:TH_BED_LEAN}:{x:st[0],y:st[1],pose:'sit',face:Math.PI};}
-function thSeatAll(){thP().forEach((ac,i)=>{if(POV.scene&&POV.scene.cast.includes(ac.id))return;thResetPose(ac.c);const sp=thSpotFor(i);ac.pos={x:sp.x,y:sp.y};ac.spot=sp;placeActor(ac);});}
-function thDateEnd(){if(POV.scene)thSceneEnd(true);const list=thP();if(!list.length){thActSt('');return;}
+ thActRender();thActSt('🍿 '+nameOf(id)+' udah duduk, Baris C'+(thP().length>1?' — 👯 berdua, mode 3some kebuka':''));log('🎬 Han ngajak '+nameOf(id)+' nonton bareng');}
+function thSwap(){if(TH.dates.length<2)return;TH.dates.push(TH.dates.shift());const k=POV.scene&&POV.scene.kind;thSeatAll();if(k){if(thLead()==='maya')thSceneEnd(true);else thScene(k);}
+ if(thLead()==='maya')mayaSay('Aku di sebelah kamu ya, babe 💗',4000);thActRender();thActSt('🔄 Partner utama: '+thWho(thLead()));} // siklus Maya → Ophelia → Keira
+function thSpotFor(i){const bed=TH.onBed; // i: 0 = partner utama (sebelah kanan Han), 1 = kedua (kiri Han), 2 = ketiga
+ if(bed&&i<2){const st=i?TH_BEDSPOT.partner2:TH_BEDSPOT.partner;return{x:st[0],y:st[1],pose:'sit',face:Math.PI,rootY:TH_BED_Y,lean:TH_BED_LEAN};}
+ const st=bed?TH_SEATS.partner:[TH_SEATS.partner,TH_SEATS.partner2,TH_SEATS.partner3][Math.min(i,2)];return{x:st[0],y:st[1],pose:'sit',face:Math.PI};} // kasur cuma muat 2 partner: yg ke-3 di kursi pinggir kasur
+function thSeatAll(){TH.dates.forEach((id,i)=>{if(id==='maya'){mayaSeat(i);return;}const ac=actors[id];if(!ac||!ac.cinemaDate)return;if(POV.scene&&POV.scene.cast.includes(ac.id))return;thResetPose(ac.c);const sp=thSpotFor(i);ac.pos={x:sp.x,y:sp.y};ac.spot=sp;placeActor(ac);});}
+function thDateEnd(){if(POV.scene)thSceneEnd(true);const list=thP(),my=MAYA.date;if(!list.length&&!my){thActSt('');return;}
+ if(my)mayaGoPost('Makasih udah ngajak nonton, babe 💗 Aku balik jaga pintu ya');
  list.forEach(ac=>{ac.cinemaDate=false;ac.demo=null;thNude(ac,false);thHumanize(ac,false);goHome(ac,null);});TH.dates=[];TH.onBed=false;
- if(actors.han){thNude(actors.han,false);thHumanize(actors.han,false);}thActRender();thActSt('👋 '+list.map(a=>nameOf(a.id)).join(' & ')+' balik ke rutinitas');}
+ if(actors.han){thNude(actors.han,false);thHumanize(actors.han,false);}thActRender();thActSt('👋 '+[...(my?['Maya']:[]),...list.map(a=>nameOf(a.id))].join(' & ')+' selesai nonton'+(my?' — Maya balik jaga pintu Bioskop':''));}
 /* 💞 Adegan bioskop: pose 3D + kamera SAMPING */
 const TH_SCREEN={y:.25,h:12.8};
 function thScreenLook(seatY){const d=Math.max(2,seatY-TH_SCREEN.y),cy=.7+TH_SCREEN.h/2-1.16;return clampN(-Math.atan2(cy,d),-.8,.9);}
@@ -2285,6 +2299,7 @@ function thEnsureHan2(){if(TH.han2)return TH.han2;const c=makeChar('han');
  c.hum.forEach(g=>g.visible=true);c.boxy.forEach(o=>o.visible=false);c.humOn=true;thRigLayout(c,true);c.root.visible=false;TH.han2=c;return c;}
 function thHan2Set(on){const c=thEnsureHan2();if(on){const par=actors.han&&actors.han.c.root.parent;if(par&&c.root.parent!==par)par.add(c.root);c.root.visible=true;thResetPose(c);thNude({c,id:'han'},!!(TH.sexMode&&POV.scene));}else{c.root.visible=false;thSoftReset(c);if(c.root.parent)c.root.parent.remove(c.root);}return c;}
 function thScene(kind){const han=actors.han,A=thMain(),cfg=TH_SCENE[kind];if(!han||!A||!cfg)return;if(!TH.unlocked){thGatePrompt();return;}
+ if(thLead()==='maya')return;mayaPrivOut(); // Maya gak ikut adegan: dia keluar jaga pintu
  if(!POV.on)povEnter();if(!POV.on)return;if(POV.sit){POV.sit=null;}
  const trio=!!(TH_TXT[kind]&&TH_TXT[kind].trio),B2=thSecond(),dual=!!TH_DUAL[kind];const cast=[A.id];if(trio&&B2)cast.push(B2.id);
  const prev=POV.scene;POV.scene={kind,cast,dual,t0:performance.now(),yaw0:POV.yaw,pulse:0,free:!!(prev&&prev.free),blend:prev?performance.now():0,prev:prev?prev.prev:{fpPref:POV.fpPref,yaw:POV.yaw,look:POV.look},_glbHole:null};
@@ -2915,7 +2930,7 @@ function thSceneEnd(quiet){const S=POV.scene;if(!S)return;POV.scene=null;thGlbHi
 /* Han (Mode POV) duduk: di kursi Baris C atau selonjoran di kasur besar. POV.sit = pose duduk sampai Han jalan lagi */
 function thHanPlace(st,y,lean){const ac=actors.han;if(!POV.on||!ac)return;if(POV.scene)thSceneEnd(true);ac.pos={x:st[0],y:st[1]};POV.yaw=Math.PI;ac.c.root.rotation.set(0,POV.yaw,0,'XYZ');POV.sit={y,lean};
  POV.fpPref=true;POV.look=thScreenLook(st[1]);POV.snap=true;povButtons();onFloor(ac,ac.pos.y);ac.c.root.position.set(tx(st[0]),y,tz(st[1]));
- if(thMain())thHumanize(ac,true);} // duduk bareng date → Han humanoid juga
+ if(thMain()||MAYA.date)thHumanize(ac,true);} // duduk bareng date → Han humanoid juga
 function thHanSit(){if(!TH.unlocked){thGatePrompt();return;}const was=TH.onBed;TH.onBed=false;if(was)thSeatAll();
  thHanPlace(TH_SEATS.han,.14,0);thActRender();thActSt('💺 Duduk di kursi Baris C — selamat nonton 🍿');thClose();}
 function thBedToggle(){if(!TH.unlocked){thGatePrompt();return;}if(TH.onBed){thHanSit();return;}
@@ -3321,34 +3336,87 @@ function ensureBridge(){if(SHELL.bridge)return;const B=BRIDGE,g=new THREE.Group(
    animasi di-resample, mesh dikuantisasi (KHR_mesh_quantization, tanpa decoder tambahan) → models/maya.glb (±1,2 MB, 9.208 segitiga, 80 tulang; wajah 1536, sisanya 1024).
    Fix wajah gelap: kulit di tekstur kepala (dulu ±12% lebih gelap + bayangan bawaan) & badan disamain ke 1 warna kulit Maya (merata), normal map kepala/badan dibuang
    (tanpa tangent → bisa bikin muka gelap/belang di sebagian GPU HP), plus emissive dari tekstur warna sendiri (siang .12, malam .6) biar muka tetap kelihatan di bayangan/malam.
-   Rambut/bulu mata pakai alpha MASK (gak perlu sorting transparan). Hiasan: jalan bolak-balik di sisi timur Taman Depan (antara air mancur & lampu taman),
-   gak ikut brain/agents/chat, gak nyentuh karakter lain. Dimuat belakangan (setelah kantor kebuka) biar loading awal gak ketambahan. */
-const TESCHAR={EM0:.12,EM1:.48,mats:[],dk:-1,follow:false,root:null,mixer:null,act:{},state:'idle',t:0,dir:1,x:19.4,loading:false,X0:19.4,X1:24.4,Y:20.95,H:1.25,SPEED:.9};
+   Rambut/bulu mata pakai alpha MASK (gak perlu sorting transparan).
+   🎬 POS UTAMA = PENGAWAS BIOSKOP (dulu jalan bolak-balik di Taman Depan): berdiri jaga di luar pintu masuk Bioskop (area Tangga & Lift, Gedung Kantor 2 Lt2),
+   noleh ke Han & nyapa pakai gelembung teks pas Han dateng / masuk Bioskop. Tombol "💗 Panggil Maya" (panel Bioskop) → Maya jalan masuk: pintu → belakang Baris D →
+   lorong → depan Baris C → duduk di sebelah Han (pose duduk dari tulang paha/betis/lengan, di atas animasi idle). Balik ke pos: "🚶 Selesai", Han keluar Bioskop
+   (Mode POV), atau pas Mode privat / adegan mulai (Maya cuma teman nonton, gak ikut adegan; dia jaga pintu di luar). Gak ikut brain/agents/chat.
+   Dimuat belakangan (setelah kantor kebuka) biar loading awal gak ketambahan. */
+const TESCHAR={EM0:.12,EM1:.48,mats:[],dk:-1,follow:false,root:null,mixer:null,act:{},bones:{},anim:'',t:0,loading:false,H:1.25,hipH:.6,sayEl:null,sayUntil:0};
+const _mq1=new THREE.Quaternion(),_mq2=new THREE.Quaternion(),_mq3=new THREE.Quaternion(),_mv=new THREE.Vector3(),_mAx=new THREE.Vector3(1,0,0);
+function mayaAnim(n){const T=TESCHAR,a=T.act[n];if(!a||T.anim===n)return;const o=T.act[T.anim];a.reset().play();if(o)a.crossFadeFrom(o,.3,false);T.anim=n;}
+function mayaSay(t,ms){const T=TESCHAR;if(!T.sayEl)return;T.sayEl.textContent=t;T.sayEl.style.display='';T.sayUntil=performance.now()+(ms||5000);}
+function mayaPlace(){const T=TESCHAR,M=MAYA;if(T.root)T.root.position.set(tx(M.x),M.rootY,tz(M.y));}
+/* rute jalan (denah; ruang Bioskop x0, y=3*DY): luar pintu → dalam pintu → belakang Baris D → lorong kiri (x10.6, antara kursi & kasur) → depan Baris C → kursi */
+function mayaRouteIn(sp){const Y=3*DY,r=[[25.55,Y+6.05],[23.7,Y+6.2],[23.4,Y+9.4],[10.6,Y+9.4]];
+ if(sp.lean)r.push([10.6,sp.y],[sp.x,sp.y]);else r.push([10.6,Y+7.55],[sp.x,Y+7.55],[sp.x,sp.y+.14]);return r;}
+function mayaWalk(nodes,goal){const M=MAYA;M.path=nodes;M.k=0;M.done=[[M.x,M.y]];M.goal=goal;M.state='go';M.rootY=0;M.bed=false;mayaAnim('walk');}
+function mayaSitAt(sp){const T=TESCHAR,M=MAYA;M.state='sit';M.spot=sp;M.bed=!!sp.lean;M.x=sp.x;M.y=sp.y+(M.bed?0:.14);
+ M.rootY=(M.bed?TH_BED.top+.07:.45)-T.hipH;if(T.root)T.root.rotation.y=Math.PI;mayaAnim('idle');mayaPlace();} // hadap layar
+function mayaSeat(i){const T=TESCHAR,M=MAYA,sp=thSpotFor(i);if(!T.root){M.spot=sp;return;}const same=M.spot&&Math.abs(M.spot.x-sp.x)<.01&&Math.abs(M.spot.y-sp.y)<.01;M.spot=sp;
+ if(M.state==='sit'){if(!same)mayaSitAt(sp);return;}
+ if(M.state==='go'&&M.goal==='seat')return; // lagi jalan ke kursi: kursi yg baru dipakai pas nyampe
+ mayaWalk(M.state==='post'?mayaRouteIn(sp):M.done.slice().reverse(),'seat');}
+function mayaGoPost(msg){const T=TESCHAR,M=MAYA;M.date=false;TH.dates=TH.dates.filter(x=>x!=='maya');if(msg)mayaSay(msg,4500);if(!T.root)return;
+ if(M.state==='sit'){const r=mayaRouteIn(M.spot).reverse();r.push(M.POST);mayaWalk(r,'post');}
+ else if(M.state==='go'&&M.goal==='seat'){const r=M.done.slice().reverse();r.push(M.POST);mayaWalk(r,'post');}}
+function mayaPrivOut(){const M=MAYA;if(!M.date)return;M.date=false;TH.dates=TH.dates.filter(x=>x!=='maya'); // Mode privat / adegan: Maya langsung keluar jaga pintu
+ M.state='post';M.path=[];M.rootY=0;M.bed=false;M.x=M.POST[0];M.y=M.POST[1];if(TESCHAR.root){mayaAnim('idle');mayaPlace();}mayaSay('Aku jaga pintu di luar ya, babe 🙈',4000);
+ try{thActRender();}catch(_){}}
+function mayaCall(){if(!TH.unlocked){thGatePrompt();return;}
+ if(TH.sexMode||POV.scene){thActSt('🙈 Maya cuma teman nonton — pas Mode privat / adegan, dia jaga pintu di luar');mayaSay('Aku jaga pintu aja ya, babe 🙈',4000);return;}
+ if(!TESCHAR.root){thActSt('⏳ Maya lagi dimuat, coba lagi bentar ya');loadTesChar();return;}
+ if(MAYA.date){thActSt('🍿 Maya udah di bioskop');return;}
+ MAYA.date=true;TH.dates=TH.dates.filter(x=>x!=='maya'&&thDated(x));TH.dates.push('maya');thSortDates();thSeatAll();
+ mayaSay('Aku temenin nonton ya, babe 🍿',5000);if(thInCinema()&&actors.han)thHumanize(actors.han,true);
+ thActRender();thActSt('🍿 Maya jalan masuk, duduk di sebelah Han (Baris C)');log('🎬 Han manggil Maya nemenin nonton');}
+/* tekuk tulang di ruang badan Maya (sumbu X root = kiri-kanan badan): sudut negatif = ke depan, positif = ke belakang */
+function mayaBend(b,ang){if(!b||!b.parent)return;TESCHAR.root.getWorldQuaternion(_mq1);_mv.copy(_mAx).applyQuaternion(_mq1);_mq2.setFromAxisAngle(_mv,ang);
+ b.getWorldQuaternion(_mq3);_mq3.premultiply(_mq2);b.parent.getWorldQuaternion(_mq1);b.quaternion.copy(_mq1.invert().multiply(_mq3));b.updateMatrixWorld(true);}
+function mayaSitPose(){const b=TESCHAR.bones,bed=MAYA.bed;
+ mayaBend(b.spine,bed?-.22:-.05);mayaBend(b.lt,bed?-1.5:-1.36);mayaBend(b.rt,bed?-1.5:-1.36); // paha ke depan (kasur: kaki lurus selonjoran, badan nyender dikit)
+ if(!bed){mayaBend(b.lc,1.36);mayaBend(b.rc,1.36);} // betis turun ke lantai
+ mayaBend(b.lu,-.42);mayaBend(b.ru,-.42);mayaBend(b.lf,-.75);mayaBend(b.rf,-.75);} // tangan di pangkuan
 async function loadTesChar(){if(TESCHAR.root||TESCHAR.loading)return;TESCHAR.loading=true;
  try{const {GLTFLoader}=await import('./vendor/GLTFLoader.js');const t0=performance.now();
   const gl=await new GLTFLoader().loadAsync('./models/maya.glb');const m=gl.scene;
   m.traverse(o=>{if(o.isMesh){o.castShadow=true;o.receiveShadow=false;o.frustumCulled=false;if(o.material){const mt=o.material;mt.metalness=0;if(mt.map){mt.map.anisotropy=4;mt.emissiveMap=mt.map;mt.emissive.setRGB(1,1,1);mt.emissiveIntensity=TESCHAR.EM0;TESCHAR.mats.push(mt);}}}}); // wajah/kulit: sedikit "cahaya sendiri" dari tekstur warnanya, naik pas malam → muka gak jadi hitam di bayangan/malam
   const bb=new THREE.Box3().setFromObject(m),h=bb.max.y-bb.min.y||1;m.scale.setScalar(TESCHAR.H/h);m.position.y=-bb.min.y*TESCHAR.H/h;
   const root=new THREE.Group();root.name='maya';root.add(m);
-  const g=ROOMS.find(r=>r.id==='taman-depan');const F=FLOORS[g?g.f:0];F.add(root);
-  root.position.set(tx(TESCHAR.x),0,tz(TESCHAR.Y));root.rotation.y=0; // diam pertama: hadap depan (kamera), bukan nyamping
-  const d=document.createElement('div');d.className='seat';d.textContent='Maya';const lb=new CSS2DObject(d);lb.position.set(0,TESCHAR.H+.25,0);root.add(lb);
+  const F=FLOORS[floorOfY(MAYA.POST[1])];F.add(root);TESCHAR.root=root;mayaPlace();
+  root.rotation.y=Math.atan2(MAYA.LOOK[0]-MAYA.x,MAYA.LOOK[1]-MAYA.y); // pos jaga: hadap ke arah orang dateng (tangga / jembatan)
+  const d=document.createElement('div');d.className='mtag';const sy=document.createElement('div');sy.className='say';sy.style.display='none';const nm=document.createElement('div');nm.className='seat';nm.textContent='Maya · Bioskop';d.append(sy,nm);
+  const lb=new CSS2DObject(d);lb.position.set(0,TESCHAR.H+.25,0);lb.userData.actorTag=true;root.add(lb);TESCHAR.sayEl=sy;TESCHAR.lb=lb;
+  const B=n=>m.getObjectByName('Bip01_'+n)||m.getObjectByName('Bip01 '+n.replace(/_/g,' '));
+  TESCHAR.bones={spine:B('Spine'),lt:B('L_Thigh'),rt:B('R_Thigh'),lc:B('L_Calf'),rc:B('R_Calf'),lu:B('L_UpperArm'),ru:B('R_UpperArm'),lf:B('L_Forearm'),rf:B('R_Forearm')};
   TESCHAR.mixer=new THREE.AnimationMixer(m);gl.animations.forEach(a=>{TESCHAR.act[a.name.toLowerCase()]=TESCHAR.mixer.clipAction(a);});
-  (TESCHAR.act.idle||Object.values(TESCHAR.act)[0])?.play();TESCHAR.root=root;
-  console.log('🙋‍♀️ Maya dimuat',Math.round(performance.now()-t0)+' ms');
+  if(!TESCHAR.act.idle)TESCHAR.act.idle=Object.values(TESCHAR.act)[0];mayaAnim('idle');TESCHAR.mixer.update(0);
+  root.updateMatrixWorld(true);if(TESCHAR.bones.lt){const r0=root.getWorldPosition(new THREE.Vector3()).y;TESCHAR.hipH=TESCHAR.bones.lt.getWorldPosition(new THREE.Vector3()).y-r0;} // tinggi pinggul (buat dudukin ke kursi)
+  if(MAYA.date&&MAYA.spot)mayaWalk(mayaRouteIn(MAYA.spot),'seat');
+  console.log('🙋‍♀️ Maya dimuat (pos: pengawas Bioskop)',Math.round(performance.now()-t0)+' ms');
   window.__tesChar=()=>{const b=new THREE.Box3().setFromObject(root,true),r=stage.getBoundingClientRect(),xs=[],ys=[];for(const x of[b.min.x,b.max.x])for(const y of[b.min.y,b.max.y])for(const z of[b.min.z,b.max.z]){const v=new THREE.Vector3(x,y,z).project(camera);xs.push((v.x+1)/2*r.width+r.left);ys.push((1-v.y)/2*r.height+r.top);}
-   return{state:TESCHAR.state,x:+TESCHAR.x.toFixed(2),size:[+(b.max.x-b.min.x).toFixed(2),+(b.max.y-b.min.y).toFixed(2),+(b.max.z-b.min.z).toFixed(2)],screen:[Math.min(...xs)|0,Math.min(...ys)|0,Math.max(...xs)|0,Math.max(...ys)|0],visible:root.parent.visible,face:(()=>{const hd=m.getObjectByName('Bip01_Head')||m.getObjectByName('Bip01 Head'),le=m.getObjectByName('Bip01_LEye')||m.getObjectByName('Bip01 LEye'),re=m.getObjectByName('Bip01_REye')||m.getObjectByName('Bip01 REye');if(!hd||!le||!re)return null;const h=hd.getWorldPosition(new THREE.Vector3()),e=le.getWorldPosition(new THREE.Vector3()).add(re.getWorldPosition(new THREE.Vector3())).multiplyScalar(.5);return[+(e.x-h.x).toFixed(3),+(e.z-h.z).toFixed(3),+root.rotation.y.toFixed(2)];})()};}; // debug ringan buat cek posisi di layar
-  window.__tesPts=()=>{const r=stage.getBoundingClientRect(),o={};['Head','Neck','L_Hand','R_Hand','LEye','REye','L_Forearm','R_Forearm'].forEach(n=>{const b=m.getObjectByName('Bip01_'+n)||m.getObjectByName('Bip01 '+n.replace('_',' '));if(!b)return;const v=b.getWorldPosition(new THREE.Vector3()).project(camera);o[n]=[Math.round((v.x+1)/2*r.width+r.left),Math.round((1-v.y)/2*r.height+r.top)];});return o;}; // debug: posisi tulang di layar (cek warna kulit)
+   return{state:MAYA.state,goal:MAYA.goal,date:MAYA.date,dates:TH.dates.slice(),x:+MAYA.x.toFixed(2),y:+(MAYA.y-3*DY).toFixed(2),rootY:+MAYA.rootY.toFixed(3),hipH:+TESCHAR.hipH.toFixed(3),size:[+(b.max.x-b.min.x).toFixed(2),+(b.max.y-b.min.y).toFixed(2),+(b.max.z-b.min.z).toFixed(2)],minY:+(b.min.y-root.parent.getWorldPosition(new THREE.Vector3()).y).toFixed(3),screen:[Math.min(...xs)|0,Math.min(...ys)|0,Math.max(...xs)|0,Math.max(...ys)|0],visible:root.parent.visible&&root.visible};}; // debug ringan
+  window.__tesPts=()=>{const r=stage.getBoundingClientRect(),o={};['Head','Neck','L_Hand','R_Hand','LEye','REye','L_Forearm','R_Forearm','Pelvis','L_Thigh','L_Calf','L_Foot','R_Foot'].forEach(n=>{const b=m.getObjectByName('Bip01_'+n)||m.getObjectByName('Bip01 '+n.replace('_',' '));if(!b)return;const w=b.getWorldPosition(new THREE.Vector3()),l=root.worldToLocal(w.clone()),v=w.clone().project(camera);o[n]={scr:[Math.round((v.x+1)/2*r.width+r.left),Math.round((1-v.y)/2*r.height+r.top)],loc:[+l.x.toFixed(2),+(l.y+MAYA.rootY).toFixed(2),+l.z.toFixed(2)]};});return o;}; // debug: posisi tulang (layar + lokal badan, y dari lantai)
  }catch(e){console.warn('karakter tes gagal dimuat',e);}finally{TESCHAR.loading=false;}}
-function tesCharTick(dt){const T=TESCHAR;if(!T.root||!T.mixer)return;if(!T.root.parent||!T.root.parent.visible)return;
- T.t+=dt;
- if(T.state==='idle'&&T.t>3.5){T.state='walk';T.t=0;T.act.walk&&T.act.idle&&T.act.walk.reset().play().crossFadeFrom(T.act.idle,.35,false);T.root.rotation.y=T.dir>0?Math.PI/2:-Math.PI/2;}
- else if(T.state==='walk'){T.x+=T.dir*T.SPEED*dt;const end=T.dir>0?T.X1:T.X0;
-  if((T.dir>0&&T.x>=end)||(T.dir<0&&T.x<=end)){T.x=end;T.dir*=-1;T.state='idle';T.t=0;T.act.idle&&T.act.walk&&T.act.idle.reset().play().crossFadeFrom(T.act.walk,.35,false);T.root.rotation.y=0;}
-  T.root.position.x=tx(T.x);}
+function tesCharTick(dt){const T=TESCHAR,M=MAYA;if(!T.root||!T.mixer)return;
+ if(M.date&&(POV.scene||TH.sexMode))mayaPrivOut();
+ const inC=thInCinema();if(inC!==M.wasIn){if(!inC&&M.date)mayaGoPost('Dadah babe, aku balik jaga pintu ya 👋');else if(inC&&M.state==='post')mayaSay(TH.unlocked?'Selamat nonton, babe 🎬 Panggil aku kalau mau ditemenin 💗':'Masukin kode dulu ya, babe 🔐',5000);M.wasIn=inC;} // Han keluar Bioskop → Maya balik ke pos
+ T.root.visible=!POV.scene; // adegan: Maya gak kelihatan (lagi jaga pintu)
+ const now=performance.now();if(T.sayUntil&&now>T.sayUntil){T.sayUntil=0;T.sayEl.style.display='none';}
+ if(!T.root.parent||!T.root.parent.visible||!T.root.visible)return;
+ T.t+=dt;let face=null;
+ if(M.state==='go'){const tg=M.path[M.k];if(!tg){M.k=M.path.length;}else{const dx=tg[0]-M.x,dy=tg[1]-M.y,d=Math.hypot(dx,dy),st=M.SPEED*dt;
+   if(d<=st){M.x=tg[0];M.y=tg[1];M.done.push(tg);M.k++;}else{M.x+=dx/d*st;M.y+=dy/d*st;face=Math.atan2(dx,dy);}}
+  if(M.k>=M.path.length){if(M.goal==='seat'&&M.date&&M.spot){mayaSitAt(M.spot);mayaSay('Aku duduk sini ya, babe 🍿',3500);}else{M.state='post';M.rootY=0;mayaAnim('idle');}}
+  if(T.act.walk)T.act.walk.timeScale=M.SPEED/.9;mayaPlace();}
+ else if(M.state==='post'){const han=actors.han;let d=99;if(han&&han.pos&&floorOfY(han.pos.y)===floorOfY(M.y))d=Math.hypot(han.pos.x-M.x,han.pos.y-M.y);
+  face=d<5?Math.atan2(han.pos.x-M.x,han.pos.y-M.y):Math.atan2(M.LOOK[0]-M.x,M.LOOK[1]-M.y); // noleh ke Han kalau deket
+  if(d<3.2&&!M.greeted){M.greeted=true;mayaSay(TH.unlocked?'Selamat datang di Bioskop, babe 🍿':'Halo babe 👋 Selamat datang di Bioskop! Masukin kode dulu ya 🔐',5000);}else if(d>6)M.greeted=false;}
+ if(face!==null){let a=face-T.root.rotation.y;a=Math.atan2(Math.sin(a),Math.cos(a));T.root.rotation.y+=a*Math.min(1,dt*8);}
  T.mixer.update(dt);
+ if(M.state==='sit')mayaSitPose();
  const dk=ENV.dark||0;if(Math.abs(dk-T.dk)>.01){T.dk=dk;T.mats.forEach(mt=>mt.emissiveIntensity=T.EM0+dk*T.EM1);} // siang .12, malam .6
- if(T.follow){const p=T.root.getWorldPosition(new THREE.Vector3()),dx=p.x-controls.target.x,dz=p.z-controls.target.z;controls.target.x+=dx;controls.target.z+=dz;camera.position.x+=dx;camera.position.z+=dz;} // #tesdekat: kamera ngikutin karakter
+ if(T.follow){const p=T.root.getWorldPosition(new THREE.Vector3()),dx=p.x-controls.target.x,dz=p.z-controls.target.z;controls.target.x+=dx;controls.target.z+=dz;camera.position.x+=dx;camera.position.z+=dz;} // #tesdekat / #maya: kamera ngikutin Maya
 }
 /* ================= 🌆 Kota latar (hiasan, gak bisa dimasukin) =================
    Ratusan kotak low-poly + 1 tekstur jendela 2D dari canvas (dipakai bareng), semua digabung jadi 2 mesh (ring dekat + ring jauh) = 2 draw call.
@@ -3468,8 +3536,9 @@ const hs=location.hash;
 const PREV={bioskop:['bioskop',[0,5.5,9]],langit:['taman-depan',[26,2.5,34]],atas:['taman-halaman',[0,62,8]],hutan:['taman-depan',[48,18,52]],dekat:['taman-depan',[18,14,28]],pondok:['pondok-taman',[0.8,4.2,-4]],kamarlove:['kamar-love',[3,8,-7.5]],lux:['kamar-hanrin',[3,8,-7.5]],tvroom:['lounge',[4,6.5,8]],lab:['lab',[4,8.5,-10.5]],close:['ig',[1.5,2.6,5.5]],zoom:['ig',[7,8.5,10]]};
 const pv=Object.keys(PREV).find(k=>hs.includes(k));
 if(pv){const [rid,off]=PREV[pv],r=ROOMS.find(x=>x.id===rid);setFloor(r.f,false);const t=FLOORS[r.f].localToWorld(new THREE.Vector3(tx(r.x+r.w/2),.5,tz(r.y+r.d/2)));camera.position.copy(t.clone().add(new THREE.Vector3(...off)));controls.target.copy(t);if(pv==='langit')controls.target.y+=5;if(pv==='atas'){controls.target.set(tx(30),0,tz(12));camera.position.set(tx(30),62,tz(12)+8);}if(pv==='hutan')controls.target.y+=1;if(pv==='dekat'){controls.target.set(tx(30),1.5,tz(14));camera.position.set(tx(42),18,tz(46));controls.target.y+=2;}}
-if(hs.includes('tesdekat')||hs.includes('maya')){setFloor(0,false);controls.minDistance=2;TESCHAR.follow=true;controls.addEventListener('start',()=>{TESCHAR.follow=false;});document.addEventListener('click',e=>{if(e.target.closest('button'))TESCHAR.follow=false;});const t=FLOORS[0].localToWorld(new THREE.Vector3(tx(21.9),.75,tz(20.95)));controls.target.copy(t);camera.position.copy(t.clone().add(new THREE.Vector3(.3,.45,2.9)));controls.update&&controls.update();} // preview dekat (zoom): Maya (#maya / #tesdekat)
-else if(hs.includes('tesasia')){setFloor(0,false);const t=FLOORS[0].localToWorld(new THREE.Vector3(tx(21.9),.7,tz(20.95)));controls.target.copy(t);camera.position.copy(t.clone().add(new THREE.Vector3(.6,3.4,11)));controls.update&&controls.update();} // preview: karakter tes wanita Asia di Taman Depan
+const mayaPostCam=(y,dist,up)=>{const f=floorOfY(MAYA.POST[1]),fa=Math.atan2(MAYA.LOOK[0]-MAYA.POST[0],MAYA.LOOK[1]-MAYA.POST[1]);setFloor(f,false);const t=FLOORS[f].localToWorld(new THREE.Vector3(tx(MAYA.POST[0]),y,tz(MAYA.POST[1])));controls.target.copy(t);camera.position.copy(t.clone().add(new THREE.Vector3(Math.sin(fa)*dist,up,Math.cos(fa)*dist)));controls.update&&controls.update();}; // kamera di depan pos jaga Maya (pintu Bioskop)
+if(hs.includes('tesdekat')||hs.includes('maya')){controls.minDistance=2;TESCHAR.follow=true;controls.addEventListener('start',()=>{TESCHAR.follow=false;});document.addEventListener('click',e=>{if(e.target.closest('button'))TESCHAR.follow=false;});mayaPostCam(.75,2.9,.45);} // preview dekat (zoom): Maya di pos Bioskop (#maya / #tesdekat)
+else if(hs.includes('tesasia'))mayaPostCam(.7,9,4.2); // preview agak jauh: Maya jaga pintu Bioskop
 if(hs.includes('jembatan')){controls.target.set(tx(32),8,tz(-14));camera.position.set(tx(84),58,tz(56));controls.update&&controls.update();} // preview: jembatan kaca + kota latar
 if(hs.includes('povpad'))document.body.classList.add('touch');
 if(hs.includes('pov'))setTimeout(()=>{if(hs.includes('povfp'))POV.fpPref=true;povEnter();},500);
