@@ -38,9 +38,12 @@ main{flex:1;display:grid;grid-template-columns:1fr 270px;gap:12px;padding:12px 1
 /* 🏙️ Gedung luar (eksterior) */
 .gedmini{position:absolute;left:10px;top:264px;z-index:5;min-width:58px;height:30px;border-radius:11px;border:2px solid #ffd2e4;background:#fff;color:#d6457f;font:inherit;font-size:11px;font-weight:800;cursor:pointer;box-shadow:0 3px 0 #ffe0ec;padding:0 8px;white-space:nowrap}
 .gedmini.on{background:linear-gradient(180deg,#5d6b86,#2f3a52);color:#fff;border-color:#fff;box-shadow:0 3px 0 #1d2536}
-#btnKota{left:100px}
+/* 🌆 Tombol Kota: dipindah ke pojok kanan bawah layar (gak nempel tombol Gedung lagi biar gak nutupin) */
+#btnKota{left:auto;top:auto;right:12px;bottom:12px;height:34px;min-width:64px;font-size:12px;touch-action:manipulation}
 #btnKota.on{background:linear-gradient(180deg,#f0a35e,#c86b3a);box-shadow:0 3px 0 #8f4520}
-@media(max-width:900px){#btnKota{left:90px}}
+@media(min-width:901px){.jp:not(.hide)~#btnKota{right:272px}.jp:not(.hide)~.hint{max-width:calc(100% - 370px)}} /* PC + panel jadwal kebuka: geser ke kiri panel */
+body.pov.touch #btnKota{bottom:284px} /* POV HP: di atas tombol POV kanan bawah */
+@media(max-width:900px){#btnKota{top:auto;right:10px;bottom:10px;height:36px;min-width:64px;font-size:12px}body.pov.touch #btnKota{bottom:272px}}
 .gcredit{display:none;position:absolute;left:12px;bottom:38px;z-index:5;font-size:10px;color:#5a4a66;background:rgba(255,255,255,.85);padding:3px 9px;border-radius:999px}
 .gcredit a{color:#d6457f}
 .gcredit.show{display:block}
@@ -60,7 +63,7 @@ body.portrait #gl{clip-path:inset(0 6% 0 6%)}
 .floors button{min-width:58px;height:30px;border-radius:11px;border:2px solid #ffd2e4;background:#fff;color:#d6457f;font:inherit;font-size:11.5px;font-weight:800;cursor:pointer;box-shadow:0 3px 0 #ffe0ec;padding:0 8px}
 .floors button.on{background:linear-gradient(180deg,#ff7eb6,#f2559a);color:#fff;border-color:#fff}
 .fsign{background:#5a3a52;color:#fff;font-weight:900;font-size:13px;padding:4px 12px;border-radius:10px;border:2px solid #fff;white-space:nowrap;box-shadow:0 3px 8px rgba(0,0,0,.18)}
-.hint{position:absolute;left:12px;bottom:10px;font-size:11px;color:#a37a95;background:rgba(255,255,255,.85);padding:4px 10px;border-radius:999px;z-index:5}
+.hint{position:absolute;left:12px;bottom:10px;max-width:calc(100% - 110px);font-size:11px;color:#a37a95;background:rgba(255,255,255,.85);padding:4px 10px;border-radius:999px;z-index:5}
 .hint a{color:#d6457f}
 /* label 3D */
 .ntag{pointer-events:auto;cursor:pointer;display:flex;flex-direction:column;align-items:center;transform:translateY(-6px)}
@@ -243,12 +246,12 @@ body.touch .povhint .kbd{display:none}body.touch .povhint .tch{display:inline}
     </div>
     <button type="button" class="portmini" id="btnPortraitMini" title="Mode Portrait: framing HP fokus kampus/kantor, ambience jauh di-crop. Show Near tetap ada.">📱 Port</button>
     <button type="button" class="gedmini on" id="btnGedung" title="Gedung Kantor 2 + jembatan kaca dari Lobi Lt 3: bangunan terpisah di belakang Taman Halaman. Klik buat nyalain/matiin.">🏙️ Gedung</button>
-    <button type="button" class="gedmini kota on" id="btnKota" title="Kota latar: gedung-gedung hiasan di kejauhan (ringan). Klik buat nyalain/matiin.">🌆 Kota</button>
     <div class="gcredit" id="gCredit">🏙️ Gedung: <a href="https://poly.pizza/m/KRT3e3kgEb" target="_blank" rel="noopener">“Office” by SoyMaria</a> · Poly Pizza · <a href="https://creativecommons.org/licenses/by/3.0/" target="_blank" rel="noopener">CC-BY 3.0</a></div>
     <button type="button" class="shownr" id="btnShowNearMini" title="Show Near: suasana sekitar (hutan dekat + jalan). OFF = Fokus Kantor biar gak lag.">🏢 Fokus</button>
     <div class="floors" id="floors"><button data-f="all" class="on">🏢 Semua</button><button data-f="3" title="Bioskop — sekarang di dalam Gedung Kantor 2 (lantai 2, sejajar jembatan kaca)">Lt 4 🎬</button><button data-f="2">Lt 3 🛏️</button><button data-f="1">Lt 2 🛋️</button><button data-f="0">Lt 1 💼</button></div>
     <button class="jtoggle" id="jToggle">📅 Jadwal per Karakter</button>
     <div class="jp" id="jPanel"><h3>📅 Jadwal per Karakter</h3><div class="list" id="jList"></div></div>
+    <button type="button" class="gedmini kota on" id="btnKota" title="Kota latar: gedung-gedung hiasan di kejauhan (ringan). Klik buat nyalain/matiin.">🌆 Kota</button>
     <div class="pop" id="pop"></div>
     <div class="hint">Drag: putar · klik kanan/2 jari: geser · scroll/pinch: zoom · klik karakter buat detail · <a href="index-iso.html">isometrik</a> · <a href="index-2d.html">2D</a> · gedung: <a href="https://poly.pizza/m/KRT3e3kgEb" target="_blank" rel="noopener">“Office” by SoyMaria</a> (<a href="https://creativecommons.org/licenses/by/3.0/" target="_blank" rel="noopener">CC-BY 3.0</a>) · Maya: modifikasi warna/tekstur dari <a href="https://github.com/microsoft/Microsoft-Rocketbox" target="_blank" rel="noopener">“Female_Adult_03” — Microsoft Rocketbox</a> (© 2020 Microsoft, <a href="https://github.com/microsoft/Microsoft-Rocketbox/blob/master/LICENSE.md" target="_blank" rel="noopener">MIT</a>)</div>
     <div class="povhint" id="povHint"><b>🎮 Mode POV Han</b> <span class="kbd">· <span class="kb">W</span><span class="kb">A</span><span class="kb">S</span><span class="kb">D</span> / <span class="kb">↑↓←→</span> jalan · <span class="kb">Q</span><span class="kb">E</span> / drag mouse: putar · <span class="kb">Shift</span> lari · <span class="kb">V</span> 1st/3rd person · scroll: jarak kamera · <span class="kb">Esc</span> keluar</span><span class="tch">· stick kiri: jalan · tombol kanan: Naik/Turun/Bioskop/POV · bar tengah: Akses cepat</span><div class="povst" id="povStair"></div></div>
