@@ -38,6 +38,9 @@ main{flex:1;display:grid;grid-template-columns:1fr 270px;gap:12px;padding:12px 1
 /* 🏙️ Gedung luar (eksterior) */
 .gedmini{position:absolute;left:10px;top:264px;z-index:5;min-width:58px;height:30px;border-radius:11px;border:2px solid #ffd2e4;background:#fff;color:#d6457f;font:inherit;font-size:11px;font-weight:800;cursor:pointer;box-shadow:0 3px 0 #ffe0ec;padding:0 8px;white-space:nowrap}
 .gedmini.on{background:linear-gradient(180deg,#5d6b86,#2f3a52);color:#fff;border-color:#fff;box-shadow:0 3px 0 #1d2536}
+#btnKota{left:100px}
+#btnKota.on{background:linear-gradient(180deg,#f0a35e,#c86b3a);box-shadow:0 3px 0 #8f4520}
+@media(max-width:900px){#btnKota{left:90px}}
 .gcredit{display:none;position:absolute;left:12px;bottom:38px;z-index:5;font-size:10px;color:#5a4a66;background:rgba(255,255,255,.85);padding:3px 9px;border-radius:999px}
 .gcredit a{color:#d6457f}
 .gcredit.show{display:block}
@@ -239,7 +242,8 @@ body.touch .povhint .kbd{display:none}body.touch .povhint .tch{display:inline}
       <button id="povMini" title="🎮 Mode POV Han (Han jalan sendiri pakai keyboard / stick)">🎮</button>
     </div>
     <button type="button" class="portmini" id="btnPortraitMini" title="Mode Portrait: framing HP fokus kampus/kantor, ambience jauh di-crop. Show Near tetap ada.">📱 Port</button>
-    <button type="button" class="gedmini on" id="btnGedung" title="Gedung Kantor 2: bangunan terpisah di samping kantor utama (belakang Taman Halaman). Klik buat nyalain/matiin.">🏙️ Gedung</button>
+    <button type="button" class="gedmini on" id="btnGedung" title="Gedung Kantor 2 + jembatan kaca dari Lobi Lt 3: bangunan terpisah di belakang Taman Halaman. Klik buat nyalain/matiin.">🏙️ Gedung</button>
+    <button type="button" class="gedmini kota on" id="btnKota" title="Kota latar: gedung-gedung hiasan di kejauhan (ringan). Klik buat nyalain/matiin.">🌆 Kota</button>
     <div class="gcredit" id="gCredit">🏙️ Gedung: <a href="https://poly.pizza/m/KRT3e3kgEb" target="_blank" rel="noopener">“Office” by SoyMaria</a> · Poly Pizza · <a href="https://creativecommons.org/licenses/by/3.0/" target="_blank" rel="noopener">CC-BY 3.0</a></div>
     <button type="button" class="shownr" id="btnShowNearMini" title="Show Near: suasana sekitar (hutan dekat + jalan). OFF = Fokus Kantor biar gak lag.">🏢 Fokus</button>
     <div class="floors" id="floors"><button data-f="all" class="on">🏢 Semua</button><button data-f="3">Lt 4 🎬</button><button data-f="2">Lt 3 🛏️</button><button data-f="1">Lt 2 🛋️</button><button data-f="0">Lt 1 💼</button></div>
@@ -2999,7 +3003,9 @@ function bindPortraitUI(){
 }
 const ROAD={y0:32,y1:38,x0:-260,x1:320,cx0:-70,cx1:130}; // cx0..cx1 = rentang muter mobil (biar rame di sekitar kantor) // koordinat logika lantai 1 (depan gedung, di bawah Taman Depan / Pondok)
 // 🏙️ Gedung Kantor 2 (bangunan terpisah, di samping kantor utama) — koordinat logika lantai 1; model & tombolnya di bagian 🏙️ bawah
-const SHELL_POS={x:36.5,y:-9.2,s:2.4}; // pusat badan gedung + skala (badan model 4.04 m -> ±9.7 m, tinggi ±23 m). Di belakang (utara) Taman Halaman, antara kantor & Rumah My Bini; kanopi ngadep jalan setapak taman (x≈36)
+const SHELL_POS={x:36.5,y:-24.85,s:2.4}; // pusat badan gedung + skala (badan model 4.04 m -> ±9.7 m, tinggi ±23 m). Jauh di belakang (utara) Taman Halaman (muka selatan gedung di y=-20 → 20 m dari dinding utara kantor), antara kantor & Rumah My Bini; kanopi ngadep jalan setapak taman (x≈36)
+// 🌉 Jembatan kaca (skybridge): Lobi Lantai 3 kantor utama (dinding utara y=0, x 33–36) → lantai 2 (baris jendela ke-2, ±5,7–10,9 m) Gedung Kantor 2. Lantai jembatan = lantai Lt 3 (2×FH = 6,4 m)
+const BRIDGE={x0:33,x1:36,yN:SHELL_POS.y+2.02*SHELL_POS.s-.25,yS:-.1,z:2*FH,h:2.65};
 function shellFootprint(){const h=2.02*SHELL_POS.s;return{x0:SHELL_POS.x-h,x1:SHELL_POS.x+h,y0:SHELL_POS.y-h,y1:SHELL_POS.y+3.12*SHELL_POS.s};}
 // keyframe suasana per jam (WITA): langit atas/bawah (sRGB), kekuatan cahaya, warna matahari/bulan
 const AMB=[
@@ -3108,6 +3114,7 @@ function forestBlocked(x,y){ // kampus (kantor+taman+rumah), pondok, jalan raya+
  if(x>-1.2&&x<61.5&&y>-1.2&&y<24.8)return true; // kantor + taman depan/halaman + rumah
  if(x>7.2&&x<14.8&&y>=24&&y<29.6)return true; // pondok taman
  {const F=shellFootprint();if(x>F.x0-2.4&&x<F.x1+2.4&&y>F.y0-2.4&&y<F.y1+2.4)return true;} // 🏙️ Gedung Kantor 2 + halaman pavingnya
+ if(x>BRIDGE.x0-3.2&&x<Math.max(BRIDGE.x1,SHELL_POS.x+.65)+3.2&&y>BRIDGE.yN-1&&y<0)return true; // 🌉 jalur di bawah jembatan + jalan setapak ke gedung (biar pohon gak nembus jembatan)
  if(y>ROAD.y0-2.2&&y<ROAD.y1+2.2)return true;
  if(y>=24&&y<=ROAD.y0-1.4&&((x>21.2&&x<26.8)||(x>33.8&&x<38.8)))return true;
  return false;}
@@ -3240,11 +3247,82 @@ const SHELL={g:new THREE.Group(),model:null,on:true,loading:false};
 scene.add(SHELL.g); // grup diatur fokus Bioskop (thFocus) kayak objek luar lainnya; model di dalamnya diatur tombol 🏙️ Gedung
 function loadShellOn(){try{return localStorage.getItem('kantorGedung')!=='0';}catch(_){return true;}}
 function shellBtn(){const b=document.getElementById('btnGedung');if(!b)return;b.classList.toggle('on',SHELL.on);
- b.title=SHELL.on?'Gedung Kantor 2 ON — bangunan terpisah di samping kantor utama (belakang Taman Halaman). Klik buat matiin.':'Gedung Kantor 2 OFF — klik buat nyalain lagi.';}
+ b.title=SHELL.on?'Gedung Kantor 2 ON — bangunan terpisah di belakang Taman Halaman, nyambung lewat jembatan kaca dari Lobi Lt 3. Klik buat matiin.':'Gedung Kantor 2 OFF — klik buat nyalain lagi.';}
 function applyShell(on,announce){SHELL.on=!!on;try{localStorage.setItem('kantorGedung',SHELL.on?'1':'0');}catch(_){}
- shellBtn();if(SHELL.on)ensureShell();if(SHELL.model)SHELL.model.visible=SHELL.on;
- if(announce&&typeof log==='function')log(SHELL.on?'🏙️ Gedung Kantor 2 nyala (belakang Taman Halaman)':'🏙️ Gedung Kantor 2 mati');}
+ shellBtn();if(SHELL.on){ensureShell();ensureBridge();}if(SHELL.model)SHELL.model.visible=SHELL.on;if(SHELL.bridge)SHELL.bridge.visible=SHELL.on&&topFloor()>=2;
+ if(announce&&typeof log==='function')log(SHELL.on?'🏙️ Gedung Kantor 2 + jembatan kaca nyala (belakang Taman Halaman)':'🏙️ Gedung Kantor 2 mati');}
 function bindShellUI(){const b=document.getElementById('btnGedung');if(b)b.onclick=()=>applyShell(!SHELL.on,true);applyShell(loadShellOn(),false);}
+/* 🌉 Jembatan kaca tertutup (skybridge) Lobi Lt 3 → Gedung Kantor 2. Semua kotak murah (BOXG), rangka pakai 1 InstancedMesh, tanpa lampu beneran:
+   "lampu hangat" = strip plafon + lantai yang nyala (emissive) pas malam lewat ENV.lampMats. Ikut tombol 🏙️ Gedung. */
+function ensureBridge(){if(SHELL.bridge)return;const B=BRIDGE,g=new THREE.Group();g.name='skybridge';
+ const X0=tx(B.x0),X1=tx(B.x1),Zs=tz(B.yS),Zn=tz(B.yN),L=Zs-Zn,cx=(X0+X1)/2,cz=(Zs+Zn)/2,Wd=X1-X0,Y=B.z,H=B.h;
+ const add=(m,x,y,z,sx,sy,sz,sh)=>{const o=new THREE.Mesh(BOXG,m);o.position.set(x,y,z);o.scale.set(sx,sy,sz);o.castShadow=!!sh;o.receiveShadow=false;g.add(o);return o;};
+ const slabM=mat(0x8b93a3),floorM=new THREE.MeshStandardMaterial({color:0xd9c4a3,roughness:.8,emissive:0x6a4416,emissiveIntensity:0});
+ const glowM=new THREE.MeshStandardMaterial({color:0xfff1d6,roughness:.5,emissive:0xffb85c,emissiveIntensity:0});
+ const glassM=new THREE.MeshStandardMaterial({color:0xbfe3ff,roughness:.08,metalness:.15,transparent:true,opacity:.3,depthWrite:false,side:THREE.DoubleSide});
+ const frameM=mat(0x2f3a52),colM=mat(0x5d6b86),doorM=new THREE.MeshStandardMaterial({color:0x3a4a66,roughness:.2,metalness:.3,emissive:0xffb85c,emissiveIntensity:0});
+ [floorM,glowM].forEach(m=>{if(!ENV.lampMats.includes(m))ENV.lampMats.push(m);});
+ add(slabM,cx,Y-.18,cz,Wd+.3,.36,L,true); // pelat bawah (beton)
+ add(floorM,cx,Y+.02,cz,Wd-.1,.04,L-.05); // lantai dalam (kayu hangat, nyala dikit pas malam)
+ add(glowM,cx,Y+H-.12,cz,.42,.06,L-.4); // strip lampu hangat di plafon
+ add(glowM,X0+.12,Y+.1,cz,.06,.06,L-.4);add(glowM,X1-.12,Y+.1,cz,.06,.06,L-.4); // lampu lis lantai kiri-kanan
+ add(slabM,cx,Y+H+.07,cz,Wd+.3,.1,.5);add(slabM,cx,Y+H+.07,Zn+.25,Wd+.3,.1,.5);add(slabM,cx,Y+H+.07,Zs-.25,Wd+.3,.1,.5); // balok atap
+ const gl1=add(glassM,X0,Y+H/2,cz,.04,H,L),gl2=add(glassM,X1,Y+H/2,cz,.04,H,L),gl3=add(glassM,cx,Y+H,cz,Wd,.04,L);[gl1,gl2,gl3].forEach(o=>o.renderOrder=2); // dinding + atap kaca
+ // rangka: tiang tiap ±2 m di 2 sisi + balok atap melintang + 4 rel memanjang → 1 InstancedMesh
+ const n=Math.max(2,Math.round(L/2)),M=[],o3=new THREE.Object3D();
+ for(let i=0;i<=n;i++){const z=Zn+L*i/n;[X0,X1].forEach(x=>M.push([x,Y+H/2,z,.12,H,.12]));M.push([cx,Y+H,z,Wd+.12,.1,.12]);}
+ [X0,X1].forEach(x=>{M.push([x,Y+H,cz,.14,.12,L]);M.push([x,Y+.2,cz,.14,.12,L]);});
+ const im=new THREE.InstancedMesh(BOXG,frameM,M.length);M.forEach((a,i)=>{o3.position.set(a[0],a[1],a[2]);o3.scale.set(a[3],a[4],a[5]);o3.updateMatrix();im.setMatrixAt(i,o3.matrix);});im.castShadow=true;g.add(im);
+ // pintu kaca di dua ujung (sisi kantor & sisi gedung)
+ add(doorM,cx,Y+1.1,Zs-.06,1.3,2.15,.06);add(doorM,cx,Y+1.1,Zn+.06,1.3,2.15,.06);
+ // 2 pasang tiang penyangga ramping di tengah bentang
+ [.36,.68].forEach(t=>{const z=Zn+L*t;[X0+.35,X1-.35].forEach(x=>add(colM,x,(Y-.36-.32)/2,z,.3,Y-.36+.32,.3,true));add(colM,cx,Y-.5,z,Wd-.4,.25,.3);});
+ SHELL.g.add(g);SHELL.bridge=g;g.visible=SHELL.on&&topFloor()>=2;}
+/* ================= 🌆 Kota latar (hiasan, gak bisa dimasukin) =================
+   Ratusan kotak low-poly + 1 tekstur jendela 2D dari canvas (dipakai bareng), semua digabung jadi 2 mesh (ring dekat + ring jauh) = 2 draw call.
+   Tanpa model GLB, tanpa bayangan, MeshLambertMaterial (murah). Susunan acak tapi seed tetap (sama tiap dibuka). Jendela nyala pas malam (emissiveMap). */
+const CITY={g:null,near:null,far:null,on:true,count:0,tris:0};
+function loadKotaOn(){try{return localStorage.getItem('kantorKota')!=='0';}catch(_){return true;}}
+function cityTextures(){const N=256,C=32,mk=()=>{const cv=document.createElement('canvas');cv.width=cv.height=N;return cv;};
+ const a=mk(),ga=a.getContext('2d'),e=mk(),ge=e.getContext('2d'),r=forestRnd(77031);
+ ga.fillStyle='#e6e6e6';ga.fillRect(0,0,N,N);ge.fillStyle='#000';ge.fillRect(0,0,N,N);
+ for(let j=0;j<8;j++){ga.fillStyle='rgba(0,0,0,.06)';ga.fillRect(0,j*C+C-3,N,3);} // garis lantai
+ for(let j=0;j<8;j++)for(let i=0;i<8;i++){const x=i*C+6,y=j*C+7,w=C-12,h=C-12;
+  const t=r(),gr=ga.createLinearGradient(x,y,x,y+h);gr.addColorStop(0,t<.5?'#5f7c9a':'#6f8aa6');gr.addColorStop(1,t<.5?'#2c3f57':'#3a4e66');ga.fillStyle=gr;ga.fillRect(x,y,w,h);
+  ga.fillStyle='rgba(255,255,255,.18)';ga.fillRect(x+2,y+2,w*.35,h*.3);
+  if(r()<.42){const k=r();ge.fillStyle=k<.6?'#ffcf7a':(k<.85?'#ffe2a8':'#cfe3ff');ge.fillRect(x,y,w,h);}}
+ const T=cv=>{const t=new THREE.CanvasTexture(cv);t.wrapS=t.wrapT=THREE.RepeatWrapping;t.colorSpace=THREE.SRGBColorSpace;t.anisotropy=4;return t;};return[T(a),T(e)];}
+function buildCity(){if(CITY.g)return;const rnd=forestRnd(20261011),C0x=34,C0y=10,CELL=15;
+ const blocked=(x0,x1,y0,y1)=>(x1>-31&&x0<99&&y1>-35&&y0<80)||(y1>24&&y0<46); // kampus + hutan Near + Gedung Kantor 2 + jalan raya
+ const PAL=[0xf1ece3,0xdde2ea,0xcbd6e2,0xf3eee6,0xc3cad3,0xe2d6c6,0xb4bfcc,0xe7e0ec,0xd4ddd2,0xece4d6].map(c=>new THREE.Color(c));
+ const mkBuf=()=>({p:[],n:[],u:[],c:[],i:[]}),bufN=mkBuf(),bufF=mkBuf();let count=0;
+ const quad=(B,v,nrm,uv,col)=>{const b=B.p.length/3;v.forEach((q,k)=>{B.p.push(q[0],q[1],q[2]);B.n.push(nrm[0],nrm[1],nrm[2]);B.u.push(uv[k][0],uv[k][1]);B.c.push(col.r,col.g,col.b);});B.i.push(b,b+1,b+2,b,b+2,b+3);};
+ const box=(B,x,y,w,d,z0,h,col,u0,v0)=>{const X0=tx(x),X1=tx(x+w),Z0=tz(y),Z1=tz(y+d),Y0=z0,Y1=z0+h,su=1/(3.2*8),sv=1/(3.4*8),V0=v0,V1=v0+h*sv;
+  const side=(ax,az,bx,bz,len,nrm)=>quad(B,[[ax,Y0,az],[bx,Y0,bz],[bx,Y1,bz],[ax,Y1,az]],nrm,[[u0,V0],[u0+len*su,V0],[u0+len*su,V1],[u0,V1]],col);
+  side(X0,Z1,X1,Z1,w,[0,0,1]);side(X1,Z1,X1,Z0,d,[1,0,0]);side(X1,Z0,X0,Z0,w,[0,0,-1]);side(X0,Z0,X0,Z1,d,[-1,0,0]);
+  const ru=.008;quad(B,[[X0,Y1,Z1],[X1,Y1,Z1],[X1,Y1,Z0],[X0,Y1,Z0]],[0,1,0],[[ru,ru],[ru,ru],[ru,ru],[ru,ru]],col.clone().multiplyScalar(.82));};
+ for(let gx=-160;gx<230;gx+=CELL)for(let gy=-165;gy<200;gy+=CELL){
+  const ccx=gx+CELL/2,ccy=gy+CELL/2,dist=Math.hypot(ccx-C0x,ccy-C0y);if(dist>185)continue;
+  const skip=rnd(),w=6+rnd()*6.5,d=6+rnd()*6.5,jx=(rnd()-.5)*(CELL-w-1.5),jy=(rnd()-.5)*(CELL-d-1.5);
+  const x=ccx-w/2+jx,y=ccy-d/2+jy;if(skip<.27||blocked(x,x+w,y,y+d))continue;
+  const back=(ccy<C0y-40)||(ccx<C0x-60); // sisi utara/barat (belakang kantor dari kamera default) boleh tinggi
+  let h=(back?8:6)+Math.pow(rnd(),1.6)*(back?(dist<85?16:dist<125?28:42):(dist<110?12:22)); // makin jauh makin tinggi → skyline bertingkat, gak jadi tembok
+  const col=PAL[Math.floor(rnd()*PAL.length)],u0=Math.floor(rnd()*8)/8,v0=Math.floor(rnd()*8)/8,B=dist<110?bufN:bufF;
+  box(B,x,y,w,d,-.32,h,col,u0,v0);count++;
+  if(h>18&&rnd()<.38){const s=.55+rnd()*.2,w2=w*s,d2=d*s,h2=4+rnd()*h*.35;box(B,x+(w-w2)/2,y+(d-d2)/2,w2,d2,-.32+h,h2,col,(u0+.25)%1,v0);} // menara kecil di atap (variasi skyline)
+ }
+ const [map,emap]=cityTextures(),m=new THREE.MeshLambertMaterial({map,emissiveMap:emap,emissive:0x787878,emissiveIntensity:0,vertexColors:true});
+ if(!ENV.lampMats.includes(m))ENV.lampMats.push(m);
+ const mkMesh=B=>{const ge=new THREE.BufferGeometry();ge.setAttribute('position',new THREE.Float32BufferAttribute(B.p,3));ge.setAttribute('normal',new THREE.Float32BufferAttribute(B.n,3));
+  ge.setAttribute('uv',new THREE.Float32BufferAttribute(B.u,2));ge.setAttribute('color',new THREE.Float32BufferAttribute(B.c,3));ge.setIndex(B.i);ge.computeBoundingSphere();
+  const o=new THREE.Mesh(ge,m);o.castShadow=false;o.receiveShadow=false;o.matrixAutoUpdate=false;CITY.tris+=B.i.length/3;return o;};
+ CITY.g=new THREE.Group();CITY.g.name='kota-latar';CITY.near=mkMesh(bufN);CITY.far=mkMesh(bufF);CITY.g.add(CITY.near);CITY.g.add(CITY.far);CITY.count=count;scene.add(CITY.g);}
+function kotaBtn(){const b=document.getElementById('btnKota');if(!b)return;b.classList.toggle('on',CITY.on);
+ b.title=CITY.on?'Kota latar ON — '+CITY.count+' gedung hiasan di kejauhan (ringan: kotak + tekstur 2D, 2 draw call). Klik buat matiin.':'Kota latar OFF — klik buat nyalain gedung-gedung hiasan di kejauhan.';}
+function applyKota(on,announce){CITY.on=!!on;try{localStorage.setItem('kantorKota',CITY.on?'1':'0');}catch(_){}
+ if(CITY.on)buildCity();if(CITY.g)CITY.g.visible=CITY.on;kotaBtn();
+ if(announce&&typeof log==='function')log(CITY.on?'🌆 Kota latar nyala ('+CITY.count+' gedung hiasan)':'🌆 Kota latar mati');}
+function bindKotaUI(){const b=document.getElementById('btnKota');if(b)b.onclick=()=>applyKota(!CITY.on,true);applyKota(loadKotaOn(),false);}
 async function ensureShell(){if(SHELL.model||SHELL.loading)return;SHELL.loading=true;
  try{const {GLTFLoader}=await import('./vendor/GLTFLoader.js');
   const gl=await new GLTFLoader().loadAsync('./models/gedung-kantor.glb');const m=gl.scene,S=SHELL_POS.s,F=shellFootprint();
@@ -3254,12 +3332,17 @@ async function ensureShell(){if(SHELL.model||SHELL.loading)return;SHELL.loading=
    if(mt.name==='Material.002'&&!ENV.lampMats.includes(mt)){mt.emissive=new THREE.Color(0x9a7438);mt.emissiveIntensity=0;ENV.lampMats.push(mt);}}); // kaca jendela nyala dikit pas malam
   // halaman paving di bawah gedung, sampai pagar tanaman Taman Halaman
   const pave=mat(0xcfc2ad),pave2=mat(0xb9ab95),Gp=SHELL.g;
-  envBox(F.x0-1.2,F.y0-1.2,-.32,F.x1-F.x0+2.4,-.35-(F.y0-1.2),.3,pave,Gp);
-  envBox(SHELL_POS.x-.65,F.y1,-.31,1.3,-.35-F.y1,.3,pave2,Gp); // jalur depan kanopi, lurus sama jalan setapak taman
+  envBox(F.x0-1.2,F.y0-1.2,-.32,F.x1-F.x0+2.4,F.y1-F.y0+2.4,.3,pave,Gp); // halaman paving di sekeliling gedung
+  envBox(SHELL_POS.x-.65,F.y1+1.2,-.31,1.3,-.35-(F.y1+1.2),.3,pave2,Gp); // jalan setapak dari kanopi ke Taman Halaman (lewat di bawah jembatan), lurus sama jalan setapak taman
   SHELL.g.add(m);SHELL.model=m;m.visible=SHELL.on;
  }catch(e){console.warn('gedung kantor 2',e);}
  SHELL.loading=false;}
-function shellTick(){const gc=document.getElementById('gCredit');if(!gc)return;
+function shellTick(){
+ // 🌉 jembatan cuma kelihatan kalau Lt 3 ikut tampil (Semua / Lt 3 / Lt 4), biar gak ngambang pas pilih Lt 1–2
+ if(SHELL.bridge)SHELL.bridge.visible=SHELL.on&&topFloor()>=2;
+ // 🌆 kota latar: mati pas fokus Bioskop; ring jauh di-crop di Mode Portrait
+ if(CITY.g){const v=CITY.on&&!TH.focus&&!envCinemaMode();CITY.g.visible=v;if(CITY.far)CITY.far.visible=v&&!ENV.portrait;}
+ const gc=document.getElementById('gCredit');if(!gc)return;
  gc.classList.toggle('show',!!(SHELL.model&&SHELL.on&&floorMode==='all'&&!POV.on&&!POV.scene&&!TH.open));}
 let last=performance.now();const tmpV=new THREE.Vector3();
 function loop(now){
@@ -3289,13 +3372,14 @@ function chatSay(m){const ac=actors[m.from],txt=Array.from(m.text.replace(/\s+/g
  log('💬 '+m.name+': '+(txt.length>60?txt.slice(0,60).join('')+'…':t));}
 try{if(window.KantorChat)KantorChat.init({el:$('chatCard'),nameOf:id=>{const a=agentsData.find(x=>idOf(x)===id);return a&&a.name;},onNew:chatSay});}catch(e){console.warn('chat',e);}
 $('loading').remove();
-bindQualityUI();applyQuality(qualityMode,false);bindShowNearUI();bindPortraitUI();ENV.portrait=loadPortrait();applyPortrait(ENV.portrait,false);bindShellUI();
+bindQualityUI();applyQuality(qualityMode,false);bindShowNearUI();bindPortraitUI();ENV.portrait=loadPortrait();applyPortrait(ENV.portrait,false);bindShellUI();bindKotaUI();
 requestAnimationFrame(loop);
 // opsi URL buat preview: #zoom, #kerja, #pop=lia
 const hs=location.hash;
 const PREV={bioskop:['bioskop',[0,5.5,9]],langit:['taman-depan',[26,2.5,34]],atas:['taman-halaman',[0,62,8]],hutan:['taman-depan',[48,18,52]],dekat:['taman-depan',[18,14,28]],pondok:['pondok-taman',[0.8,4.2,-4]],kamarlove:['kamar-love',[3,8,-7.5]],lux:['kamar-hanrin',[3,8,-7.5]],tvroom:['lounge',[4,6.5,8]],lab:['lab',[4,8.5,-10.5]],close:['ig',[1.5,2.6,5.5]],zoom:['ig',[7,8.5,10]]};
 const pv=Object.keys(PREV).find(k=>hs.includes(k));
 if(pv){const [rid,off]=PREV[pv],r=ROOMS.find(x=>x.id===rid);setFloor(r.f,false);const t=FLOORS[r.f].localToWorld(new THREE.Vector3(tx(r.x+r.w/2),.5,tz(r.y+r.d/2)));camera.position.copy(t.clone().add(new THREE.Vector3(...off)));controls.target.copy(t);if(pv==='langit')controls.target.y+=5;if(pv==='atas'){controls.target.set(tx(30),0,tz(12));camera.position.set(tx(30),62,tz(12)+8);}if(pv==='hutan')controls.target.y+=1;if(pv==='dekat'){controls.target.set(tx(30),1.5,tz(14));camera.position.set(tx(42),18,tz(46));controls.target.y+=2;}}
+if(hs.includes('jembatan')){controls.target.set(tx(32),8,tz(-14));camera.position.set(tx(84),58,tz(56));controls.update&&controls.update();} // preview: jembatan kaca + kota latar
 if(hs.includes('povpad'))document.body.classList.add('touch');
 if(hs.includes('pov'))setTimeout(()=>{if(hs.includes('povfp'))POV.fpPref=true;povEnter();},500);
 if(hs.includes('kerja'))setTimeout(()=>suruhKerja(),300);
